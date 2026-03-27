@@ -43,65 +43,86 @@ if (isset($_POST['update'])) {
 }
 include "includes/header.php";
 ?>
+<div class="pms-wrap">
+    <div class="row">
+        <div class="col-md-12">
 
-<div class="card shadow-lg border-0 rounded-3">
-    <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center">
-        <h4 class="mb-0">Edit Order</h4>
-        <a href="view_order.php?id=<?= $id ?>" class="btn btn-secondary btn-sm">
-            <i class="bi bi-arrow-left"></i> Back
-        </a>
-    </div>
+            <form method="POST" class="needs-validation" novalidate>
+                <div class="pms-panel">
 
-    <div class="card-body">
-        <form method="POST" class="row g-3">
+                    <div class="pms-panel-header d-flex justify-content-between align-items-center">
+                        Edit Order
+                        <a href="view_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-left"></i> Back
+                        </a>
+                    </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Order #</label>
-                <input type="text" class="form-control" value="<?= $order['order_no'] ?>" disabled>
-            </div>
+                    <div class="pms-panel-body">
+                        <div class="row g-3">
 
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Customer</label>
-                <input type="text" name="customer" class="form-control"
-                    value="<?= $order['customer'] ?>" required>
-            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label">Order #</label>
+                                <input type="text" class="form-control" value="<?= htmlspecialchars($order['order_no']) ?>" disabled>
+                            </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Product</label>
-                <input type="text" name="product" class="form-control"
-                    value="<?= $order['product'] ?>" required>
-            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
+                                <input type="text" name="customer" class="form-control" value="<?= htmlspecialchars($order['customer']) ?>" required>
+                                <div class="invalid-feedback">Please enter customer name</div>
+                            </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Deadline</label>
-                <input type="date" name="deadline" class="form-control"
-                    value="<?= $order['deadline'] ?>" required>
-            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Product</label>
+                                <input type="text" name="product" class="form-control" value="<?= htmlspecialchars($order['product']) ?>" required>
+                                <div class="invalid-feedback">Please enter product name</div>
+                            </div>
 
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Status</label>
-                <select name="status" class="form-select" required>
-                    <option value="active" <?= ($order['status'] == 'active') ? 'selected' : '' ?>>Active</option>
-                    <option value="pending" <?= ($order['status'] == 'pending') ? 'selected' : '' ?>>Pending</option>
-                    <option value="completed" <?= ($order['status'] == 'completed') ? 'selected' : '' ?>>Completed</option>
-                </select>
-            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
+                                <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($order['deadline']) ?>" required>
+                                <div class="invalid-feedback">Please select deadline</div>
+                            </div>
 
-            <div class="col-12 col-md-3 align-self-end">                
-                    <button type="submit" name="update" class="btn btn-success w-100">
-                         <i class="bi bi-check-circle me-1"></i> Update Order
-                    </button>
-            </div>
-            <!-- <div class="row p-0 m-0 justify-content-end">
-                <div class="col-12 col-md-3 text-end mt-3">
-                    <button type="submit" name="update" class="btn btn-warning px-4 py-2">
-                        <i class="bi bi-pencil-square me-1"></i> Update Order
-                    </button>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Status</label>
+                                <select name="status" class="form-select" required>
+                                    <option value="active" <?= ($order['status'] == 'active') ? 'selected' : '' ?>>Active</option>
+                                    <option value="pending" <?= ($order['status'] == 'pending') ? 'selected' : '' ?>>Pending</option>
+                                    <option value="completed" <?= ($order['status'] == 'completed') ? 'selected' : '' ?>>Completed</option>
+                                </select>
+                                <div class="invalid-feedback">Please select status</div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="pms-panel-footer text-end">
+                        <a href="view_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <button type="submit" name="update" class="pms-btn-dark">
+                            <i class="bi bi-check-circle"></i> Update Order
+                        </button>
+                    </div>
+
                 </div>
-            </div> -->
+            </form>
 
-        </form>
+        </div>
     </div>
 </div>
-
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
 <?php include "includes/footer.php"; ?>
