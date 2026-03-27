@@ -3,6 +3,7 @@ if(!isset($_SESSION['user'])) {
     header("Location: ../login.php");
     exit();
 }
+$current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
 <!DOCTYPE html>
@@ -22,60 +23,54 @@ if(!isset($_SESSION['user'])) {
 
 <body>
 
-<!-- 🔷 NAVBAR -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
   <div class="container-fluid">
 
-    <!-- LOGO -->
     <a class="navbar-brand fw-bold" href="dashboard.php">
         🚀 MySystem
     </a>
 
-    <!-- TOGGLE (Mobile) -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
     </button>
 
-    <!-- MENU -->
     <div class="collapse navbar-collapse" id="navbarNav">
 
-        <!-- LEFT MENU -->
         <ul class="navbar-nav me-auto">
 
             <li class="nav-item">
-                <a class="nav-link" href="orders.php">
-                    <i class="bi bi-cart"></i> Orders
+                <a class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>" href="orders.php">
+                    <i class="bi bi-bag-check"></i> Orders
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="tasks.php">
+                <a class="nav-link <?= ($current_page == 'tasks.php') ? 'active' : '' ?>" href="tasks.php">
                     <i class="bi bi-list-task"></i> Tasks
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="resources.php">
+                <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>" href="resources.php">
                     <i class="bi bi-box"></i> Resources
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>" href="#">
                     <i class="bi bi-bar-chart"></i> Reports
                 </a>
             </li>
 
             <li class="nav-item">
-                <a class="nav-link" href="#">
+                <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="#">
                     <i class="bi bi-gear"></i> Settings
                 </a>
             </li>
 
-            <!-- 👇 USERS (Superadmin only) -->
             <?php if($_SESSION['role'] == 'superadmin') { ?>
             <li class="nav-item">
-                <a class="nav-link" href="users.php">
+                <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
                     <i class="bi bi-people"></i> Users
                 </a>
             </li>
@@ -83,28 +78,21 @@ if(!isset($_SESSION['user'])) {
 
         </ul>
 
-        <!-- RIGHT SIDE -->
         <ul class="navbar-nav align-items-center">
-
-            <!-- USER NAME -->
             <li class="nav-item me-3 text-white">
-                <i class="bi bi-person-circle"></i>
-                <?= $_SESSION['user'] ?>
+                <i class="bi bi-person-circle"></i> <?= $_SESSION['user'] ?>
             </li>
 
-            <!-- LOGOUT -->
             <li class="nav-item">
                 <a href="logout.php" class="btn btn-danger btn-sm">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
             </li>
-
         </ul>
 
     </div>
-
   </div>
 </nav>
 
 <!-- PAGE CONTENT -->
-<div class="container mt-4">
+<div class="container-fluid mt-4">
