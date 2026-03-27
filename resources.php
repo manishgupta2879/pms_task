@@ -98,9 +98,9 @@ $qs  = '&search=' . urlencode($search);
                             </span>
                         </td>
                         <td class="text-end">
-                            <!-- <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Leave Management" style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
+                            <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Leave Management" style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
                                 <i class="bi bi-calendar-event-fill"></i>
-                            </a> -->
+                            </a>
                             
                             <a href="view_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
                                 <i class="bi bi-eye"></i>
