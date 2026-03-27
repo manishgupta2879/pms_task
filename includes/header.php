@@ -1,6 +1,6 @@
-<?php 
-if(!isset($_SESSION['user'])) {
-    header("Location: ../login.php");
+<?php
+if (!isset($_SESSION['user'])) {
+    header("Location: index.php");
     exit();
 }
 $current_page = basename($_SERVER['PHP_SELF']);
@@ -8,6 +8,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <!DOCTYPE html>
 <html>
+
 <head>
     <title>My System</title>
 
@@ -16,7 +17,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
     <!-- Optional Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <!-- Custom CSS -->
     <link rel="stylesheet" href="assets/style.css">
 </head>
@@ -96,3 +98,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <!-- PAGE CONTENT -->
 <div class="container-fluid mt-4">
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
+                <?= htmlspecialchars($_SESSION['success']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['success']); ?>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show mb-3" role="alert">
+                <?= htmlspecialchars($_SESSION['error']) ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <?php unset($_SESSION['error']); ?>
+        <?php endif; ?>
