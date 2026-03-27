@@ -25,79 +25,86 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
-  <div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container-fluid">
 
-    <a class="navbar-brand fw-bold" href="dashboard.php">
-        🚀 MySystem
-    </a>
+            <a class="navbar-brand fw-bold" href="dashboard.php">
+                🚀 MySystem
+            </a>
 
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="collapse navbar-collapse" id="navbarNav">
+            <div class="collapse navbar-collapse" id="navbarNav">
 
-        <ul class="navbar-nav me-auto">
+                <ul class="navbar-nav me-auto">
 
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>" href="orders.php">
-                    <i class="bi bi-bag-check"></i> Orders
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>" href="orders.php">
+                            <i class="bi bi-bag-check"></i> Orders
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'tasks.php') ? 'active' : '' ?>" href="tasks.php">
-                    <i class="bi bi-list-task"></i> Tasks
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'tasks.php') ? 'active' : '' ?>" href="tasks.php">
+                            <i class="bi bi-list-task"></i> Tasks
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>" href="resources.php">
-                    <i class="bi bi-box"></i> Resources
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>" href="resources.php">
+                            <i class="bi bi-box"></i> Resources
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>" href="#">
-                    <i class="bi bi-bar-chart"></i> Reports
-                </a>
-            </li>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'roles.php') ? 'active' : '' ?>" href="roles.php">
+                            <i class="bi bi-shield-lock"></i> Roles
+                        </a>
+                    </li>
 
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="#">
-                    <i class="bi bi-gear"></i> Settings
-                </a>
-            </li>
 
-            <?php if($_SESSION['role'] == 'superadmin') { ?>
-            <li class="nav-item">
-                <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
-                    <i class="bi bi-people"></i> Users
-                </a>
-            </li>
-            <?php } ?>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>" href="#">
+                            <i class="bi bi-bar-chart"></i> Reports
+                        </a>
+                    </li>
 
-        </ul>
+                    <li class="nav-item">
+                        <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="#">
+                            <i class="bi bi-gear"></i> Settings
+                        </a>
+                    </li>
 
-        <ul class="navbar-nav align-items-center">
-            <li class="nav-item me-3 text-white">
-                <i class="bi bi-person-circle"></i> <?= $_SESSION['user'] ?>
-            </li>
+                    <?php if ($_SESSION['role'] == 'superadmin') { ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                    <?php } ?>
 
-            <li class="nav-item">
-                <a href="logout.php" class="btn btn-danger btn-sm">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
-            </li>
-        </ul>
+                </ul>
 
-    </div>
-  </div>
-</nav>
+                <ul class="navbar-nav align-items-center">
+                    <li class="nav-item me-3 text-white">
+                        <i class="bi bi-person-circle"></i> <?= $_SESSION['user'] ?>
+                    </li>
 
-<!-- PAGE CONTENT -->
-<div class="container-fluid mt-4">
+                    <li class="nav-item">
+                        <a href="logout.php" class="btn btn-danger btn-sm">
+                            <i class="bi bi-box-arrow-right"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+
+            </div>
+        </div>
+    </nav>
+
+    <!-- PAGE CONTENT -->
+    <div class="container-fluid mt-4">
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
                 <?= htmlspecialchars($_SESSION['success']) ?>
