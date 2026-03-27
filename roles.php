@@ -5,11 +5,11 @@ include "includes/header.php";
 // Handle delete
 if (isset($_GET['delete'])) {
     $del_id = (int)$_GET['delete'];
-    
+
     // Check if the role is Superadmin
     $check_role = $conn->query("SELECT role_name, slug FROM roles WHERE id=$del_id");
     $role_data = $check_role->fetch_assoc();
-    
+
     if ($role_data && (strtolower($role_data['role_name']) == 'superadmin' || $role_data['slug'] == 'super-admin')) {
         $_SESSION['error'] = "Cannot delete Superadmin role";
     } else {
@@ -84,19 +84,20 @@ $qs  = '&search=' . urlencode($search);
                         <td><?= $i++ ?></td>
                         <td class="text-dark fw-medium"><?= htmlspecialchars($r['role_name']) ?></td>
                         <td class="text-muted"><code class="bg-light px-1 rounded"><?= htmlspecialchars($r['slug']) ?></code></td>
-                        <td><?= date('Y-m-d H:i:s', strtotime($r['created_at'])) ?></td>
+                        <td><span class="text-muted" style="font-size: 13px;"><?= date('M d, Y', strtotime($r['created_at'])) ?></span></td>
                         <td>
                             <span class="pms-status <?= $r['status'] == 'Active' ? 'active' : 'inactive' ?>">
                                 <?= $r['status'] ?>
                             </span>
                         </td>
                         <td class="text-end">
-                            <a href="add_role.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            <?php if (strtolower($r['role_name']) == 'superadmin' || $r['slug'] == 'super-admin'): ?>
-                                
+
+                            <!-- <?php if (strtolower($r['role_name']) == 'superadmin' || $r['slug'] == 'super-admin'): ?> -->
+
                             <?php else: ?>
+                                <a href="add_role.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
                                 <a href="roles.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this role?')">
                                     <i class="bi bi-trash"></i>
                                 </a>

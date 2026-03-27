@@ -88,10 +88,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
                         </div>
                     </div>
 
-                    <div class="pms-panel-footer">
-                        <a href="roles.php" class="btn btn-secondary me-2">Cancel</a>
-                        <button type="submit" name="save_role" class="btn btn-primary w-auto">
-                            Save Role
+                    <div class="pms-panel-footer text-end">
+                        <a href="roles.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <button type="submit" name="save_role" class="pms-btn-dark">
+                            <i class="bi bi-save"></i> Save Role
                         </button>
                     </div>
 

@@ -116,7 +116,7 @@ if (!isset($_SESSION['user'])) {
     </nav>
 
     <!-- PAGE CONTENT -->
-    <div class="container-fluid mt-4">
+    <div class="container-fluid mt-3">
 
         <?php if (isset($_SESSION['success'])): ?>
             <div class="alert alert-success alert-dismissible fade show mb-3" role="alert">
