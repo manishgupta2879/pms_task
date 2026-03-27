@@ -102,7 +102,7 @@ $qs  = '&search=' . urlencode($search);
                                 <i class="bi bi-calendar-event-fill"></i>
                             </a>
                             
-                            <a href="view_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
+                            <a href="view_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="View">
                                 <i class="bi bi-eye"></i>
                             </a>
 

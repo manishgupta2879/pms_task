@@ -32,80 +32,78 @@ if (isset($_POST['save'])) {
 include "includes/header.php";
 ?>
 
-<!-- <div class="card shadow">
-    <div class="card-header">
-        <h4>Create Order</h4>
-    </div>
+<div class="pms-wrap">
+    <div class="row">
+        <div class="col-md-12">
 
-    <div class="card-body">
+            <form method="POST" class="needs-validation" novalidate>
+                <div class="pms-panel">
 
-        <form method="POST">
+                    <div class="pms-panel-header d-flex justify-content-between align-items-center">
+                        <?= isset($order_id) ? 'Edit Order' : 'Create Order' ?>
+                        <a href="orders.php" class="btn btn-outline-secondary btn-sm">Back to Orders</a>
+                    </div>
 
-            <input class="form-control mb-2" name="customer" placeholder="Customer" required>
+                    <div class="pms-panel-body">
+                        <div class="row g-3">
 
-            <input class="form-control mb-2" name="product" placeholder="Product" required>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
+                                <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= htmlspecialchars($customer ?? '') ?>" required autofocus>
+                                <div class="invalid-feedback">Please enter customer name</div>
+                            </div>
 
-            <input type="date" class="form-control mb-2" name="deadline" required>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Product</label>
+                                <input type="text" name="product" class="form-control" placeholder="Product Name" value="<?= htmlspecialchars($product ?? '') ?>" required>
+                                <div class="invalid-feedback">Please enter product name</div>
+                            </div>
 
-            <select class="form-select mb-2" name="status">
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-            </select>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
+                                <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($deadline ?? '') ?>" required>
+                                <div class="invalid-feedback">Please select deadline</div>
+                            </div>
 
-            <button class="btn btn-success" name="save">Save Order</button>
+                            <div class="col-md-6">
+                                <label class="pms-form-label">Status</label>
+                                <select name="status" class="form-select">
+                                    <option value="active" <?= (isset($status) && $status == 'active') ? 'selected' : '' ?>>Active</option>
+                                    <option value="pending" <?= (isset($status) && $status == 'pending') ? 'selected' : '' ?>>Pending</option>
+                                    <option value="completed" <?= (isset($status) && $status == 'completed') ? 'selected' : '' ?>>Completed</option>
+                                </select>
+                            </div>
 
-        </form>
+                        </div>
+                    </div>
 
-    </div>
-</div> -->
-<div class="card shadow-lg border-0 rounded-3">
-    <div class="card-header border-0 bg-transparent d-flex justify-content-between align-items-center">
-        <h4 class="mb-0"> Create Order</h4>
-        <a href="orders.php" class="btn btn-success btn-sm">
-            <i class="bi bi-list"></i> Order List
-        </a>
-    </div>
+                    <div class="pms-panel-footer text-end">
+                        <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <button type="submit" name="save_order" class="pms-btn-dark">
+                            <i class="bi bi-check-circle"></i> Save Order
+                        </button>
+                    </div>
 
-    <div class="card-body">
-        <form method="POST" class="row g-3">
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Customer</label>
-                <input type="text" name="customer" class="form-control" placeholder="Customer Name" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Product</label>
-                <input type="text" name="product" class="form-control" placeholder="Product Name" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Deadline</label>
-                <input type="date" name="deadline" class="form-control" required>
-            </div>
-
-            <div class="col-md-6">
-                <label class="form-label fw-bold">Status</label>
-                <select name="status" class="form-select">
-                    <option value="active">Active</option>
-                    <option value="pending">Pending</option>
-                    <option value="completed">Completed</option>
-                </select>
-            </div>
-
-            <div class="row p-0 m-0 justify-content-end">
-                <div class="col-12 col-md-3 text-end mt-3">
-                    <button type="submit" name="save" class="btn btn-success px-4 py-2">
-                        <i class="bi bi-check-circle me-1"></i> Save Order
-                    </button>
                 </div>
-            </div>
+            </form>
 
-
-        </form>
-
+        </div>
     </div>
 </div>
-
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
 <?php include "includes/footer.php"; ?>
