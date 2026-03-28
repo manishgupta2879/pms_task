@@ -38,7 +38,7 @@ if (isset($_POST['login'])) {
         <div class="login-left">
             <div class="overlay"></div>
             <div class="content">
-                <h1>Manage Your Repairs Efficiently</h1>
+                <h1>Manage Your Orders Efficiently</h1>
                 <p>Track every order, optimize every task, and stay on top of your repair projects.</p>
                 <div class="features">
                     <div class="feature-item">

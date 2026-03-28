@@ -92,7 +92,7 @@ $qs  = '&search=' . urlencode($search);
                         </td>
                         <td class="text-end">
 
-                            <!-- <?php if (strtolower($r['role_name']) == 'superadmin' || $r['slug'] == 'super-admin'): ?> -->
+                            <?php if (strtolower($r['role_name']) == 'superadmin' || $r['slug'] == 'super-admin'): ?>
 
                             <?php else: ?>
                                 <a href="add_role.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">

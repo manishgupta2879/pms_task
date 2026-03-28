@@ -4,10 +4,10 @@ include "includes/header.php";
 
 if (isset($_GET['delete'])) {
     $del_id = (int)$_GET['delete'];
-    
+
     $check_user = $conn->query("SELECT r.slug FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id=$del_id");
     $u_data = $check_user->fetch_assoc();
-    
+
     if ($u_data && $u_data['slug'] == 'super-admin') {
         $_SESSION['error'] = "Cannot delete Superadmin using resource module";
     } else {
@@ -20,7 +20,7 @@ if (isset($_GET['delete'])) {
 
 $search   = $_GET['search'] ?? '';
 $page     = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 10; 
+$per_page = 10;
 $offset   = ($page - 1) * $per_page;
 
 
@@ -39,7 +39,7 @@ $res = $conn->query($sql);
 $qs  = '&search=' . urlencode($search);
 ?>
 
-<div class="pms-wrap">  
+<div class="pms-wrap">
 
     <div class="pms-panel">
 
@@ -61,65 +61,67 @@ $qs  = '&search=' . urlencode($search);
             </div>
         </div>
 
-        <table class="pms-table">
-            <thead>
-                <tr>
-                    <th style="width: 80px;">#</th>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Type</th>
-                    <th>Role</th>
-                    <th>Status</th>
-                    <th class="text-end" style="width: 150px;">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php if ($total == 0): ?>
+        <div class="table-responsive">
+            <table class="pms-table">
+                <thead>
                     <tr>
-                        <td colspan="7" class="text-center py-4">No resources found</td>
+                        <th style="width: 80px;">#</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th class="text-end" style="width: 150px;">Actions</th>
                     </tr>
-                <?php endif; ?>
-                <?php $i = $offset + 1; ?>
-                <?php while ($r = $res->fetch_assoc()): ?>
-                    <tr>
-                        <td><?= $i++ ?></td>
-                        <td class="text-dark fw-medium"><?= htmlspecialchars($r['name'] ?? $r['username']) ?></td>
-                        <td><?= htmlspecialchars($r['email']) ?></td>
-                        <td>
-                            <span class="badge border text-dark fw-normal" style="background: #f1f5f9; border-color: #cbd5e1 !important;">
-                                <?= $r['type'] ?>
-                            </span>
-                        </td>
-                        <td><?= htmlspecialchars($r['role_name'] ?? 'No Role') ?></td>
-                        <td>
-                            <?php $status = $r['status'] ?? 'Active'; ?>
-                            <span class="pms-status <?= strtolower($status) == 'active' ? 'active' : 'inactive' ?>">
-                                <?= htmlspecialchars($status) ?>
-                            </span>
-                        </td>
-                        <td class="text-end">
-                            <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Leave Management" style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
-                                <i class="bi bi-calendar-event-fill"></i>
-                            </a>
-                            
-                            <a href="view_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
-                                <i class="bi bi-eye"></i>
-                            </a>
-
-                            <a href="add_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
-                                <i class="bi bi-pencil"></i>
-                            </a>
-                            
-                            <?php if ($r['role_slug'] != 'super-admin'): ?>
-                                <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this resource?')">
-                                    <i class="bi bi-trash"></i>
+                </thead>
+                <tbody>
+                    <?php if ($total == 0): ?>
+                        <tr>
+                            <td colspan="7" class="text-center py-4">No resources found</td>
+                        </tr>
+                    <?php endif; ?>
+                    <?php $i = $offset + 1; ?>
+                    <?php while ($r = $res->fetch_assoc()): ?>
+                        <tr>
+                            <td><?= $i++ ?></td>
+                            <td class="text-dark fw-medium"><?= htmlspecialchars($r['name'] ?? $r['username']) ?></td>
+                            <td><?= htmlspecialchars($r['email']) ?></td>
+                            <td>
+                                <span class="badge border text-dark fw-normal" style="background: #f1f5f9; border-color: #cbd5e1 !important;">
+                                    <?= $r['type'] ?>
+                                </span>
+                            </td>
+                            <td><?= htmlspecialchars($r['role_name'] ?? 'No Role') ?></td>
+                            <td>
+                                <?php $status = $r['status'] ?? 'Active'; ?>
+                                <span class="pms-status <?= strtolower($status) == 'active' ? 'active' : 'inactive' ?>">
+                                    <?= htmlspecialchars($status) ?>
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Leave Management" style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
+                                    <i class="bi bi-calendar-event-fill"></i>
                                 </a>
-                            <?php endif; ?>
-                        </td>
-                    </tr>
-                <?php endwhile; ?>
-            </tbody>
-        </table>
+
+                                <a href="view_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+
+                                <a href="add_resource.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+
+                                <?php if ($r['role_slug'] != 'super-admin'): ?>
+                                    <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this resource?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                <?php endif; ?>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
 
         <!-- Pagination -->
         <div class="pms-footer">
