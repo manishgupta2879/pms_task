@@ -144,11 +144,11 @@ include "includes/header.php";
                             <!-- Status -->
                             <td>
                                 <?php if ($t['status'] == 'completed') { ?>
-                                    <span class="badge bg-success">Completed</span>
+                                    <span class="pms-status completed">Completed</span>
                                 <?php } elseif ($t['status'] == 'in_progress') { ?>
-                                    <span class="badge bg-primary">In Progress</span>
+                                    <span class="pms-status active">In Progress</span>
                                 <?php } else { ?>
-                                    <span class="badge bg-secondary">Not Started</span>
+                                    <span class="pms-status pending">Not Started</span>
                                 <?php } ?>
                             </td>
                             <!-- Start & End Time -->
@@ -258,9 +258,12 @@ include "includes/header.php";
 
         <div class="card-body">
 
-            <form method="POST">
-                <textarea name="notes" class="form-control" rows="4"><?= $order['notes'] ?></textarea>
-                <button name="save_notes" class="btn btn-primary mt-2">Save Notes</button>
+            <form method="POST" class="needs-validation" novalidate>
+                <textarea name="notes" class="form-control" rows="4" required><?= $order['notes'] ?></textarea>
+                <div class="invalid-feedback">Please enter notes</div>
+                <div class="text-end">
+                    <button name="save_notes" class="btn btn-primary mt-2 text-end">Save Notes</button>
+                </div>
                 
             </form>
 
@@ -268,5 +271,21 @@ include "includes/header.php";
     </div>
 
 </div>
+<script>
+    (function () {
+        'use strict'
+        var forms = document.querySelectorAll('.needs-validation')
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+    })()
+</script>
 
 <?php include "includes/footer.php"; ?>
