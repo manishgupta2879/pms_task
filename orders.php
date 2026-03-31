@@ -12,7 +12,8 @@ if (isset($_GET['delete'])) {
     // delete order
     // $conn->query("DELETE FROM orders WHERE id=$delete_id");
     $conn->query("UPDATE orders SET deleted_at = NOW() WHERE id = $delete_id");
-    header("Location: orders.php?msg=deleted");
+    $_SESSION['success'] = "Order deleted successfully.";
+    header("Location: orders.php");
     exit();
 }
 
@@ -20,9 +21,10 @@ if (isset($_GET['delete'])) {
 $search = $_GET['search'] ?? '';
 $status = $_GET['status'] ?? '';
 $customer = $_GET['customer'] ?? '';
+$deadline = $_GET['deadline'] ?? '';
 
 // pagination
-$limit = 5;
+$limit = 25;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int)$page);
 $offset = ($page - 1) * $limit;
@@ -33,9 +35,11 @@ $where = "WHERE deleted_at IS NULL";
 if ($search != '') {
     $where .= " AND (order_no LIKE '%$search%' OR product LIKE '%$search%')";
 }
-
 if ($status != '') {
-    $where .= " AND status='$status'";
+    $where .= " AND orders.status='$status'";
+}
+if ($deadline != '') {
+    $where .= " AND deadline='$deadline'";
 }
 
 if ($customer != '') {
@@ -84,7 +88,11 @@ include "includes/header.php";
                                 <label class="pms-form-label">Search</label>
                                 <input type="text" name="search" class="form-control" placeholder="Order # or Product" value="<?= $search ?>">
                             </div>
-
+                            <!-- Deadline -->
+                            <div class="col-6">
+                                <label class="pms-form-label">Deadline</label>
+                                <input type="date" name="deadline" class="form-control" value="<?= $deadline ?>">
+                            </div>
                             <div class="col-6">
                                 <label class="pms-form-label">Customer</label>
                                 <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= $customer ?>">
