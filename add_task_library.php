@@ -1,10 +1,13 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 include "includes/header.php";
 
 $order_id = (int) ($_GET['order_id'] ?? 0);
 
-// save task
 if (isset($_POST['save'])) {
 
     $task_name = trim($_POST['task_name']);

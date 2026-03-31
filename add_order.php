@@ -1,16 +1,19 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('orders');
+include "includes/header.php";
 
 if (isset($_POST['save_order'])) {
 
-    // ✅ get max id safely
+    
     $res = $conn->query("SELECT MAX(id) as max_id FROM orders");
     $row = $res->fetch_assoc();
 
-    // fix NULL case
     $next_id = ($row['max_id'] ?? 0) + 1;
 
-    // generate order number
     $order_no = 10000 + $next_id;
 
     $customer = $_POST['customer'];
@@ -18,7 +21,6 @@ if (isset($_POST['save_order'])) {
     $deadline = $_POST['deadline'];
     $status = $_POST['status'];
 
-    // ✅ insert with error check
     $sql = "INSERT INTO orders(order_no,customer,product,deadline,status)
             VALUES('$order_no','$customer','$product','$deadline','$status')";
 

@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('orders');
 include "includes/header.php";
 
 if (!isset($_GET['id'])) {
@@ -25,19 +29,6 @@ if (isset($_POST['save_notes'])) {
     header("Location: view_order.php?id=$id");
     exit();
 }
-
-// ✅ get tasks with user details
-$taskRes = $conn->query("
-    SELECT t.*, 
-           u.username,
-           u.role_id,
-           r.role_name,
-           r.slug
-    FROM tasks t
-    LEFT JOIN users u ON t.user_id = u.id
-    LEFT JOIN roles r ON u.role_id = r.id
-    WHERE t.order_id=$id
-");
 
 // progress
 $total = $conn->query("SELECT COUNT(*) as t FROM tasks WHERE order_id=$id")->fetch_assoc()['t'];
@@ -166,83 +157,90 @@ $productivityRes = $conn->query("
                 </div>
             </div>
 
-            <table class="pms-table">
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">#</th>
-                        <th>Task Name</th>
-                        <th>Assigned To</th>
-                        <th>Est. Time</th>
-                        <th>Status</th>
-                        <th>Start Time</th>
-                        <th>End Time</th>
-                        <th class="text-end">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if ($taskRes->num_rows == 0): ?>
+            <?php 
+            $taskRes = $conn->query("
+                SELECT t.*, 
+                       u.username,
+                       u.role_id,
+                       r.role_name,
+                       r.slug
+                FROM tasks t
+                LEFT JOIN users u ON t.user_id = u.id
+                LEFT JOIN roles r ON u.role_id = r.id
+                WHERE t.order_id=$id
+            ");
+            ?>
+
+            <?php if ($taskRes->num_rows == 0): ?>
+                <div class="alert alert-info text-center py-4" style="margin: 15px 20px;">
+                    <i class="bi bi-info-circle me-2"></i> No tasks added yet
+                </div>
+            <?php else: ?>
+                <div style="overflow-x: auto;">
+                <table class="pms-table">
+                    <thead>
                         <tr>
-                            <td colspan="8" class="text-center py-4">No tasks added yet</td>
+                            <th style="width: 50px;">#</th>
+                            <th>Task Name</th>
+                            <th>Assigned To</th>
+                            <th>Est. Time</th>
+                            <th>Status</th>
+                            <th>Start Time</th>
+                            <th>End Time</th>
+                            <th class="text-end">Actions</th>
                         </tr>
-                    <?php endif; ?>
+                    </thead>
+                    <tbody>
+                        <?php $task_counter = 1;
+                        while ($t = $taskRes->fetch_assoc()): ?>
+                            <tr>
+                                <td class="text-muted fw-medium"><?= $task_counter++ ?></td>
+                                <td class="text-dark fw-medium"><?= htmlspecialchars($t['task_name']) ?></td>
+                                <td>
+                                    <?php if ($t['username']): ?>
+                                        <span class="text-dark fw-medium"><?= htmlspecialchars($t['username']) ?></span>
+                                    <?php else: ?>
+                                        <span class="text-muted">Not Assigned</span>
+                                    <?php endif; ?>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
+                                </td>
+                                <td>
+                                    <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>">
+                                        <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
+                                    </span>
+                                </td>
+                                <td><span class="text-muted" style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span></td>
+                                <td><span class="text-muted" style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span></td>
+                                <td class="text-end">
+                                    <?php if ($order['status'] != 'completed'): ?>
+                                        <?php if ($t['status'] == 'not_started'): ?>
+                                            <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success" title="Start Task">
+                                                <i class="bi bi-play-fill"></i> Start Task
+                                            </a>
+                                        <?php elseif ($t['status'] == 'in_progress'): ?>
+                                            <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="End Task">
+                                                <i class="bi bi-stop-fill"></i> End Task
+                                            </a>
+                                        <?php else: ?>
+                                            <span class="text-success fw-medium">✓ Done</span>
+                                        <?php endif; ?>
 
-                    <?php $task_counter = 1;
-                    while ($t = $taskRes->fetch_assoc()): ?>
-                        <tr>
-                            <td class="text-muted fw-medium"><?= $task_counter++ ?></td>
-                            <td class="text-dark fw-medium"><?= htmlspecialchars($t['task_name']) ?></td>
-                            <td>
-                                <?php if ($t['username']): ?>
-                                    <span class="text-dark fw-medium"><?= htmlspecialchars($t['username']) ?></span>
-
-                                <?php else: ?>
-                                    <span class="text-muted">Not Assigned</span>
-                                <?php endif; ?>
-                            </td>
-                            <td>
-                                <span
-                                    class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
-                            </td>
-                            <td>
-                                <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>">
-                                    <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
-                                </span>
-                            </td>
-                            <td><span class="text-muted"
-                                    style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span>
-                            </td>
-                            <td><span class="text-muted"
-                                    style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span>
-                            </td>
-                            <td class="text-end">
-                                <?php if ($order['status'] != 'completed'): ?>
-                                    <?php if ($t['status'] == 'not_started'): ?>
-                                        <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success"
-                                            title="Start Task">
-                                            <i class="bi bi-play-fill"></i> Start Task
-                                        </a>
-                                    <?php elseif ($t['status'] == 'in_progress'): ?>
-                                        <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger"
-                                            title="End Task">
-                                            <i class="bi bi-stop-fill"></i> End Task
+                                        <a href="delete_task.php?id=<?= $t['id'] ?>&order_id=<?= $id ?>" class="pms-action-btn pms-action-btn-danger" title="Delete Task" onclick="return confirm('Delete this task?')">
+                                            <i class="bi bi-trash"></i>
                                         </a>
                                     <?php else: ?>
-                                        <span class="text-success fw-medium">✓ Done</span>
+                                        <span class="text-muted">Locked</span>
                                     <?php endif; ?>
-
-                                    <a href="delete_task.php?id=<?= $t['id'] ?>&order_id=<?= $id ?>"
-                                        class="pms-action-btn pms-action-btn-danger" title="Delete Task"
-                                        onclick="return confirm('Delete this task?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
-                                <?php else: ?>
-                                    <span class="text-muted">Locked</span>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+                                </td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                </div>
+            <?php endif; ?>
+        </div>
         </div>
         <!-- PRODUCTIVITY SECTION -->
         <div class="row g-3 mb-3">
@@ -253,6 +251,7 @@ $productivityRes = $conn->query("
                         </h5>
                     </div>
 
+                    <div style="overflow-x: auto;">
                     <table class="pms-table" style="margin-bottom: 0;">
                         <thead>
                             <tr>
@@ -289,6 +288,7 @@ $productivityRes = $conn->query("
                             <?php endwhile; ?>
                         </tbody>
                     </table>
+                    </div>
                 </div>
             </div>
         </div>

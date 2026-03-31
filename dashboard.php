@@ -1,4 +1,7 @@
-<?php include "includes/config.php";
+<?php 
+include "includes/config.php";
+include "includes/rbac.php";
+requireAuth();
 include "includes/header.php"; ?>
 
 <!-- <div class="card">
@@ -98,7 +101,6 @@ include "includes/header.php"; ?>
                         <tbody>
                             <tr>
                                 <?php
-                                // Example structure: $weekly_tasks[day] = array of tasks
                                 $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
                                 $weekly_tasks = [
                                     'Mon' => [

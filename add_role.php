@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requireSuperAdmin();
 include "includes/header.php";
 
 $id = $_GET['id'] ?? 0;
@@ -22,7 +26,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
     $status = $_POST['status'];
 
     if ($role_name != '') {
-        // Unique validation
         $check_sql = "SELECT id FROM roles WHERE role_name = ? AND deleted_at IS NULL";
         if ($id) $check_sql .= " AND id != $id";
         $stmt_check = $conn->prepare($check_sql);
@@ -106,7 +109,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
     (function () {
         'use strict'
 
-        // Slug generation logic
         const roleInput = document.getElementById('role_name');
         const slugInput = document.getElementById('role_slug');
 
@@ -120,7 +122,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
             slugInput.value = slug;
         });
 
-        // Bootstrap validation
+        
         var forms = document.querySelectorAll('.needs-validation')
         Array.prototype.slice.call(forms)
             .forEach(function (form) {

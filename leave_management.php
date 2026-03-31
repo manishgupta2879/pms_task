@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+include "includes/header.php";
 
 $user_id = $_GET['id'] ?? 0;
 
@@ -173,6 +177,7 @@ $qs = '&id=' . $user_id;
                     <a href="resources.php" class="btn btn-outline-secondary btn-sm">Back to Resources</a>
                 </div>
 
+                <div style="overflow-x: auto;">
                 <table class="pms-table">
                     <thead>
                         <tr>
@@ -220,6 +225,7 @@ $qs = '&id=' . $user_id;
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
 
                 <!-- Pagination -->
                 <div class="pms-footer">

@@ -1,9 +1,13 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('resources');
+include "includes/header.php";
 
 $id = $_GET['id'] ?? 0;
 
-// Fetch 'Staff' role ID once to ensure we have the correct ID
 $staff_q = $conn->query("SELECT id FROM roles WHERE slug = 'staff' OR role_name LIKE 'Staff%' LIMIT 1");
 $staff_id_global = $staff_q->fetch_assoc()['id'] ?? 0;
 
@@ -13,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_resource'])) {
     $upass = $_POST['password'];
     $utype = $_POST['type'];
     $ustatus = $_POST['status'];
-    $role_id = $staff_id_global; // Always set to static staff ID
+    $role_id = $staff_id_global;
 
     $working_hours = null;
     if ($utype == 'Part-time') {
@@ -182,7 +186,6 @@ $existing_minutes = $working_hours ? ($working_hours % 60) : 0;
                 }, false)
             })
 
-        // Show/hide working hours based on resource type
         const typeSelect = document.getElementById('resource_type');
         const workingHoursDiv = document.getElementById('working_hours_div');
         const hoursInput = document.getElementById('hours');

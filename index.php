@@ -1,19 +1,32 @@
 <?php
 
 include "includes/config.php";
+include "includes/rbac.php";
 
 if (isset($_POST['login'])) {
     // Using trim to avoid accidental spaces in input
     $username = trim($_POST['username']);
     $password = md5(trim($_POST['password']));
-    // Standard query as per original code
-    $res = $conn->query("SELECT * FROM users WHERE username='$username' AND password='$password'");
+    
+    // Query user with role information
+    $res = $conn->query("SELECT u.id, u.username, u.role_id, r.slug, r.role_name 
+                         FROM users u 
+                         LEFT JOIN roles r ON u.role_id = r.id 
+                         WHERE u.username='$username' AND u.password='$password' AND u.deleted_at IS NULL");
 
     if ($res->num_rows == 1) {
         $row = $res->fetch_assoc();
+        
+        // Store secure session data
+        $_SESSION['user_id'] = $row['id'];
         $_SESSION['user'] = $row['username'];
-        $_SESSION['role'] = $row['role'];
-
+        $_SESSION['role_slug'] = $row['slug'] ?? 'staff'; // Fallback to 'staff' if no role assigned
+        $_SESSION['role_name'] = $row['role_name'] ?? 'Staff';
+        $_SESSION['role_id'] = $row['role_id'];
+        
+        // Legacy support (deprecated but kept for compatibility)
+        $_SESSION['role'] = $row['slug'] ?? 'staff';
+        
         // Ensure redirect works by calling exit immediately after header
         header("Location: dashboard.php");
         exit();

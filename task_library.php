@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 include "includes/header.php";
 
 // fetch tasks
@@ -27,6 +31,7 @@ $tasks = $conn->query("SELECT * FROM task_library");
         </div>
         <?php endif; ?> -->
 
+        <div style="overflow-x: auto;">
         <table class="pms-table">
             <thead>
                 <tr>
@@ -76,6 +81,7 @@ $tasks = $conn->query("SELECT * FROM task_library");
             </tbody>
 
         </table>
+        </div>
 
     </div>
 </div>

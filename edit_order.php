@@ -1,5 +1,10 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('orders');
+include "includes/header.php";
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");

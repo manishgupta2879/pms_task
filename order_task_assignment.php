@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('orders');
 include "includes/header.php";
 
 if (!isset($_GET['order_id'])) {
@@ -48,6 +52,7 @@ if (!$tasks) {
             <div class="alert alert-warning m-3">No tasks found in library.</div>
         <?php else: ?>
 
+            <div style="overflow-x: auto;">
             <table class="pms-table">
                 <thead>
                     <tr>
@@ -112,6 +117,7 @@ if (!$tasks) {
                     <?php endwhile; ?>
                 </tbody>
             </table>
+            </div>
 
         <?php endif; ?>
 
