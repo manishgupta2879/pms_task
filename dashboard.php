@@ -1,7 +1,4 @@
-<?php 
-include "includes/config.php";
-include "includes/rbac.php";
-requireAuth();
+<?php include "includes/config.php";
 include "includes/header.php"; ?>
 
 <!-- <div class="card">
@@ -82,160 +79,157 @@ include "includes/header.php"; ?>
     </div>
 
     <!-- Weekly Task Timeline -->
-    <div class=" mt-4">
-        <div class="card shadow-sm">
-            <div class="card-body">
-                <h5 class="card-title">Weekly Task Timeline</h5>
+    <div class="mt-4">
+        <div class="pms-panel">
+            <div class="pms-panel-header">
+                <i class="bi bi-calendar-week me-2"></i>Weekly Task Timeline
+            </div>
+            <div style="overflow-x: auto;">
+                <table class="pms-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 100px;">Monday</th>
+                            <th style="width: 100px;">Tuesday</th>
+                            <th style="width: 100px;">Wednesday</th>
+                            <th style="width: 100px;">Thursday</th>
+                            <th style="width: 100px;">Friday</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <?php
+                            // Example structure: $weekly_tasks[day] = array of tasks
+                            $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+                            $weekly_tasks = [
+                                'Mon' => [
+                                    ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
+                                    ['name' => 'Inventory Check', 'assigned_to' => 'Amit']
+                                ],
+                                'Tue' => [
+                                    ['name' => 'Dispatch Order #102', 'assigned_to' => 'Neha']
+                                ],
+                                'Wed' => [],
+                                'Thu' => [
+                                    ['name' => 'Client Follow-up', 'assigned_to' => 'Priya']
+                                ],
+                                'Fri' => [
+                                    ['name' => 'Weekly Report', 'assigned_to' => 'Manager']
+                                ]
+                            ];
+                            foreach ($days as $day) {
+                                echo "<td>";
 
-                <div class="table-responsive">
-                    <table class="table table-bordered align-middle text-center">
-                        <thead class="table-light">
+                                if (!empty($weekly_tasks[$day])) {
+                                    $count = 1;
+                                    foreach ($weekly_tasks[$day] as $task) {
+                                        echo "<div class='mb-2 p-2 bg-light rounded text-start'>";
+                                        echo "<strong>#{$count}</strong> ";
+                                        echo htmlspecialchars($task['name']) . "<br>";
+                                        echo "<small class='text-muted'>Assigned: " . htmlspecialchars($task['assigned_to']) . "</small>";
+                                        echo "</div>";
+                                        $count++;
+                                    }
+                                } else {
+                                    echo "<span class='text-muted'>No Tasks</span>";
+                                }
+
+                                echo "</td>";
+                            }
+                            ?>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4">
+    <div class="row g-4">
+        <?php $urgent_tasks = [
+            [
+                'name' => 'Packing Order #101',
+                'order_no' => '101',
+                'assigned_to' => 'Rahul',
+                'due_date' => '2026-03-28',
+                'status' => 'Pending'
+            ],
+            [
+                'name' => 'Dispatch Order #102',
+                'order_no' => '102',
+                'assigned_to' => 'Neha',
+                'due_date' => '2026-03-27',
+                'status' => 'Completed'
+            ]
+        ]; ?>
+        <!-- Urgent Tasks Panel -->
+        <div class="col-lg-8">
+            <div class="pms-panel">
+                <div class="pms-panel-header">
+                    <i class="bi bi-exclamation-triangle me-2"></i>Urgent Tasks
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="pms-table">
+                        <thead>
                             <tr>
-                                <th>Mon</th>
-                                <th>Tue</th>
-                                <th>Wed</th>
-                                <th>Thu</th>
-                                <th>Fri</th>
+                                <th>Task Name</th>
+                                <th>Order #</th>
+                                <th>Assigned To</th>
+                                <th>Due Date</th>
+                                <th style="width: 100px;">Status</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <?php
-                                $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-                                $weekly_tasks = [
-                                    'Mon' => [
-                                        ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
-                                        ['name' => 'Inventory Check', 'assigned_to' => 'Amit']
-                                    ],
-                                    'Tue' => [
-                                        ['name' => 'Dispatch Order #102', 'assigned_to' => 'Neha']
-                                    ],
-                                    'Wed' => [],
-                                    'Thu' => [
-                                        ['name' => 'Client Follow-up', 'assigned_to' => 'Priya']
-                                    ],
-                                    'Fri' => [
-                                        ['name' => 'Weekly Report', 'assigned_to' => 'Manager']
-                                    ]
-                                ];
-                                foreach ($days as $day) {
-                                    echo "<td>";
-
-                                    if (!empty($weekly_tasks[$day])) {
-                                        $count = 1;
-                                        foreach ($weekly_tasks[$day] as $task) {
-                                            echo "<div class='mb-2 p-2 bg-light rounded text-start'>";
-                                            echo "<strong>#{$count}</strong> ";
-                                            echo htmlspecialchars($task['name']) . "<br>";
-                                            echo "<small class='text-muted'>Assigned: " . htmlspecialchars($task['assigned_to']) . "</small>";
-                                            echo "</div>";
-                                            $count++;
-                                        }
-                                    } else {
-                                        echo "<span class='text-muted'>No Tasks</span>";
-                                    }
-
-                                    echo "</td>";
-                                }
-                                ?>
-                            </tr>
+                            <?php if (!empty($urgent_tasks)) { ?>
+                                <?php foreach ($urgent_tasks as $task) { ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($task['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($task['order_no']); ?></td>
+                                        <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
+                                        <td><?php echo date("d M Y", strtotime($task['due_date'])); ?></td>
+                                        <td>
+                                            <span class="badge p-2 text-md bg-<?php echo $task['status'] == 'Pending' ? 'warning' : ($task['status'] == 'Completed' ? 'success' : 'secondary'); ?>">
+                                                <?php echo $task['status']; ?>
+                                            </span>
+                                        </td>
+                                    </tr>
+                                <?php } ?>
+                            <?php } else { ?>
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">No urgent tasks</td>
+                                </tr>
+                            <?php } ?>
                         </tbody>
                     </table>
                 </div>
+            </div>
+        </div>
+        <!-- Quick Actions -->
+        <div class="col-lg-4">
+            <div class="pms-panel">
+                <div class="pms-panel-header">
+                    <i class="bi bi-lightning me-2"></i>Quick Actions
+                </div>
+                <div class="pms-panel-body">
+                    <div class="d-grid gap-2">
+                        <a href="add_order.php" class="btn btn-primary">
+                            <i class="bi bi-plus-circle"></i> New Order
+                        </a>
 
+                        <a href="add_task_library.php" class="btn btn-success">
+                            <i class="bi bi-list-task"></i>Add Task
+                        </a>
+
+                        <a href="add_resource.php" class="btn btn-dark">
+                            <i class="bi bi-person-plus"></i> Add Resource
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
 
-    <div class="mt-4">
-        <div class="row g-4">
-            <?php $urgent_tasks = [
-                [
-                    'name' => 'Packing Order #101',
-                    'order_no' => '101',
-                    'assigned_to' => 'Rahul',
-                    'due_date' => '2026-03-28',
-                    'status' => 'Pending'
-                ],
-                [
-                    'name' => 'Dispatch Order #102',
-                    'order_no' => '102',
-                    'assigned_to' => 'Neha',
-                    'due_date' => '2026-03-27',
-                    'status' => 'Completed'
-                ]
-            ]; ?>
-            <!-- Urgent Tasks Panel -->
-            <div class="col-lg-8">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Urgent Tasks</h5>
 
-                        <div class="table-responsive">
-                            <table class="table table-bordered table-hover align-middle">
-                                <thead class="table-danger text-center">
-                                    <tr>
-                                        <th>Task Name</th>
-                                        <th>Order #</th>
-                                        <th>Assigned To</th>
-                                        <th>Due Date</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php if (!empty($urgent_tasks)) { ?>
-                                        <?php foreach ($urgent_tasks as $task) { ?>
-                                            <tr>
-                                                <td><?php echo htmlspecialchars($task['name']); ?></td>
-                                                <td><?php echo htmlspecialchars($task['order_no']); ?></td>
-                                                <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
-                                                <td><?php echo date("d M Y", strtotime($task['due_date'])); ?></td>
-                                                <td>
-                                                    <span class="badge bg-<?php echo $task['status'] == 'Pending' ? 'warning' : ($task['status'] == 'Completed' ? 'success' : 'secondary'); ?>">
-                                                        <?php echo $task['status']; ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php } ?>
-                                    <?php } else { ?>
-                                        <tr>
-                                            <td colspan="5" class="text-center text-muted">No urgent tasks</td>
-                                        </tr>
-                                    <?php } ?>
-                                </tbody>
-                            </table>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="col-lg-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">Quick Actions</h5>
-
-                        <div class="d-grid gap-3 mt-3">
-                            <a href="add_order.php" class="btn btn-primary">
-                                <i class="bi bi-plus-circle"></i> + New Order
-                            </a>
-
-                            <a href="add_task.php" class="btn btn-success">
-                                <i class="bi bi-list-task"></i> + Add Task
-                            </a>
-
-                            <a href="add_resource.php" class="btn btn-dark">
-                                <i class="bi bi-person-plus"></i> + Add Resource
-                            </a>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-        </div>
-    </div>
 </div>
 <?php include "includes/footer.php"; ?>

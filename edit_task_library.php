@@ -75,7 +75,7 @@ $existing_minutes = $stored_time % 60;
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         Edit Task
                         <?php $back_url = ($order_id == 0) ? "task_library.php" : "order_task_assignment.php?order_id=$order_id"; ?>
-                        <a href="<?= $back_url ?>" class="btn btn-outline-secondary btn-sm">Back</a>
+                        <a href="<?= $back_url ?>" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <div class="pms-panel-body">
@@ -120,7 +120,7 @@ $existing_minutes = $stored_time % 60;
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="<?= $back_url ?>" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <a href="<?= $back_url ?>" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="update" class="pms-btn-dark btn-sm">
                             <i class="bi bi-pencil"></i> Update Task
                         </button>

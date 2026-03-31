@@ -58,7 +58,7 @@ td {
     background-color: #1e293b;
     color: #fff;
     border-radius: 4px;
-    padding: 7px 14px;
+    padding: 6px 12px;
     font-size: 13px;
     font-weight: 500;
     border: 1px solid #1e293b;
@@ -92,6 +92,51 @@ td {
 .pms-btn-light:hover {
     background-color: #f8fafc;
     color: #1e293b;
+}
+
+/* Standardized Button Classes */
+.pms-btn-back,
+.pms-btn-cancel {
+    background-color: #f3f4f6;
+    color: #4b5563;
+    border-radius: 4px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #d1d5db;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.pms-btn-back:hover,
+.pms-btn-cancel:hover {
+    background-color: #e5e7eb;
+    color: #1f2937;
+    border-color: #9ca3af;
+}
+
+.pms-btn-add {
+    background-color: #1e293b;
+    color: #fff;
+    border-radius: 4px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid #1e293b;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: all 0.2s;
+}
+
+.pms-btn-add:hover {
+    background-color: #0f172a;
+    color: #fff;
+    border-color: #0f172a;
 }
 
 .pms-panel {

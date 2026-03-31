@@ -75,7 +75,7 @@ $qs  = '&search=' . urlencode($search);
                         <th>Type</th>
                         <th>Role</th>
                         <th>Status</th>
-                        <th class="text-end" style="width: 150px;">Actions</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
