@@ -1,19 +1,13 @@
 <?php
 include "includes/config.php";
-if (isset($_POST['save_notes'])) {
-    $id = (int)$_GET['id'];
-    $notes = $conn->real_escape_string($_POST['notes']);
-    $conn->query("UPDATE orders SET notes='$notes' WHERE id=$id");
-    header("Location: view_order.php?id=$id&save_notes=notes_saved");
-    exit();
-}
+include "includes/header.php";
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");
     exit();
 }
 
-$id = (int)$_GET['id'];
+$id = (int) $_GET['id'];
 
 // get order
 $orderRes = $conn->query("SELECT * FROM orders WHERE id=$id");
@@ -23,14 +17,25 @@ if (!$order) {
     die("Order not found");
 }
 
-// ✅ get tasks with BOTH user + resource
+// save notes
+if (isset($_POST['save_notes'])) {
+    $notes = $conn->real_escape_string($_POST['notes']);
+    $conn->query("UPDATE orders SET notes='$notes' WHERE id=$id");
+    $_SESSION['success'] = "Notes saved successfully";
+    header("Location: view_order.php?id=$id");
+    exit();
+}
+
+// ✅ get tasks with user details
 $taskRes = $conn->query("
     SELECT t.*, 
            u.username,
-           r.name as resource_name, r.role
+           u.role_id,
+           r.role_name,
+           r.slug
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
-    LEFT JOIN resources r ON t.resource_id = r.id
+    LEFT JOIN roles r ON u.role_id = r.id
     WHERE t.order_id=$id
 ");
 
@@ -43,249 +48,318 @@ $progress = ($total > 0) ? round(($done / $total) * 100) : 0;
 $today = date("Y-m-d");
 $deadline = $order['deadline'];
 
-$deadline_alert = "";
+$deadline_class = "";
+$deadline_text = "";
 if ($deadline < $today) {
-    $deadline_alert = "<div class='alert alert-danger'>⚠️ Deadline passed!</div>";
+    $deadline_class = "bg-danger";
+    $deadline_text = "⚠️ Deadline passed!";
 } elseif ($deadline == $today) {
-    $deadline_alert = "<div class='alert alert-warning'>⚠️ Deadline is today!</div>";
+    $deadline_class = "bg-warning";
+    $deadline_text = "⚠️ Deadline is today!";
 }
 
-// ✅ productivity (user + resource combined)
+// ✅ productivity - users only
 $productivityRes = $conn->query("
     SELECT 
-        COALESCE(u.username, r.name) as person,
+        COALESCE(u.username, 'Unassigned') as person,
         COUNT(t.id) as total,
         SUM(CASE WHEN t.status='completed' THEN 1 ELSE 0 END) as completed
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
-    LEFT JOIN resources r ON t.resource_id = r.id
     WHERE t.order_id=$id
-    GROUP BY person
+    GROUP BY u.id, u.username
 ");
-include "includes/header.php";
 ?>
-<div class="container">
-        <?php if (isset($_GET['save_notes']) && $_GET['save_notes'] == 'notes_saved') { ?>
-            <div class="alert alert-success text-center">Notes saved successfully</div>
-        <?php } ?>
 
-    <?= $deadline_alert ?>
+<div class="pms-wrap">
+    <div style="padding-bottom: 20px;">
 
-    <!-- ORDER INFO -->
-    <div class="card shadow mb-3">
-        <div class="card-body">
+        <!-- ORDER INFO HEADER -->
+        <div class="pms-panel mb-3">
+            <div class="pms-controls">
+                <div class="pms-controls-left">
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Order #<?= $order['order_no'] ?></h5>
+                </div>
+                <div>
 
-            <h5><strong>Order #:</strong> <?= $order['order_no'] ?></h5>
-            <div class="d-flex justify-content-between align-items-center">
-                <p><strong>Customer:</strong> <?= $order['customer'] ?></p>
-                <p><strong>Product:</strong> <?= $order['product'] ?></p>
-                <p><strong>Deadline:</strong> <?= date("d-F-Y", strtotime($order['deadline'])) ?></p>
-                <a href="edit_order.php?id=<?= $id ?>" class="btn btn-warning btn-sm">
-                    <i class="bi bi-pencil-square"></i> Edit Order
-                </a>
+                    <!-- Deadline Alert Centered in Header -->
+                    <?php if ($deadline_text): ?>
+                        <div style="text-align: center;">
+                            <div class="alert alert-<?= str_replace('bg-', '', $deadline_class) ?> d-inline-block"
+                                style="padding: 4px 12px; margin-bottom: 0px !important; border-radius: 6px; min-width: 300px;">
+                                <?= $deadline_text ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+                </div>
+                <div class="pms-controls-right">
+                    <a href="orders.php" class="pms-btn-secondary me-2">
+                        <i class="bi bi-arrow-left me-1"></i> Back
+                    </a>
+                    <a href="edit_order.php?id=<?= $id ?>" class="pms-btn-dark">
+                        <i class="bi bi-pencil me-1"></i> Edit
+                    </a>
+                </div>
             </div>
 
-            <!-- <p><strong>Status:</strong> 
-    <span class="badge bg-dark"><?= ucfirst($order['status']) ?></span>
-</p> -->
 
-
-
+            <!-- Order Details Grid - Smaller -->
+            <div class="row g-2" style="padding: 0 20px 12px 20px;">
+                <div class="col-md-3">
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Customer
+                        </div>
+                        <div style="font-size: 13px; color: #1e293b; font-weight: 600;">
+                            <?= htmlspecialchars($order['customer']) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Product
+                        </div>
+                        <div style="font-size: 13px; color: #1e293b; font-weight: 600;">
+                            <?= htmlspecialchars($order['product']) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Deadline
+                        </div>
+                        <div
+                            style="font-size: 13px; font-weight: 600; color: <?= ($deadline < $today) ? '#ef4444' : ($deadline == $today ? '#f59e0b' : '#10b981') ?>;">
+                            <?= date("M d, Y", strtotime($order['deadline'])) ?>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div style="background: #f8fafc; padding: 6px 12px; border-radius: 6px;">
+                        <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Status</div>
+                        <span class="pms-status <?= strtolower($order['status']) ?>"
+                            style="font-weight: 600; font-size: 12px;">
+                            <?= ucfirst($order['status']) ?>
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
 
-    <!-- TASK LIST -->
-    <div class="card shadow mb-3">
-        <div class="card-header">
-            <h5 class=""><i class="bi bi-list-task align-middle"></i> Task List</h5>
-        </div>
 
-        <div class="card-body">
 
-            <table class="table table-bordered table-hover align-middle">
-                <thead class="table-dark">
+
+
+
+
+
+        <div class="pms-panel mb-3">
+            <div class="pms-controls">
+                <div class="pms-controls-left">
+                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-list-task me-2"></i>Task List</h5>
+                </div>
+                <div class="pms-controls-right">
+                    <?php if ($order['status'] != 'completed'): ?>
+                        <a href="order_task_assignment.php?order_id=<?= $id ?>" class="pms-btn-dark">
+                            <i class="bi bi-plus-lg"></i> Add Task
+                        </a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <table class="pms-table">
+                <thead>
                     <tr>
+                        <th style="width: 50px;">#</th>
                         <th>Task Name</th>
                         <th>Assigned To</th>
                         <th>Est. Time</th>
                         <th>Status</th>
-                        <th>Start</th>
-                        <th>End</th>
-                        <!-- <th>Actions</th> -->
+                        <th>Start Time</th>
+                        <th>End Time</th>
+                        <th class="text-end">Actions</th>
                     </tr>
                 </thead>
-
                 <tbody>
-
-                    <?php if ($taskRes->num_rows == 0) { ?>
+                    <?php if ($taskRes->num_rows == 0): ?>
                         <tr>
-                            <td colspan="4" class="text-center">No tasks added yet</td>
+                            <td colspan="8" class="text-center py-4">No tasks added yet</td>
                         </tr>
-                    <?php } ?>
+                    <?php endif; ?>
 
-                    <?php while ($t = $taskRes->fetch_assoc()) { ?>
+                    <?php $task_counter = 1;
+                    while ($t = $taskRes->fetch_assoc()): ?>
                         <tr>
-
-                            <td><?= $t['task_name'] ?></td>
-
+                            <td class="text-muted fw-medium"><?= $task_counter++ ?></td>
+                            <td class="text-dark fw-medium"><?= htmlspecialchars($t['task_name']) ?></td>
                             <td>
-                                <?php
-                                if ($t['username']) {
-                                    echo $t['username'] . " (User)";
-                                } elseif ($t['resource_name']) {
-                                    echo $t['resource_name'] . " (" . $t['role'] . " - Resource)";
-                                } else {
-                                    echo "Not Assigned";
-                                }
-                                ?>
-                            </td>
-                            <!-- Estimated Time -->
-                            <td><?= isset($t['estimated_time']) ? $t['estimated_time'] . ' hrs' : '-' ?></td>
-                            <!-- Status -->
-                            <td>
-                                <?php if ($t['status'] == 'completed') { ?>
-                                    <span class="pms-status completed">Completed</span>
-                                <?php } elseif ($t['status'] == 'in_progress') { ?>
-                                    <span class="pms-status active">In Progress</span>
-                                <?php } else { ?>
-                                    <span class="pms-status pending">Not Started</span>
-                                <?php } ?>
-                            </td>
-                            <!-- Start & End Time -->
-                            <td><?= ($t['start_time']) ? date("d-M H:i", strtotime($t['start_time'])) : '-' ?></td>
-                            <td><?= ($t['end_time']) ? date("d-M H:i", strtotime($t['end_time'])) : '-' ?></td>
-                            <!-- <td>
-                                <?php if ($order['status'] != 'completed') { ?>
+                                <?php if ($t['username']): ?>
+                                    <span class="text-dark fw-medium"><?= htmlspecialchars($t['username']) ?></span>
 
-                                    <?php if ($t['status'] == 'not_started') { ?>
-                                        <a href="start_task.php?id=<?= $t['id'] ?>" class="btn btn-success btn-sm">Start</a>
-                                    <?php } elseif ($t['status'] == 'in_progress') { ?>
-                                        <a href="stop_task.php?id=<?= $t['id'] ?>" class="btn btn-danger btn-sm">Stop</a>
-                                    <?php } else { ?>
-                                        <span class="text-success">Done</span>
-                                    <?php } ?>
+                                <?php else: ?>
+                                    <span class="text-muted">Not Assigned</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <span
+                                    class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
+                            </td>
+                            <td>
+                                <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>">
+                                    <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
+                                </span>
+                            </td>
+                            <td><span class="text-muted"
+                                    style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span>
+                            </td>
+                            <td><span class="text-muted"
+                                    style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span>
+                            </td>
+                            <td class="text-end">
+                                <?php if ($order['status'] != 'completed'): ?>
+                                    <?php if ($t['status'] == 'not_started'): ?>
+                                        <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success"
+                                            title="Start Task">
+                                            <i class="bi bi-play-fill"></i> Start Task
+                                        </a>
+                                    <?php elseif ($t['status'] == 'in_progress'): ?>
+                                        <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger"
+                                            title="End Task">
+                                            <i class="bi bi-stop-fill"></i> End Task
+                                        </a>
+                                    <?php else: ?>
+                                        <span class="text-success fw-medium">✓ Done</span>
+                                    <?php endif; ?>
 
                                     <a href="delete_task.php?id=<?= $t['id'] ?>&order_id=<?= $id ?>"
-                                        class="btn btn-outline-danger btn-sm mt-1"
+                                        class="pms-action-btn pms-action-btn-danger" title="Delete Task"
                                         onclick="return confirm('Delete this task?')">
-                                        Delete
+                                        <i class="bi bi-trash"></i>
                                     </a>
-
-                                <?php } else { ?>
+                                <?php else: ?>
                                     <span class="text-muted">Locked</span>
-                                <?php } ?>
-                            </td> -->
-
+                                <?php endif; ?>
+                            </td>
                         </tr>
-                    <?php } ?>
-
+                    <?php endwhile; ?>
                 </tbody>
             </table>
-
-            <!-- ADD TASK -->
-            <div class="text-end">
-                <?php if ($order['status'] != 'completed') { ?>
-                    <a href="task_library.php?order_id=<?= $id ?>" class="btn btn-success">
-                        + Add Task
-                    </a>
-                <?php } else { ?>
-                    <button class="btn btn-secondary" disabled>Order Completed</button>
-                <?php } ?>
-            </div>
-
-
         </div>
-    </div>
+        <!-- PRODUCTIVITY SECTION -->
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <div class="pms-panel">
+                    <div class="pms-controls">
+                        <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-cpu-fill me-2"></i>Productivity
+                        </h5>
+                    </div>
 
-    <!-- PROGRESS -->
-    <div class="card shadow mb-3">
-         <div class="card-header">
-                <h5><i class="bi bi-binoculars-fill"></i> Progress</h5>
+                    <table class="pms-table" style="margin-bottom: 0;">
+                        <thead>
+                            <tr>
+                                <th style="width: 50px;">#</th>
+                                <th>Name</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Completed</th>
+                                <th class="text-end">Efficiency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if ($productivityRes->num_rows == 0): ?>
+                                <tr>
+                                    <td colspan="5" class="text-center py-4">No data</td>
+                                </tr>
+                            <?php endif; ?>
+
+                            <?php $prod_counter = 1;
+                            while ($p = $productivityRes->fetch_assoc()):
+                                $eff = ($p['total'] > 0) ? round(($p['completed'] / $p['total']) * 100) : 0;
+                                ?>
+                                <tr>
+                                    <td class="text-muted fw-medium"><?= $prod_counter++ ?></td>
+                                    <td class="text-dark fw-medium"><?= htmlspecialchars($p['person']) ?></td>
+                                    <td class="text-center text-dark fw-medium"><?= $p['total'] ?></td>
+                                    <td class="text-center text-dark fw-medium"><?= $p['completed'] ?></td>
+                                    <td class="text-end">
+                                        <span
+                                            class="badge <?= $eff >= 80 ? 'bg-success' : ($eff >= 50 ? 'bg-warning' : 'bg-danger') ?>">
+                                            <?= $eff ?>%
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php endwhile; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
-        <div class="card-body">           
-            <div class="d-flex align-items-center gap-3">
-                <strong>Overall Completion:</strong>
-                <div class="flex-grow-1">
-                    <div class="progress" style="height: 25px;">
-                        <div class="progress-bar bg-success" role="progressbar" style="width: <?= $progress ?>%;" aria-valuenow="<?= $progress ?>" aria-valuemin="0" aria-valuemax="100">
-                            <?= $progress ?>%
+        </div>
+
+        <!-- PROGRESS SECTION (Full width) -->
+        <div class="row g-3 mb-3">
+            <div class="col-12">
+                <div class="pms-panel">
+                    <div class="pms-controls">
+                        <h5 class="mb-0 fw-bold" style="color: #334155;"><i
+                                class="bi bi-binoculars-fill me-2"></i>Progress</h5>
+                    </div>
+                    <div style="padding: 30px 20px;">
+                        <!-- Progress Bar -->
+                        <div style="margin-bottom: 25px;">
+                            <div
+                                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <!-- <span style="font-size: 14px; font-weight: 600; color: #334155;">Completion</span> -->
+                                <span
+                                    style="font-size: 18px; font-weight: 900; color: #10b981;"><?= $progress ?>%</span>
+                            </div>
+                            <div
+                                style="background-color: #e2e8f0; border-radius: 10px; height: 12px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
+                                <div
+                                    style="background: linear-gradient(90deg, #34d399 0%, #10b981 100%); height: 100%; width: <?= $progress ?>%; transition: width 0.5s ease; border-radius: 10px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Task Summary -->
+                        <div style="background-color: #f1f5f9; border-radius: 8px; padding: 15px; text-align: center;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div>
+                                    <div style="font-size: 24px; font-weight: 900; color: #10b981;"><?= $done ?></div>
+                                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Completed</div>
+                                </div>
+                                <div>
+                                    <div style="font-size: 24px; font-weight: 900; color: #3b82f6;"><?= $total ?></div>
+                                    <div style="font-size: 12px; color: #64748b; margin-top: 4px;">Total Tasks</div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-
-
         </div>
+
+
+
+        <!-- NOTES SECTION -->
+        <div class="pms-panel">
+            <div class="pms-controls">
+                <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-chat-left-text-fill me-2"></i>Notes
+                </h5>
+            </div>
+
+            <div style="padding: 20px;">
+                <form method="POST">
+                    <textarea name="notes" class="form-control mb-3" rows="6" placeholder="Add order notes..."
+                        style="font-size: 14px; border-radius: 6px; border: 1px solid #e2e8f0;"><?= htmlspecialchars($order['notes'] ?? '') ?></textarea>
+                    <div class="text-end">
+                        <button type="submit" name="save_notes" class="pms-btn-dark btn-sm">
+                            <i class="bi bi-check-lg"></i> Save Notes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
     </div>
-
-
-    <div class="card shadow mb-3">
-        <div class="card-header">
-            <h5><i class="bi bi-cpu-fill allign-middle"></i> Productivity</h5>
-        </div>
-
-        <div class="card-body">
-
-            <table class="table table-bordered">
-                <tr>
-                    <th>Name</th>
-                    <th>Total</th>
-                    <th>Completed</th>
-                    <th>Efficiency</th>
-                </tr>
-
-                <?php while ($p = $productivityRes->fetch_assoc()) {
-                    $eff = ($p['total'] > 0) ? round(($p['completed'] / $p['total']) * 100) : 0;
-                ?>
-                    <tr>
-                        <td><?= $p['person'] ?></td>
-                        <td><?= $p['total'] ?></td>
-                        <td><?= $p['completed'] ?></td>
-                        <td><?= $eff ?>%</td>
-                    </tr>
-                <?php } ?>
-
-            </table>
-
-        </div>
-    </div>
-
-    <!-- NOTES -->
-    <div class="card shadow">
-        <div class="card-header">
-            <h5><i class="bi bi-chat-left-text-fill align-middle"></i> Notes</h5>
-        </div>
-
-        <div class="card-body">
-
-            <form method="POST" class="needs-validation" novalidate>
-                <textarea name="notes" class="form-control" rows="4" required><?= $order['notes'] ?></textarea>
-                <div class="invalid-feedback">Please enter notes</div>
-                <div class="text-end">
-                    <button name="save_notes" class="btn btn-primary mt-2 text-end">Save Notes</button>
-                </div>
-                
-            </form>
-
-        </div>
-    </div>
-
 </div>
-<script>
-    (function () {
-        'use strict'
-        var forms = document.querySelectorAll('.needs-validation')
-        Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
-                    if (!form.checkValidity()) {
-                        event.preventDefault()
-                        event.stopPropagation()
-                    }
-                    form.classList.add('was-validated')
-                }, false)
-            })
-    })()
-</script>
+</div>
 
 <?php include "includes/footer.php"; ?>

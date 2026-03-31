@@ -112,10 +112,10 @@ include "includes/header.php";
                     <a href="orders.php" class="btn btn-secondary w-100 mt-2">Reset Filters</a> -->
                         </div>
                     </div>
-                    <div class="pms-panel-footer">
-                        <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">Reset</a>
-                        <button type="submit" name="save_leave" class="pms-btn-dark justify-content-center">
-                            <i class="bi bi-calendar-plus"></i> Apply Filters
+                    <div class="pms-panel-footer d-flex gap-2">
+                        <a href="orders.php" class="btn btn-outline-secondary btn-sm">Reset</a>
+                        <button type="submit" name="save_leave" class="pms-btn-dark btn-sm">
+                            <i class="bi bi-funnel"></i> Apply Filters
                         </button>
                     </div>
                 </form>

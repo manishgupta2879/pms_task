@@ -13,8 +13,14 @@ if (isset($_GET['delete'])) {
     if ($role_data && (strtolower($role_data['role_name']) == 'superadmin' || $role_data['slug'] == 'super-admin')) {
         $_SESSION['error'] = "Cannot delete Superadmin role";
     } else {
-        $conn->query("UPDATE roles SET deleted_at=NOW() WHERE id=$del_id");
-        $_SESSION['success'] = "Role deleted successfully.";
+        // Check if any users are assigned
+        $check_users = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE role_id=$del_id AND deleted_at IS NULL");
+        if ($check_users->fetch_assoc()['cnt'] > 0) {
+            $_SESSION['error'] = "Cannot delete: This role has assigned users.";
+        } else {
+            $conn->query("UPDATE roles SET deleted_at=NOW() WHERE id=$del_id");
+            $_SESSION['success'] = "Role deleted successfully.";
+        }
     }
     header("Location: roles.php");
     exit();
@@ -35,7 +41,13 @@ $total       = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, (int)ceil($total / $per_page));
 if ($total_pages == 0) $total_pages = 1;
 
-$res = $conn->query("SELECT * FROM roles $where ORDER BY id DESC LIMIT $per_page OFFSET $offset");
+$res = $conn->query("
+    SELECT r.*, 
+    (SELECT COUNT(*) FROM users u WHERE u.role_id = r.id AND u.deleted_at IS NULL) as user_count 
+    FROM roles r $where 
+    ORDER BY r.id DESC 
+    LIMIT $per_page OFFSET $offset
+");
 $qs  = '&search=' . urlencode($search);
 ?>
 
@@ -98,9 +110,15 @@ $qs  = '&search=' . urlencode($search);
                                 <a href="add_role.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Edit">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="roles.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this role?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
+                                <?php if ($r['user_count'] > 0): ?>
+                                    <span class="pms-action-btn border-0 text-muted" title="Locked: Role has assigned users" style="cursor: not-allowed; opacity: 0.6;">
+                                        <i class="bi bi-lock-fill"></i>
+                                    </span>
+                                <?php else: ?>
+                                    <a href="roles.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this role?')">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </td>
                     </tr>

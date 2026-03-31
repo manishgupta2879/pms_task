@@ -98,8 +98,8 @@ include "includes/header.php";
 
                     <div class="pms-panel-footer text-end">
                         <a href="view_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
-                        <button type="submit" name="update" class="pms-btn-dark">
-                            <i class="bi bi-check-circle"></i> Update Order
+                        <button type="submit" name="update" class="pms-btn-dark btn-sm">
+                            <i class="bi bi-pencil"></i> Update Order
                         </button>
                     </div>
 

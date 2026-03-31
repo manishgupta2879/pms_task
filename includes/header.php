@@ -47,13 +47,15 @@ $current_page = basename($_SERVER['PHP_SELF']);
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'tasks.php') ? 'active' : '' ?>" href="tasks.php">
+                        <a class="nav-link <?= ($current_page == 'task_library.php') ? 'active' : '' ?>"
+                            href="task_library.php">
                             <i class="bi bi-list-task"></i> Tasks
                         </a>
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>" href="resources.php">
+                        <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>"
+                            href="resources.php">
                             <i class="bi bi-box"></i> Resources
                         </a>
                     </li>

@@ -124,7 +124,7 @@ $qs = '&id=' . $user_id;
                             </div>
                         </div>
                         <div class="pms-panel-footer">
-                            <button type="submit" name="save_leave" class="pms-btn-dark justify-content-center">
+                            <button type="submit" name="save_leave" class="pms-btn-dark btn-sm justify-content-center">
                                 <i class="bi bi-calendar-plus"></i> Submit Leave
                             </button>
                         </div>

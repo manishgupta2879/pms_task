@@ -1,7 +1,7 @@
 <?php
 include "includes/config.php";
 
-if (isset($_POST['save'])) {
+if (isset($_POST['save_order'])) {
 
     // ✅ get max id safely
     $res = $conn->query("SELECT MAX(id) as max_id FROM orders");
@@ -26,9 +26,11 @@ if (isset($_POST['save'])) {
         header("Location: orders.php?msg=created");
         exit();
     } else {
+        die($conn->error);
         echo "<div class='alert alert-danger'>Error: " . $conn->error . "</div>";
     }
 }
+
 include "includes/header.php";
 ?>
 
@@ -49,19 +51,22 @@ include "includes/header.php";
 
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
-                                <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= htmlspecialchars($customer ?? '') ?>" required autofocus>
+                                <input type="text" name="customer" class="form-control" placeholder="Customer Name"
+                                    value="<?= htmlspecialchars($customer ?? '') ?>" required autofocus>
                                 <div class="invalid-feedback">Please enter customer name</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Product</label>
-                                <input type="text" name="product" class="form-control" placeholder="Product Name" value="<?= htmlspecialchars($product ?? '') ?>" required>
+                                <input type="text" name="product" class="form-control" placeholder="Product Name"
+                                    value="<?= htmlspecialchars($product ?? '') ?>" required>
                                 <div class="invalid-feedback">Please enter product name</div>
                             </div>
 
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
-                                <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($deadline ?? '') ?>" required>
+                                <input type="date" name="deadline" class="form-control"
+                                    value="<?= htmlspecialchars($deadline ?? '') ?>" required>
                                 <div class="invalid-feedback">Please select deadline</div>
                             </div>
 
@@ -79,8 +84,8 @@ include "includes/header.php";
 
                     <div class="pms-panel-footer text-end">
                         <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
-                        <button type="submit" name="save_order" class="pms-btn-dark">
-                            <i class="bi bi-check-circle"></i> Save Order
+                        <button type="submit" name="save_order" class="pms-btn-dark btn-sm">
+                            <i class="bi bi-check-lg"></i> Save Order
                         </button>
                     </div>
 
