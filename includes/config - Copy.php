@@ -33,7 +33,12 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
     if (!$staff_role_id)
         return [];
 
-    $sql = "SELECT u.id, u.name, r.role_name as role, u.type, u.working_hours 
+    // Query users with their total assigned minutes for the date
+    $sql = "SELECT u.id, u.username as name, r.role_name as role, u.type, u.working_hours,
+            (SELECT COALESCE(SUM(t.est_time), 0) 
+             FROM tasks t 
+             WHERE t.user_id = u.id 
+             AND DATE(t.start_time) <= '$date' AND (DATE(t.end_time) >= '$date' OR t.end_time IS NULL)) as assigned_mins
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
             WHERE u.deleted_at IS NULL 
@@ -55,7 +60,7 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
         while ($u = $res->fetch_assoc()) {
             $is_available = true;
 
-            // Check availability for Part-time resources
+            // Check availability for Part-time users
             if ($u['type'] == 'Part-time') {
                 $working_hours = (int) $u['working_hours'];
                 $assigned = (int) $u['assigned_mins'];
@@ -68,7 +73,7 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
 
             if ($is_available) {
                 // Add useful info to the result for display
-                $u['remaining_mins'] = ($u['type'] == 'Part-time') ? ($u['working_hours'] - $u['assigned_mins']) : null;
+                $u['remaining_mins'] = ($u['type'] == 'Part-time') ? ($u['working_hours'] - (int)$u['assigned_mins']) : null;
                 $resources[] = $u;
             }
         }

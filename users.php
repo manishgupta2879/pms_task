@@ -23,11 +23,15 @@ $res = $conn->query("SELECT * FROM users");
 
     <!-- SUCCESS MESSAGE -->
     <?php if(isset($_GET['msg']) && $_GET['msg']=='updated'){ ?>
-        <p style="color:green;">✅ User updated successfully</p>
+        <div class="alert alert-success mt-3">
+            ✅ User updated successfully
+        </div>
     <?php } ?>
 
     <?php if(isset($_GET['msg']) && $_GET['msg']=='deleted'){ ?>
-        <p style="color:red;">🗑️ User deleted successfully</p>
+        <div class="alert alert-danger mt-3">
+            🗑️ User deleted successfully
+        </div>
     <?php } ?>
 
     <!-- TABLE -->
