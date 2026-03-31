@@ -139,7 +139,7 @@ $qs = '&search=' . urlencode($search) . '&status=' . urlencode($status_filter) .
                     </div>
                 </div>
                 <div class="pms-panel-footer d-flex gap-2 text-end">
-                    <a href="my_task.php" class="btn btn-outline-secondary btn-sm">Reset</a>
+                    <a href="my_task.php" class="pms-btn-back"><i class="bi bi-arrow-clockwise"></i> Reset</a>
                     <button type="submit" class="pms-btn-dark btn-sm">
                         <i class="bi bi-funnel"></i> Apply Filters
                     </button>

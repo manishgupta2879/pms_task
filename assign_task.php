@@ -55,7 +55,7 @@ if (isset($_POST['assign'])) {
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         📌 Assign Task: <?= $task['task_name'] ?>
-                        <a href="task_library.php" class="btn btn-outline-secondary btn-sm">Back</a>
+                        <a href="task_library.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <div class="pms-panel-body">
@@ -101,7 +101,7 @@ if (isset($_POST['assign'])) {
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="task_library.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <a href="task_library.php" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="assign" class="pms-btn-dark btn-sm">
                             <i class="bi bi-check-lg"></i> Assign Task
                         </button>
