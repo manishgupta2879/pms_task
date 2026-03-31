@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 include "includes/header.php";
 
 if (!isset($_GET['id'])) {
@@ -9,7 +13,6 @@ if (!isset($_GET['id'])) {
 
 $task_id = (int) $_GET['id'];
 
-// get task
 $res = $conn->query("SELECT * FROM task_library WHERE id=$task_id");
 $task = $res->fetch_assoc();
 
@@ -17,13 +20,10 @@ if (!$task) {
     die("Task not found");
 }
 
-// get orders
 $orders = $conn->query("SELECT id, order_no, customer FROM orders ORDER BY id DESC");
 
-// ✅ get available resources
 $resourcesArr = getAvailableResources($conn, $task['default_time']);
 
-// assign task
 if (isset($_POST['assign'])) {
 
     $order_id = (int) $_POST['order_id'];
@@ -33,8 +33,8 @@ if (isset($_POST['assign'])) {
         $error = "Please select order and user";
     } else {
 
-        $sql = "INSERT INTO tasks(order_id, task_name, est_time, status, user_id)
-                VALUES('$order_id', '{$task['task_name']}', '{$task['default_time']}', 'not_started', '$user_id')";
+        $sql = "INSERT INTO tasks(order_id, task_name, est_time, status, user_id, assigned_by)
+                VALUES('$order_id', '{$task['task_name']}', '{$task['default_time']}', 'not_started', '$user_id', ".$_SESSION['user_id'].")";
 
         if ($conn->query($sql)) {
             header("Location: view_order.php?id=$order_id&msg=task_added");

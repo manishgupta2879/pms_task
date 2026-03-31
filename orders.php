@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('orders');
 
 
 // ✅ DELETE ORDER
@@ -120,6 +124,7 @@ include "includes/header.php";
                     <a href="add_order.php" class="btn btn-outline-secondary btn-sm">+ Create New Order</a>
                 </div>
 
+                <div style="overflow-x: auto;">
                 <table class="pms-table">
 
                     <thead class="table-dark">
@@ -178,7 +183,8 @@ include "includes/header.php";
                     </tbody>
 
                 </table>
-                <div class="pms-footer">
+                </div>
+                <div class=\"pms-footer\">
                     <?php
                     $start = ($total > 0) ? $offset + 1 : 0;
                     $end   = min($total, $offset + $limit);

@@ -1,10 +1,10 @@
 <?php 
-include "includes/config.php"; 
-include "includes/header.php";
+include "includes/config.php";
+include "includes/rbac.php";
 
-if($_SESSION['role'] != 'superadmin') {
-    die("Access denied");
-}
+requireAuth();
+requireSuperAdmin();
+include "includes/header.php";
 
 $res = $conn->query("SELECT * FROM users");
 ?>

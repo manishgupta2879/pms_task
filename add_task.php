@@ -1,5 +1,9 @@
 <?php 
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 include "includes/header.php";
 
 $order_id = $_GET['order_id'];
@@ -9,9 +13,10 @@ if(isset($_POST['save'])){
     $assigned = $_POST['assigned_to'];
     $time = $_POST['est_time'];
     $status = $_POST['status'];
+    $assigned_by = $_SESSION['user_id'];
 
-    $conn->query("INSERT INTO tasks(order_id,task_name,assigned_to,est_time,status)
-                  VALUES('$order_id','$task','$assigned','$time','$status')");
+    $conn->query("INSERT INTO tasks(order_id,task_name,assigned_to,est_time,status,user_id,assigned_by)
+                  VALUES('$order_id','$task','$assigned','$time','$status','$assigned','$assigned_by')");
 
     header("Location: view_order.php?id=$order_id");
 }

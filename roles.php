@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requireSuperAdmin();
 include "includes/header.php";
 
 // Handle delete
@@ -73,6 +77,7 @@ $qs  = '&search=' . urlencode($search);
             </div>
         </div>
 
+        <div style="overflow-x: auto;">
         <table class="pms-table">
             <thead>
                 <tr>
@@ -125,6 +130,7 @@ $qs  = '&search=' . urlencode($search);
                 <?php endwhile; ?>
             </tbody>
         </table>
+        </div>
 
         <!-- Pagination -->
         <div class="pms-footer">

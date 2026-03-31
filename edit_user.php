@@ -1,5 +1,9 @@
 <?php 
-include "includes/config.php"; 
+include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requireSuperAdmin();
 include "includes/header.php";
 
 // check role

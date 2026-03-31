@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 
 $id = $_GET['id'];
 

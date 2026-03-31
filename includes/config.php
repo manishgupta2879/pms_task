@@ -33,11 +33,14 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
     if (!$staff_role_id)
         return [];
 
-    $sql = "SELECT u.id, u.name, r.role_name as role, u.type, u.working_hours 
+    $sql = "SELECT u.id, u.name, r.role_name as role, u.type, u.working_hours,
+            COALESCE(SUM(CASE WHEN t.status != 'completed' THEN t.est_time ELSE 0 END), 0) as assigned_mins
             FROM users u 
             JOIN roles r ON u.role_id = r.id 
+            LEFT JOIN tasks t ON u.id = t.user_id
             WHERE u.deleted_at IS NULL 
             AND u.role_id = $staff_role_id
+            GROUP BY u.id, u.name, r.role_name, u.type, u.working_hours
             ";
 
     // Filter by Leave using the given $date

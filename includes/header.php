@@ -3,6 +3,10 @@ if (!isset($_SESSION['user'])) {
     header("Location: index.php");
     exit();
 }
+
+// Include RBAC system
+require_once(__DIR__ . '/rbac.php');
+
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
@@ -40,58 +44,77 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
                 <ul class="navbar-nav me-auto">
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>" href="orders.php">
-                            <i class="bi bi-bag-check"></i> Orders
-                        </a>
-                    </li>
+                    <?php if (hasPermission('orders')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'orders.php') ? 'active' : '' ?>" href="orders.php">
+                                <i class="bi bi-bag-check"></i> Orders
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'task_library.php') ? 'active' : '' ?>"
-                            href="task_library.php">
-                            <i class="bi bi-list-task"></i> Tasks
-                        </a>
-                    </li>
+                    <?php if (isSuperAdmin()): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'task_library.php') ? 'active' : '' ?>"
+                                href="task_library.php">
+                                <i class="bi bi-list-task"></i> Tasks
+                            </a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'my_task.php') ? 'active' : '' ?>"
+                                href="my_task.php">
+                                <i class="bi bi-list-check"></i> My Tasks
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>"
-                            href="resources.php">
-                            <i class="bi bi-box"></i> Resources
-                        </a>
-                    </li>
+                    <?php if (hasPermission('resources')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'resources.php') ? 'active' : '' ?>"
+                                href="resources.php">
+                                <i class="bi bi-box"></i> Resources
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'roles.php') ? 'active' : '' ?>" href="roles.php">
-                            <i class="bi bi-shield-lock"></i> Roles
-                        </a>
-                    </li>
+                    <?php if (hasPermission('roles')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'roles.php') ? 'active' : '' ?>" href="roles.php">
+                                <i class="bi bi-shield-lock"></i> Roles
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
+                    <?php if (hasPermission('reports')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>" href="reports.php">
+                                <i class="bi bi-bar-chart"></i> Reports
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'reports.php') ? 'active' : '' ?>" href="#">
-                            <i class="bi bi-bar-chart"></i> Reports
-                        </a>
-                    </li>
+                    <?php if (hasPermission('settings')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="settings.php">
+                                <i class="bi bi-gear"></i> Settings
+                            </a>
+                        </li>
+                    <?php endif; ?>
 
-                    <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="#">
-                            <i class="bi bi-gear"></i> Settings
-                        </a>
-                    </li>
-
-                    <?php if ($_SESSION['role'] == 'superadmin') { ?>
+                    <?php if (hasPermission('users')): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
                                 <i class="bi bi-people"></i> Users
                             </a>
                         </li>
-                    <?php } ?>
+                    <?php endif; ?>
 
                 </ul>
 
                 <ul class="navbar-nav align-items-center">
                     <li class="nav-item me-3 text-white">
-                        <i class="bi bi-person-circle"></i> <?= $_SESSION['user'] ?>
+                        <i class="bi bi-person-circle"></i> <?= htmlspecialchars($_SESSION['user']) ?>
+                        <span class="badge bg-info"><?= getRoleLabel($_SESSION['role_slug'] ?? 'staff') ?></span>
                     </li>
 
                     <li class="nav-item">

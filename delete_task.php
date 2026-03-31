@@ -1,5 +1,9 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('tasks');
 
 if(!isset($_GET['id']) || !isset($_GET['order_id'])){
     header("Location: orders.php");

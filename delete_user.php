@@ -1,5 +1,9 @@
 <?php 
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requireSuperAdmin();
 
 if(!isset($_GET['id'])){
     header("Location: users.php");

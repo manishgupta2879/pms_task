@@ -1,5 +1,10 @@
 <?php
 include "includes/config.php";
+include "includes/rbac.php";
+
+requireAuth();
+requirePermission('resources');
+include "includes/header.php";
 
 $id = $_GET['id'] ?? 0;
 

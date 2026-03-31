@@ -1,4 +1,10 @@
-<?php include "includes/config.php"; include "includes/header.php";
+<?php 
+include "includes/config.php";
+include "includes/rbac.php";
+requireAuth();
+requireSuperAdmin();
+include "includes/header.php";
+
 if(isset($_POST['save'])){
 $username=$_POST['username'];
 $email=$_POST['email'];
