@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-// include "includes/header.php";
+include "includes/header.php";
 
 if (isset($_POST['save_order'])) {
 

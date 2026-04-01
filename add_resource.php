@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('resources');
-// include "includes/header.php";
+include "includes/header.php";
 
 $id = $_GET['id'] ?? 0;
 

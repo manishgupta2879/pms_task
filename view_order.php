@@ -84,7 +84,7 @@ $productivityRes = $conn->query("
                     <?php endif; ?>
                 </div>
                 <div class="pms-controls-right">
-                    <a href="orders.php" class="pms-btn-secondary me-2">
+                    <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">
                         <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
                     <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
@@ -187,12 +187,42 @@ $productivityRes = $conn->query("
                             <th>Status</th>
                             <th>Start Time</th>
                             <th>End Time</th>
+                            <th>On-Time/Delay</th>
                             <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php $task_counter = 1;
-                        while ($t = $taskRes->fetch_assoc()): ?>
+                        while ($t = $taskRes->fetch_assoc()):
+                            $is_delayed = false;
+                            $delay_text = '-';
+                            if ($t['status'] == 'completed' && $t['start_time'] && $t['end_time'] && $t['est_time']) {
+
+                                $start_timestamp = strtotime($t['start_time']);
+                                $end_timestamp = strtotime($t['end_time']);
+                            
+                                $actual_seconds = $end_timestamp - $start_timestamp;
+                                $est_seconds = $t['est_time'] * 60; // assuming est_time is in minutes
+                            
+                                if ($actual_seconds > $est_seconds) {
+                                    $is_delayed = true;
+                            
+                                    $diff_seconds = $actual_seconds - $est_seconds;
+                                    $diff_hours = floor($diff_seconds / 3600);
+                                    $diff_minutes = floor(($diff_seconds % 3600) / 60);
+                            
+                                    if ($diff_hours > 0) {
+                                        $delay_text = $diff_hours . 'h ' . $diff_minutes . 'm late';
+                                    } else {
+                                        $delay_text = $diff_minutes . 'm late';
+                                    }
+                            
+                                } else {
+                                    $delay_text = '✓ On Time';
+                                }
+                            }
+
+                        ?>
                             <tr>
                                 <td class="text-muted fw-medium"><?= $task_counter++ ?></td>
                                 <td class="text-dark fw-medium"><?= htmlspecialchars($t['task_name']) ?></td>
@@ -213,6 +243,15 @@ $productivityRes = $conn->query("
                                 </td>
                                 <td><span class="text-muted" style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span></td>
                                 <td><span class="text-muted" style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span></td>
+                                <td>
+                                    <?php if ($t['status'] == 'completed'): ?>
+                                        <span class="badge <?= $is_delayed ? 'bg-danger' : 'bg-success' ?>" style="font-size: 11px;">
+                                            <?= $delay_text ?>
+                                        </span>
+                                    <?php else: ?>
+                                        -
+                                    <?php endif; ?>
+                                </td>
                                 <td class="text-end">
                                     <?php if ($order['status'] != 'completed'): ?>
                                         <?php if ($t['status'] == 'not_started'): ?>
