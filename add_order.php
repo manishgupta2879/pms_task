@@ -32,8 +32,6 @@ if (isset($_POST['save_order'])) {
         echo "<div class='alert alert-danger'>Error: " . $conn->error . "</div>";
     }
 }
-
-include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
@@ -45,7 +43,7 @@ include "includes/header.php";
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         <?= isset($order_id) ? 'Edit Order' : 'Create Order' ?>
-                        <a href="orders.php" class="btn btn-outline-secondary btn-sm">Back to Orders</a>
+                        <a href="orders.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <div class="pms-panel-body">
@@ -85,7 +83,7 @@ include "includes/header.php";
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <a href="orders.php" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="save_order" class="pms-btn-dark btn-sm">
                             <i class="bi bi-check-lg"></i> Save Order
                         </button>

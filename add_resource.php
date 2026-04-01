@@ -71,7 +71,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_resource'])) {
     }
 }
 
-include "includes/header.php";
 
 $name = '';
 $email = '';
@@ -102,7 +101,7 @@ $existing_minutes = $working_hours ? ($working_hours % 60) : 0;
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         <?= $id ? 'Edit Resource' : 'Add New Resource' ?>
-                        <a href="resources.php" class="btn btn-outline-secondary btn-sm">Back to resources</a>
+                        <a href="resources.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <div class="pms-panel-body">
@@ -158,7 +157,7 @@ $existing_minutes = $working_hours ? ($working_hours % 60) : 0;
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="resources.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <a href="resources.php" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="save_resource" class="pms-btn-dark btn-sm">
                             <i class="bi bi-check-lg"></i> Save Resource
                         </button>
