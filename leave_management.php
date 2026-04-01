@@ -3,7 +3,7 @@ include "includes/config.php";
 include "includes/rbac.php";
 
 requireAuth();
-include "includes/header.php";
+// include "includes/header.php";
 
 $user_id = $_GET['id'] ?? 0;
 

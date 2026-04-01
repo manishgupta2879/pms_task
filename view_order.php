@@ -87,7 +87,7 @@ $productivityRes = $conn->query("
                     <a href="orders.php" class="pms-btn-secondary me-2">
                         <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
-                    <a href="edit_order.php?id=<?= $id ?>" class="pms-btn-dark">
+                    <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-pencil me-1"></i> Edit
                     </a>
                 </div>
@@ -150,7 +150,7 @@ $productivityRes = $conn->query("
                 </div>
                 <div class="pms-controls-right">
                     <?php if ($order['status'] != 'completed'): ?>
-                        <a href="order_task_assignment.php?order_id=<?= $id ?>" class="pms-btn-dark">
+                        <a href="order_task_assignment.php?order_id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-plus-lg"></i> Add Task
                         </a>
                     <?php endif; ?>

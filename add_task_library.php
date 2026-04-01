@@ -50,7 +50,7 @@ if (isset($_POST['save'])) {
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         Add New Task
                         <?php $back_url = ($order_id > 0) ? "order_task_assignment.php?order_id=$order_id" : "task_library.php"; ?>
-                        <a href="<?= $back_url ?>" class="btn btn-outline-secondary btn-sm">Back</a>
+                        <a href="<?= $back_url ?>" class="pms-btn-secondary me-2">Back</a>
                     </div>
 
                     <div class="pms-panel-body">

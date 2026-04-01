@@ -62,7 +62,8 @@ if (isset($_POST['update_user'])) {
     // execute if no error
     if (!isset($error)) {
         if ($conn->query($sql)) {
-            header("Location: users.php?msg=updated");
+            $_SESSION['success'] = "User updated successfully.";
+            header("Location: users.php");
             exit();
         } else {
             $error = "Error: " . $conn->error;

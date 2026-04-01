@@ -59,7 +59,7 @@ $qs  = '&search=' . urlencode($search);
                         <input type="text" name="search" class="form-control ps-5" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" style="font-size: 13px; width: 220px;">
                     </div>
                 </form>
-                <a href="add_resource.php" class="pms-btn-dark">
+                <a href="add_resource.php" class="btn btn-outline-secondary btn-sm">
                     + New Resource
                 </a>
             </div>

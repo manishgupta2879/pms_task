@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-include "includes/header.php";
+// include "includes/header.php";
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");

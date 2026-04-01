@@ -192,7 +192,7 @@ include "includes/header.php";
 
                 </table>
                 </div>
-                <div class=\"pms-footer\">
+                <div class="pms-footer">
                     <?php
                     $start = ($total > 0) ? $offset + 1 : 0;
                     $end   = min($total, $offset + $limit);
