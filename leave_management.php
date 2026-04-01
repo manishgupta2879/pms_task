@@ -174,7 +174,7 @@ $qs = '&id=' . $user_id;
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <span>Leave History</span>
-                    <a href="resources.php" class="btn btn-outline-secondary btn-sm">Back to Resources</a>
+                    <a href="resources.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back to Resources</a>
                 </div>
 
                 <div style="overflow-x: auto;">

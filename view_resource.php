@@ -124,6 +124,7 @@ include "includes/header.php";
                             <i class="bi bi-pencil"></i> Edit Profile
                         </a> -->
                         <a href="resources.php" class="btn btn-outline-secondary btn-sm w-100 mt-1">
+                        <i class="bi bi-arrow-left me-1"></i>
                             Back to List
                         </a>
                     </div>

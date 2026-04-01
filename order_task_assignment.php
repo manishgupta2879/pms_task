@@ -32,7 +32,7 @@ if (!$tasks) {
             </div>
 
             <div class="pms-controls-right">
-                <a href="view_order.php?id=<?= $order_id ?>" class="pms-btn-secondary me-2 me-2">Back</a>
+                <a href="view_order.php?id=<?= $order_id ?>" class="btn btn-outline-secondary btn-sm me-2"><i class="bi bi-arrow-left me-1"></i>Back</a>
                 <a href="add_task_library.php?order_id=<?= $order_id ?>" class="btn btn-outline-secondary btn-sm">
                     + Add New Task
                 </a>
