@@ -62,7 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         <?= $id ? 'Edit Role' : 'Add New Role' ?>
-                        <a href="roles.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
+                        <a href="roles.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <div class="pms-panel-body">
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_role'])) {
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="roles.php" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
+                        <a href="roles.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="save_role" class="pms-btn-dark btn-sm">
                             <i class="bi bi-check-lg"></i> Save Role
                         </button>

@@ -3,7 +3,7 @@ include "includes/config.php";
 include "includes/header.php";
 
 // Restrict access
-if ($_SESSION['role'] != 'superadmin') {
+if ($_SESSION['role'] != 'super-admin') {
     die("Access denied");
 }
 
@@ -72,7 +72,7 @@ $qs = '&search=' . urlencode($search);
                     </div>
                 </form>
 
-                <a href="add_user.php" class="pms-btn-dark">
+                <a href="add_user.php" class="btn btn-outline-secondary btn-sm">
                     + New User
                 </a>
             </div>

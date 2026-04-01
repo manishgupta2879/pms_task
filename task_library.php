@@ -19,7 +19,7 @@ $tasks = $conn->query("SELECT * FROM task_library");
             </div>
 
             <div class="pms-controls-right">
-                <a href="add_task_library.php" class="pms-btn-dark btn-sm">+ Add Task</a>
+                <a href="add_task_library.php" class="btn btn-outline-secondary btn-sm">+ Add Task</a>
             </div>
         </div>
 

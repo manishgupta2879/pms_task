@@ -115,7 +115,7 @@ include "includes/header.php";
                         </div>
                     </div>
                     <div class="pms-panel-footer d-flex gap-2">
-                        <a href="orders.php" class="pms-btn-back"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+                        <a href="orders.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
                         <button type="submit" name="save_leave" class="pms-btn-dark btn-sm">
                             <i class="bi bi-funnel"></i> Apply Filters
                         </button>
@@ -127,7 +127,7 @@ include "includes/header.php";
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <span>Orders List</span>
-                    <a href="add_order.php" class="pms-btn-add"><i class="bi bi-plus-circle me-1"></i>Add Order</a>
+                    <a href="add_order.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Order</a>
                 </div>
 
                 <div style="overflow-x: auto;">

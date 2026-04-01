@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-include "includes/header.php";
+// include "includes/header.php";
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");
@@ -57,8 +57,8 @@ include "includes/header.php";
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         Edit Order
-                        <a href="view_order.php?id=<?= $id ?>" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>
-                            <i class="bi bi-arrow-left"></i> Back
+                        <a href="view_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>
+                             Back
                         </a>
                     </div>
 
@@ -102,7 +102,7 @@ include "includes/header.php";
                     </div>
 
                     <div class="pms-panel-footer text-end">
-                        <a href="view_order.php?id=<?= $id ?>" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
+                        <a href="view_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="update" class="pms-btn-dark btn-sm">
                             <i class="bi bi-pencil"></i> Update Order
                         </button>
