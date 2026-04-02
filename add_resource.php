@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('resources');
-include "includes/header.php";
+
 
 $id = $_GET['id'] ?? 0;
 
@@ -90,6 +90,7 @@ if ($id) {
 }
 $existing_hours = $working_hours ? floor($working_hours / 60) : 0;
 $existing_minutes = $working_hours ? ($working_hours % 60) : 0;
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">

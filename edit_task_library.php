@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('tasks');
-include "includes/header.php";
+
 
 if (!isset($_GET['id'])) {
     header("Location: order_task_assignment.php");
@@ -63,6 +63,7 @@ if (isset($_POST['update'])) {
 $stored_time = (int) $task['default_time'];
 $existing_hours = floor($stored_time / 60);
 $existing_minutes = $stored_time % 60;
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">

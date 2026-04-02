@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('tasks');
-include "includes/header.php";
+
 
 if (!isset($_GET['id'])) {
     header("Location: task_library.php");
@@ -44,6 +44,7 @@ if (isset($_POST['assign'])) {
         }
     }
 }
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
