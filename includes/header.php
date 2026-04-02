@@ -108,7 +108,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             </a>
                         </li>
                     <?php endif; ?>
-
                 </ul>
 
                 <ul class="navbar-nav align-items-center">

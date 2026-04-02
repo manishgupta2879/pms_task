@@ -182,47 +182,58 @@ $qs = '&search=' . urlencode($search) . '&status=' . urlencode($status_filter) .
                         while ($t = $taskRes->fetch_assoc()):
                             $is_delayed = false;
                             $delay_text = '-';
-
-                            // if ($t['status'] == 'completed' && $t['end_time'] && $t['deadline']) {
-                            //     $end_timestamp = strtotime($t['end_time']);
-                            //     $deadline_timestamp = strtotime($t['deadline']);
-
-                            //     if ($end_timestamp > $deadline_timestamp) {
-                            //         $is_delayed = true;
-                            //         $diff_seconds = $end_timestamp - $deadline_timestamp;
-                            //         $diff_days = floor($diff_seconds / (24 * 3600));
-                            //         $diff_hours = floor(($diff_seconds % (24 * 3600)) / 3600);
-
-                            //         if ($diff_days > 0) {
-                            //             $delay_text = $diff_days . 'd ' . $diff_hours . 'h late';
-                            //         } else {
-                            //             $delay_text = $diff_hours . 'h late';
-                            //         }
-                            //     } else {
-                            //         $delay_text = '✓ On Time';
-                            //     }
-                            // }
                             if ($t['status'] == 'completed' && $t['start_time'] && $t['end_time'] && $t['est_time']) {
 
-                                $start_timestamp = strtotime($t['start_time']);
-                                $end_timestamp = strtotime($t['end_time']);
+                                // $start_timestamp = strtotime($t['start_time']);
+                                // $end_timestamp = strtotime($t['end_time']);
                             
-                                $actual_seconds = $end_timestamp - $start_timestamp;
-                                $est_seconds = $t['est_time'] * 60; // assuming est_time is in minutes
+                                // $actual_seconds = $end_timestamp - $start_timestamp;
+                                // $est_seconds = $t['est_time'] * 60; // assuming est_time is in minutes
                             
-                                if ($actual_seconds > $est_seconds) {
+                                // if ($actual_seconds > $est_seconds) {
+                                //     $is_delayed = true;
+                            
+                                //     $diff_seconds = $actual_seconds - $est_seconds;
+                                //     $diff_hours = floor($diff_seconds / 3600);
+                                //     $diff_minutes = floor(($diff_seconds % 3600) / 60);
+                            
+                                //     if ($diff_hours > 0) {
+                                //         $delay_text = $diff_hours . 'h ' . $diff_minutes . 'm late';
+                                //     } else {
+                                //         $delay_text = $diff_minutes . 'm late';
+                                //     }
+                            
+                                // } else {
+                                //     $delay_text = '✓ On Time';
+                                // }
+                                $start = new DateTime($t['start_time']);
+                                $end = new DateTime($t['end_time']);
+
+                                $start->setTime($start->format('H'), $start->format('i'), 0);
+                                $end->setTime($end->format('H'), $end->format('i'), 0);
+
+                                if ($end < $start) {
+                                    $end->modify('+1 day');
+                                }
+
+                                $actual_minutes = floor(($end->getTimestamp() - $start->getTimestamp()) / 60);
+
+                                $est_minutes = (int)$t['est_time'];
+
+                                if ($actual_minutes > $est_minutes) {
                                     $is_delayed = true;
-                            
-                                    $diff_seconds = $actual_seconds - $est_seconds;
-                                    $diff_hours = floor($diff_seconds / 3600);
-                                    $diff_minutes = floor(($diff_seconds % 3600) / 60);
-                            
+
+                                    $diff_minutes_total = $actual_minutes - $est_minutes;
+
+                                    $diff_hours = floor($diff_minutes_total / 60);
+                                    $diff_minutes = $diff_minutes_total % 60;
+
                                     if ($diff_hours > 0) {
                                         $delay_text = $diff_hours . 'h ' . $diff_minutes . 'm late';
                                     } else {
                                         $delay_text = $diff_minutes . 'm late';
                                     }
-                            
+
                                 } else {
                                     $delay_text = '✓ On Time';
                                 }

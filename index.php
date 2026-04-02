@@ -9,7 +9,8 @@ if (isset($_POST['login'])) {
     $password = md5(trim($_POST['password']));
     
     // Query user with role information
-    $res = $conn->query("SELECT u.id, u.username, u.role_id, r.slug, r.role_name 
+    $res = $conn->query("SELECT u.id, u.username, u.role_id, r.slug, r.role_name , 
+                         u.name
                          FROM users u 
                          LEFT JOIN roles r ON u.role_id = r.id 
                          WHERE u.username='$username' AND u.password='$password' AND u.deleted_at IS NULL");
@@ -20,6 +21,7 @@ if (isset($_POST['login'])) {
         // Store secure session data
         $_SESSION['user_id'] = $row['id'];
         $_SESSION['user'] = $row['username'];
+        $_SESSION['name'] = $row['name'];
         $_SESSION['role_slug'] = $row['slug'] ?? 'staff'; // Fallback to 'staff' if no role assigned
         $_SESSION['role_name'] = $row['role_name'] ?? 'Staff';
         $_SESSION['role_id'] = $row['role_id'];

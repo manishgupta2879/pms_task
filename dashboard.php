@@ -230,10 +230,22 @@ include "includes/header.php"; ?>
         </div>
     </div>
 <?php else: ?>
-    <div class="card">
-        <h1>Welcome <?php echo $_SESSION['user']; ?></h1>
-        <p>Role: <?php echo $_SESSION['role']; ?></p>
+    <div class="container d-flex justify-content-center align-items-center ">
+    <div class="card welcome-card shadow-lg p-4 text-center" style="max-width: 420px; width: 100%;">
+        
+        <h2 class="mb-2">👋 Welcome, <?php echo $_SESSION['name']; ?>!</h2>
+        <p class="text-secondary mb-4">
+            Glad to have you back. Manage your work efficiently from your dashboard.
+        </p>
+
+        <div class="d-grid gap-2">
+            <!-- <a href="profile.php" class="btn btn-primary">View Profile</a> -->
+            <a href="my_task.php" class="btn btn-info text-white">My Tasks</a>
+            <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+        </div>
+
     </div>
+</div>
 <?php endif; ?>
 
 
