@@ -63,6 +63,7 @@ $productivityRes = $conn->query("
 ?>
 
 <div class="pms-wrap">
+<div id="alertBox"></div>
     <div style="padding-bottom: 20px;">
 
         <!-- ORDER INFO HEADER -->
@@ -185,6 +186,7 @@ $productivityRes = $conn->query("
                             <th>Assigned To</th>
                             <th>Est. Time</th>
                             <th>Status</th>
+                            <th>Priority</th>
                             <th>Start Time</th>
                             <th>End Time</th>
                             <th>On-Time/Delay</th>
@@ -249,6 +251,13 @@ $productivityRes = $conn->query("
                                     <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>">
                                         <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
                                     </span>
+                                </td>
+                                <td>  
+                                    <select name="priority" class="form-select py-0 <?= $t['status'] == 'completed' ? 'disabled' : 'select2 priority-change' ?> " data-task-id="<?= $t['id'] ?>" <?= $t['status'] == 'completed' ? 'disabled' : '' ?>>
+                                        <option value="low" <?= $t['priority'] == 'low' ? 'selected' : '' ?> >Low</option>
+                                        <option value="medium" <?= $t['priority'] == 'medium' ? 'selected' : '' ?> >Medium</option>
+                                        <option value="high" <?= $t['priority'] == 'high' ? 'selected' : '' ?> >High</option>                                    
+                                    </select>
                                 </td>
                                 <td><span class="text-muted" style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span></td>
                                 <td><span class="text-muted" style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span></td>
@@ -411,3 +420,60 @@ $productivityRes = $conn->query("
 </div>
 
 <?php include "includes/footer.php"; ?>
+
+<!-- SELECT2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+<!-- SELECT2 JS -->
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        $('.select2').select2({
+            placeholder: "Search...",
+            width: '100%'
+        });
+    });
+</script>
+<script>
+$(document).on('change', '.priority-change', function () {
+    let priority = $(this).val();
+    let task_id = $(this).data('task-id');
+
+    $.ajax({
+        url: 'update_priority.php',
+        method: 'POST',
+        data: {
+            task_id: task_id,
+            priority: priority
+        },
+        success: function (res) {
+            // optional success feedback
+            // console.log("Priority updated");
+            showAlert('success', 'Priority updated successfully');
+        },
+        error: function () {
+            // alert("Failed to update priority");
+            showAlert('danger', 'Failed to update priority');
+        }
+    });
+    function showAlert(type, message) {
+        let alertHtml = `
+            <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+
+        $('#alertBox').html(alertHtml);
+
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            $('#alertBox .alert').alert('close');
+        }, 3000);
+    }
+});
+</script>
