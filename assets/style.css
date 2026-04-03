@@ -347,7 +347,32 @@ td {
     border-radius: 50%;
     background-color: #0ea5e9;
 }
+.pms-status.danger {
+    background-color: #fee2e2; /* light red */
+    color: #991b1b;            /* dark red text */
+}
 
+.pms-status.danger::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #ef4444; /* red dot */
+}
+.pms-status.warning {
+    background-color: #ffedd5; /* light orange */
+    color: #9a3412;            /* dark orange text */
+}
+
+.pms-status.warning::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background-color: #f97316; /* orange dot */
+}
 .pms-footer {
     padding: 10px 15px;
     display: flex;

@@ -28,16 +28,18 @@ if (isset($_POST['assign'])) {
 
     $order_id = (int) $_POST['order_id'];
     $user_id = (int) $_POST['user_id'];
+    $priority = $_POST['priority'];
 
     if ($order_id == 0 || $user_id == 0) {
         $error = "Please select order and user";
     } else {
 
-        $sql = "INSERT INTO tasks(order_id, task_name, est_time, status, user_id, assigned_by)
-                VALUES('$order_id', '{$task['task_name']}', '{$task['default_time']}', 'not_started', '$user_id', ".$_SESSION['user_id'].")";
+        $sql = "INSERT INTO tasks(order_id, task_name, est_time, status, user_id, assigned_by,priority)
+                VALUES('$order_id', '{$task['task_name']}', '{$task['default_time']}', 'not_started', '$user_id', ".$_SESSION['user_id'].",'$priority')";
 
         if ($conn->query($sql)) {
-            header("Location: view_order.php?id=$order_id&msg=task_added");
+            $_SESSION['success'] = "Task assigned successfully.";
+            header("Location: view_order.php?id=$order_id");
             exit();
         } else {
             $error = "Error: " . $conn->error;
@@ -66,7 +68,7 @@ include "includes/header.php";
                         <?php endif; ?>
 
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-2">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Select Order</label>
                                 <select name="order_id" class="form-select select2" required>
                                     <option value="">Search Order...</option>
@@ -81,7 +83,7 @@ include "includes/header.php";
                                 </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-6 mb-2">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Assign Resource</label>
                                 <select name="user_id" class="form-select select2" required>
                                     <option value="">Search User...</option>
@@ -95,6 +97,17 @@ include "includes/header.php";
                                 </select>
                                 <div class="invalid-feedback">
                                     Please select a user
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-2">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Priority</label>
+                                <select name="priority" class="form-select select2" required>
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>                                    
+                                </select>
+                                <div class="invalid-feedback">
+                                    Please select a Priority
                                 </div>
                             </div>
                         </div>
