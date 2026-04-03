@@ -5,92 +5,67 @@ include "includes/rbac.php";
 requireAuth();
 // requirePermission('tasks');
 
-// reseources
 $resources = $conn->query("SELECT id, name FROM users");
 
 $resource_filter = $_GET['resource'] ?? '';
-$date = $_GET['date'] ?? '';
-// $date = $_GET['date'] ?? date("Y-m-d");
-
-$limit = 10;
-$page = $_GET['page'] ?? 1;
-$page = max(1, (int)$page);
-$offset = ($page - 1) * $limit;
-
-// $total = $countRes->fetch_assoc()['total'];
-// $total_pages = max(1, ceil($total / $limit));
-$total = 0;
-$total_pages = 0;
+$week = $_GET['week'] ?? date('o-\WW');
 
 $where = "o.deleted_at IS NULL";
 
-// if ($search != '') {
-//     $search_esc = $conn->real_escape_string($search);
-//     $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
-// }
+if (!empty($week) && strpos($week, '-W') !== false) {
+    list($year, $week_num) = explode('-W', $week);
 
+    $dto = new DateTime();
+    $dto->setISODate((int)$year, (int)$week_num);
+
+    $start_date = $dto->format('Y-m-d');
+
+    $dto->modify('+6 days');
+    $end_date = $dto->format('Y-m-d');
+
+    $where .= " AND DATE(o.deadline) BETWEEN '$start_date' AND '$end_date'";
+}
 if ($resource_filter != '') {
     $resource_esc = (int)$resource_filter;
     $where .= " AND t.user_id = $resource_esc";
 }
 
-// if ($priority != '') {
-//     $priority_esc = $conn->real_escape_string($priority);
-//     if($priority_esc == 'low'){
-//         $where .= " AND (t.priority = '$priority_esc' OR t.priority IS NULL)";  
-//     }
-//     else{
-//         $where .= " AND t.priority = '$priority_esc'";
-//     }
-// }
-
-// if ($date != '') {
-//     $date_esc = $conn->real_escape_string($date);
-//     $where .= " AND DATE(o.deadline) = '$date_esc'";
-// }
-
 $taskRes = $conn->query("
     SELECT 
-    t.*,
-    u.id AS user_id,
-    u.name AS user_name,
-    ab.id AS assigned_by_id,
-    ab.name AS assigned_by_name,
-    o.deadline,
-    o.id AS order_id,
-    o.order_no
+        u.name AS user_name,
+        t.task_name,
+        o.order_no,
+        DATE(o.deadline) as task_date,
+        DAYNAME(o.deadline) as day_name
+    FROM tasks t
+    LEFT JOIN users u ON t.user_id = u.id
+    LEFT JOIN orders o ON t.order_id = o.id
+    WHERE $where
+    ORDER BY u.name, o.deadline ASC
+");
 
-FROM tasks t
-LEFT JOIN users u ON t.user_id = u.id
-LEFT JOIN users ab ON t.assigned_by = ab.id
-LEFT JOIN orders o ON t.order_id = o.id
-WHERE $where
-ORDER BY t.updated_at DESC
-LIMIT $limit OFFSET $offset");
-echo "<pre>";
-print_r($taskRes->fetch_assoc());
-echo "</pre>";
-exit();
-$employees = [
-    "John" => [
-        "Mon" => ["Assembly (Order 10234)", "Testing (Order 10230)", "Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Tue" => ["Testing (Order 10230)", "Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Wed" => ["Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Thu" => ["Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Fri" => ["Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Sat" => ["Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Sun" => ["Dispatch (Order 10225)"]
-    ],
-    "Sarah" => [
-        "Mon" => ["QA (Order 10231)", "Testing (Order 10230)", "Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Tue" => ["Testing (Order 10234)", "Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Wed" => ["Packaging (Order 10229)", "Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Thu" => ["Dispatch (Order 10228)", "Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Fri" => ["Dispatch (Order 10227)", "Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Sat" => ["Dispatch (Order 10226)", "Dispatch (Order 10225)"],
-        "Sun" => ["Dispatch (Order 10225)"]
-    ]
-];
+$employees = [];
+
+while ($row = $taskRes->fetch_assoc()) {
+
+    $emp = $row['user_name'] ?? 'Unknown';
+    $day = date('D', strtotime($row['task_date']));
+
+    $taskText = $row['task_name'] . " (Order " . $row['order_no'] . ")";
+
+    $employees[$emp][$day][] = $taskText;
+}
+
+$weekDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+foreach ($employees as $emp => $days) {
+    foreach ($weekDays as $d) {
+        if (!isset($employees[$emp][$d])) {
+            $employees[$emp][$d] = [];
+        }
+    }
+}
+
 include "includes/header.php";
 ?>
 
@@ -119,7 +94,7 @@ include "includes/header.php";
                                 </div>
                                 <div class="">
                                     <label class="pms-form-label">Week Filter</label>
-                                    <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($deadline) ?>">
+                                    <input type="week" name="week" class="form-control" value="<?= htmlspecialchars($week) ?>">
                                 </div>
                             </div>
                         </div>
@@ -136,7 +111,10 @@ include "includes/header.php";
         <div class="col-lg-8 col-md-7">
             <div class="pms-panel mb-2">
                 <div class="pms-panel-header">
-                    <i class="bi bi-list-check me-2"></i>Scheduling / Workload
+                    <i class="bi bi-list-check me-2"></i>Scheduling / Workload 
+                    <?php if (!empty($week)): ?>
+                        ( <?= date('M d, Y', strtotime($start_date)) ?> - <?= date('M d, Y', strtotime($end_date)) ?> )
+                    <?php endif; ?>
                 </div>
 
                 <?php if (count($employees) == 0): ?>
@@ -146,27 +124,26 @@ include "includes/header.php";
                 <?php else: ?>
                     <div style="overflow-x: auto;">
                         <div class="pms-panel-body p-2">
-                            <?php foreach ($employees as $employee => $schedule): ?>
-                                <div class="mb-2">
-                                    <div class="col me-2">
-                                        <?php echo $employee; ?>
-                                    </div>
-                                    <div class="">
-                                        <?php foreach ($schedule as $day => $tasks): ?>
-                                            <div class="ms-5 mb-2 d-flex">
-                                                <div class=""><?php echo $day; ?>:&nbsp;</div>
-                                                <div>
-                                                    <?php foreach ($tasks as $task): ?>
-                                                        <span class="badge text-bg-secondary"><?php echo $task; ?></span>
-                                                    <?php endforeach; ?>
-                                                </div>
+                        <?php foreach ($employees as $emp_name => $days): ?>
+                            <div class="mb-3">
+                                <div class="fw-bold"><?= $emp_name ?></div>
 
-                                            </div>
-
-                                        <?php endforeach; ?>
+                                <?php foreach ($days as $day => $tasks): ?>
+                                    <div class="ms-4 mb-1 d-flex">
+                                        <div style="width:60px;"><strong><?= $day ?>:</strong></div>
+                                        <div>
+                                            <?php if (count($tasks)): ?>
+                                                <?php foreach ($tasks as $t): ?>
+                                                    <span class="badge text-bg-secondary"><?= $t ?></span>
+                                                <?php endforeach; ?>
+                                            <?php else: ?>
+                                                <span class="text-muted">No tasks</span>
+                                            <?php endif; ?>
+                                        </div>
                                     </div>
-                                </div>
-                            <?php endforeach; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
                         </div>
                     </div>
 
