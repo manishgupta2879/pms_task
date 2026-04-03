@@ -138,6 +138,8 @@ include "includes/header.php";
                             <th>Order #</th>
                             <th>Customer</th>
                             <th>Product</th>
+                            <th>Species</th>
+                            <th>Qty</th>
                             <th>Deadline</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 80px;">Actions</th>
@@ -156,6 +158,8 @@ include "includes/header.php";
                                 <td class="text-dark fw-medium"><?= $row['order_no'] ?></td>
                                 <td class="text-dark fw-medium"><?= $row['customer'] ?></td>
                                 <td class="text-dark fw-medium"><?= $row['product'] ?></td>
+                                <td class="text-dark fw-medium"><?= $row['species'] ?></td>
+                                <td class="text-dark fw-medium"><?= $row['qty'] ?></td>
                                 <td class="text-dark fw-medium"><?= date("M d, Y", strtotime($row['deadline'])) ?></td>
 
                                 <td>

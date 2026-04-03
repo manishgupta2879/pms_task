@@ -1,4 +1,90 @@
 <?php include "includes/config.php";
+// Total Active Orders
+// Orders Due This Week
+// Overdue Tasks
+// Staff Utilization
+
+$result = $conn->query("SELECT COUNT(*) AS total_active_orders FROM orders WHERE status = 'active' AND deleted_at IS NULL");
+$row = $result->fetch_assoc();
+$totalActiveOrders = $row['total_active_orders'];
+
+$result = $conn->query("
+    SELECT COUNT(*) AS orders_due_this_week
+    FROM orders
+    WHERE
+        status = 'active'
+        AND deleted_at IS NULL
+        AND YEARWEEK(deadline, 1) = YEARWEEK(CURDATE(), 1)
+");
+$row = $result->fetch_assoc();
+$orders_due_this_week = $row['orders_due_this_week'];
+
+$result = $conn->query("
+    SELECT COUNT(*) AS overdue_tasks
+    FROM tasks t
+    JOIN orders o ON t.order_id = o.id
+    WHERE t.status != 'completed'
+    AND o.deadline < CURDATE();
+");
+$row = $result->fetch_assoc();
+$overdue_tasks = $row['overdue_tasks'];
+
+$urgent_tasks = $conn->query("
+    SELECT 
+        t.task_name, 
+        o.order_no, 
+        u.name AS assigned_to, 
+        DATE(o.deadline) AS due_date, 
+        o.status
+    FROM tasks t
+    LEFT JOIN orders o ON t.order_id = o.id
+    LEFT JOIN users u ON t.user_id = u.id
+    WHERE t.priority = 'high' AND t.status <> 'completed'
+    ORDER BY o.deadline ASC;
+");
+
+$result = $conn->query("
+    SELECT 
+        t.task_name,
+        o.order_no,
+        u.name AS assigned_to,
+        DAYNAME(o.deadline) AS deadline_day,
+        o.deadline
+    FROM tasks t
+    JOIN orders o ON t.order_id = o.id
+    LEFT JOIN users u ON t.user_id = u.id
+    WHERE o.deadline BETWEEN CURDATE() - INTERVAL (WEEKDAY(CURDATE())) DAY 
+                        AND CURDATE() + INTERVAL (4 - WEEKDAY(CURDATE())) DAY
+    ORDER BY FIELD(DAYNAME(o.deadline), 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), o.deadline ASC;
+");
+
+$weekly_tasks = [
+    'Mon' => [],
+    'Tue' => [],
+    'Wed' => [],
+    'Thu' => [],
+    'Fri' => []
+];
+
+$dayMap = [
+    'Monday' => 'Mon',
+    'Tuesday' => 'Tue',
+    'Wednesday' => 'Wed',
+    'Thursday' => 'Thu',
+    'Friday' => 'Fri'
+];
+
+while ($task = $result->fetch_assoc()) {
+    $dayKey = $dayMap[$task['deadline_day']] ?? null;
+    if ($dayKey) {
+        $taskName = $task['order_no'] ? "Order #{$task['order_no']} {$task['task_name']}" : $task['task_name'];
+        $weekly_tasks[$dayKey][] = [
+            'name' => $taskName,
+            'assigned_to' => $task['assigned_to'] ?? 'Unassigned'
+        ];
+    }
+}
+
 
 include "includes/header.php"; ?>
 <!-- <div class="card">
@@ -16,7 +102,7 @@ include "includes/header.php"; ?>
                             <h6 class="card-title text-nowrap overflow-hidden text-truncate">Total Active Orders</h6>
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2 class="fw-bold">
-                                    <?php echo $total_active_orders ?? 0; ?>
+                                    <?php echo $totalActiveOrders ?? 0; ?>
                                 </h2>
                                 <i class="bi bi-bag-check fs-2"></i>
                             </div>
@@ -33,7 +119,7 @@ include "includes/header.php"; ?>
                             <h6 class="card-title text-nowrap overflow-hidden text-truncate">Orders Due This Week</h6>
                             <div class="d-flex justify-content-between align-items-center">
                                 <h2 class="fw-bold">
-                                    <?php echo $orders_due_week ?? 0; ?>
+                                    <?php echo $orders_due_this_week ?? 0; ?>
                                 </h2>
                                 <i class="bi bi-calendar-week fs-2"></i>
                             </div>
@@ -100,22 +186,22 @@ include "includes/header.php"; ?>
                                 <?php
                                 // Example structure: $weekly_tasks[day] = array of tasks
                                 $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
-                                $weekly_tasks = [
-                                    'Mon' => [
-                                        ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
-                                        ['name' => 'Inventory Check', 'assigned_to' => 'Amit']
-                                    ],
-                                    'Tue' => [
-                                        ['name' => 'Dispatch Order #102', 'assigned_to' => 'Neha']
-                                    ],
-                                    'Wed' => [],
-                                    'Thu' => [
-                                        ['name' => 'Client Follow-up', 'assigned_to' => 'Priya']
-                                    ],
-                                    'Fri' => [
-                                        ['name' => 'Weekly Report', 'assigned_to' => 'Manager']
-                                    ]
-                                ];
+                                // $weekly_tasks = [
+                                //     'Mon' => [
+                                //         ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
+                                //         ['name' => 'Inventory Check', 'assigned_to' => 'Amit']
+                                //     ],
+                                //     'Tue' => [
+                                //         ['name' => 'Dispatch Order #102', 'assigned_to' => 'Neha']
+                                //     ],
+                                //     'Wed' => [],
+                                //     'Thu' => [
+                                //         ['name' => 'Client Follow-up', 'assigned_to' => 'Priya']
+                                //     ],
+                                //     'Fri' => [
+                                //         ['name' => 'Weekly Report', 'assigned_to' => 'Manager']
+                                //     ]
+                                // ];
                                 foreach ($days as $day) {
                                     echo "<td>";
 
@@ -146,22 +232,6 @@ include "includes/header.php"; ?>
 
     <div class="mt-4">
         <div class="row g-4">
-            <?php $urgent_tasks = [
-                [
-                    'name' => 'Packing Order #101',
-                    'order_no' => '101',
-                    'assigned_to' => 'Rahul',
-                    'due_date' => '2026-03-28',
-                    'status' => 'Pending'
-                ],
-                [
-                    'name' => 'Dispatch Order #102',
-                    'order_no' => '102',
-                    'assigned_to' => 'Neha',
-                    'due_date' => '2026-03-27',
-                    'status' => 'Completed'
-                ]
-            ]; ?>
             <!-- Urgent Tasks Panel -->
             <div class="col-lg-8">
                 <div class="pms-panel">
@@ -183,12 +253,12 @@ include "includes/header.php"; ?>
                                 <?php if (!empty($urgent_tasks)) { ?>
                                     <?php foreach ($urgent_tasks as $task) { ?>
                                         <tr>
-                                            <td><?php echo htmlspecialchars($task['name']); ?></td>
+                                            <td><?php echo htmlspecialchars($task['task_name']); ?></td>
                                             <td><?php echo htmlspecialchars($task['order_no']); ?></td>
                                             <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
                                             <td><?php echo date("d M Y", strtotime($task['due_date'])); ?></td>
                                             <td>
-                                                <span class="badge p-2 text-md bg-<?php echo $task['status'] == 'Pending' ? 'warning' : ($task['status'] == 'Completed' ? 'success' : 'secondary'); ?>">
+                                                <span class="badge p-2 text-md bg-<?php echo $task['status'] == 'pending' ? 'warning' : ($task['status'] == 'active' ? 'success' : 'secondary'); ?>">
                                                     <?php echo $task['status']; ?>
                                                 </span>
                                             </td>
