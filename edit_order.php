@@ -26,6 +26,8 @@ if (isset($_POST['update'])) {
 
     $customer = $conn->real_escape_string($_POST['customer']);
     $product  = $conn->real_escape_string($_POST['product']);
+    $species  = $conn->real_escape_string($_POST['species']);
+    $qty  = $conn->real_escape_string($_POST['qty']);
     $deadline = $_POST['deadline'];
     $status   = $_POST['status'];
 
@@ -36,7 +38,9 @@ if (isset($_POST['update'])) {
             SET customer='$customer',
                 product='$product',
                 deadline='$deadline',
-                status='$status'
+                status='$status',
+                species ='$species',
+                qty='$qty'
             WHERE id=$id";
 
     if ($conn->query($sql)) {
@@ -80,6 +84,16 @@ include "includes/header.php";
                                 <label class="pms-form-label"><span class="text-danger">*</span> Product</label>
                                 <input type="text" name="product" class="form-control" value="<?= htmlspecialchars($order['product']) ?>" required>
                                 <div class="invalid-feedback">Please enter product name</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Species</label>
+                                <input type="text" name="species" class="form-control" value="<?= htmlspecialchars($order['species']) ?>" required>
+                                <div class="invalid-feedback">Please enter Species name</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Quantity</label>
+                                <input type="text" name="qty" class="form-control" value="<?= htmlspecialchars($order['qty']) ?>" required>
+                                <div class="invalid-feedback">Please enter Quantity</div>
                             </div>
 
                             <div class="col-md-6">

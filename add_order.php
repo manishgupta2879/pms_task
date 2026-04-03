@@ -4,7 +4,6 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-include "includes/header.php";
 
 if (isset($_POST['save_order'])) {
 
@@ -19,10 +18,12 @@ if (isset($_POST['save_order'])) {
     $customer = $_POST['customer'];
     $product = $_POST['product'];
     $deadline = $_POST['deadline'];
+    $species = $_POST['species'];
+    $qty = $_POST['qty'];
     $status = $_POST['status'];
 
-    $sql = "INSERT INTO orders(order_no,customer,product,deadline,status)
-            VALUES('$order_no','$customer','$product','$deadline','$status')";
+    $sql = "INSERT INTO orders(order_no,customer,product,deadline,status,species,qty)
+            VALUES('$order_no','$customer','$product','$deadline','$status','$species', '$qty')";
 
     if ($conn->query($sql)) {
         header("Location: orders.php?msg=created");
@@ -32,6 +33,7 @@ if (isset($_POST['save_order'])) {
         echo "<div class='alert alert-danger'>Error: " . $conn->error . "</div>";
     }
 }
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
@@ -62,7 +64,18 @@ if (isset($_POST['save_order'])) {
                                     value="<?= htmlspecialchars($product ?? '') ?>" required>
                                 <div class="invalid-feedback">Please enter product name</div>
                             </div>
-
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span>Species</label>
+                                <input type="text" name="species" class="form-control" placeholder="Species Name"
+                                    value="<?= htmlspecialchars($species ?? '') ?>" required>
+                                <div class="invalid-feedback">Please enter Species name</div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Quantity</label>
+                                <input type="text" name="qty" class="form-control" placeholder="Quantity"
+                                    value="<?= htmlspecialchars($qty ?? '') ?>" required>
+                                <div class="invalid-feedback">Please enter Quantity</div>
+                            </div>
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
                                 <input type="date" name="deadline" class="form-control"
