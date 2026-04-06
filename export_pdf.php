@@ -24,7 +24,12 @@ if ($employee != '') {
 
 if ($priority != '') {
     $priority_esc = $conn->real_escape_string($priority);
-    $where .= " AND t.priority = '$priority_esc'";
+    if($priority_esc == 'low'){
+        $where .= " AND (t.priority = '$priority_esc' OR t.priority IS NULL)";  
+    }
+    else{
+        $where .= " AND t.priority = '$priority_esc'";
+    }
 }
 
 if ($date != '') {
