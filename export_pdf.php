@@ -14,7 +14,8 @@ $where = "o.deleted_at IS NULL";
 
 if ($search != '') {
     $search_esc = $conn->real_escape_string($search);
-    $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
+    $where .= " AND (o.order_no LIKE '%$search_esc%')";
+    // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
 }
 
 if ($employee != '') {
@@ -77,7 +78,7 @@ $result = $conn->query("
             <td><?= $row['order_no'] ?></td>
             <td><?= $row['employee'] ?></td>
             <td><?= date('M d, Y', strtotime($row['deadline'])) ?></td>
-            <td><?= ucfirst($row['priority']) ?></td>
+            <td><?= ucfirst($row['priority']?? 'Low') ?></td>
         </tr>
     <?php } ?>
 

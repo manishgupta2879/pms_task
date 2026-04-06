@@ -61,18 +61,24 @@ if (isset($_POST['save_order'])) {
 
     try {
 
+        $conn->query("INSERT INTO orders(order_no, customer, deadline, status)
+              VALUES('$order_no', '$customer', '$deadline', '$status')");
+        $order_id = $conn->insert_id;
+
         for ($i = 0; $i < count($products); $i++) {
 
             $product = $conn->real_escape_string($products[$i]);
             $species = $conn->real_escape_string($species_list[$i]);
             $qty = $conn->real_escape_string($qtys[$i]);
 
-            $sql = "INSERT INTO orders(order_no, customer, product, deadline, status, species, qty)
-                    VALUES('$order_no', '$customer', '$product', '$deadline', '$status', '$species', '$qty')";
+            $conn->query("INSERT INTO order_items(order_id, product, species, qty)
+                    VALUES('$order_no', '$product', '$species', '$qty')");
+            // $sql = "INSERT INTO orders(order_no, customer, product, deadline, status, species, qty)
+            //         VALUES('$order_no', '$customer', '$product', '$deadline', '$status', '$species', '$qty')";
 
-            if (!$conn->query($sql)) {
-                throw new Exception($conn->error);
-            }
+            // if (!$conn->query($sql)) {
+            //     throw new Exception($conn->error);
+            // }
         }
 
         $conn->commit();
