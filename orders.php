@@ -37,7 +37,8 @@ $offset = ($page - 1) * $limit;
 $where = "WHERE deleted_at IS NULL";
 
 if ($search != '') {
-    $where .= " AND (order_no LIKE '%$search%' OR product LIKE '%$search%')";
+    $where .= " AND (order_no LIKE '%$search%')";
+    // $where .= " AND (order_no LIKE '%$search%' OR product LIKE '%$search%')";
 }
 if ($status != '') {
     $where .= " AND orders.status='$status'";
@@ -83,14 +84,14 @@ include "includes/header.php";
         <div class="col-lg-4 col-md-5">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
-                    Filter Orders
+                    Filter
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="pms-form-label">Search</label>
-                                <input type="text" name="search" class="form-control" placeholder="Order # or Product" value="<?= $search ?>">
+                                <input type="text" name="search" class="form-control" placeholder="Order #" value="<?= $search ?>">
                             </div>
                             <!-- Deadline -->
                             <div class="col-6">
@@ -137,9 +138,9 @@ include "includes/header.php";
                         <tr>
                             <th>Order #</th>
                             <th>Customer</th>
-                            <th>Product</th>
+                            <!-- <th>Product</th>
                             <th>Species</th>
-                            <th>Qty</th>
+                            <th>Qty</th> -->
                             <th>Deadline</th>
                             <th>Status</th>
                             <th class="text-end" style="width: 80px;">Actions</th>
@@ -156,10 +157,10 @@ include "includes/header.php";
                         <?php while ($row = $result->fetch_assoc()) { ?>
                             <tr>
                                 <td class="text-dark fw-medium"><?= $row['order_no'] ?></td>
-                                <td class="text-dark fw-medium"><?= $row['customer'] ?></td>
-                                <td class="text-dark fw-medium"><?= $row['product'] ?></td>
-                                <td class="text-dark fw-medium"><?= $row['species'] ?></td>
-                                <td class="text-dark fw-medium"><?= $row['qty'] ?></td>
+                                <td class="text-dark fw-medium"><?= $row['customer']?? '-' ?></td>
+                                <!-- <td class="text-dark fw-medium"><?= $row['product'] ?? '-' ?></td>
+                                <td class="text-dark fw-medium"><?= $row['species'] ?? '-' ?></td>
+                                <td class="text-dark fw-medium"><?= $row['qty'] ?? '-' ?></td> -->
                                 <td class="text-dark fw-medium"><?= date("M d, Y", strtotime($row['deadline'])) ?></td>
 
                                 <td>

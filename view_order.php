@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-include "includes/header.php";
+
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");
@@ -20,6 +20,9 @@ $order = $orderRes->fetch_assoc();
 if (!$order) {
     die("Order not found");
 }
+// $order_items = $conn->query("SELECT * FROM order_items WHERE order_id='{$order['order_no']}'")->fetch_all(MYSQLI_ASSOC);
+$order_items = $conn->query("SELECT * FROM order_items WHERE order_id='{$order['order_no']}'");
+
 
 // save notes
 if (isset($_POST['save_notes'])) {
@@ -60,6 +63,7 @@ $productivityRes = $conn->query("
     WHERE t.order_id=$id
     GROUP BY u.id, u.username
 ");
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
@@ -106,7 +110,7 @@ $productivityRes = $conn->query("
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Product
                         </div>
@@ -114,7 +118,7 @@ $productivityRes = $conn->query("
                             <?= htmlspecialchars($order['product']) ?>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-md-3">
                     <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Deadline
@@ -137,12 +141,44 @@ $productivityRes = $conn->query("
             </div>
         </div>
 
+        <div class="pms-panel mb-3">
+            <div class="pms-controls">
+                <div class="pms-controls-left">
+                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-list-task me-2"></i>Product List</h5>
+                </div>
+            </div>
 
-
-
-
-
-
+            <?php if ($order_items->num_rows == 0): ?>
+                <div class="alert alert-info text-center py-4" style="margin: 15px 20px;">
+                    <i class="bi bi-info-circle me-2"></i> No products added yet
+                </div>
+            <?php else: ?>
+                <div style="overflow-x: auto;">
+                <table class="pms-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">#</th>
+                            <th>Product</th>
+                            <th>Species</th>
+                            <th>Quantity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php $counter = 1;
+                        while ($item = $order_items->fetch_assoc()):
+                        ?>
+                            <tr>
+                                <td class="text-muted fw-medium"><?= $counter++ ?></td>
+                                <td class="text-dark fw-medium"><?= htmlspecialchars($item['product']) ?></td>
+                                <td class="text-dark fw-medium"><?= htmlspecialchars($item['species']) ?></td>
+                                <td class="text-dark fw-medium"><?= htmlspecialchars($item['qty']) ?></td>
+                            </tr>
+                        <?php endwhile; ?>
+                    </tbody>
+                </table>
+                </div>
+            <?php endif; ?>
+        </div>
 
         <div class="pms-panel mb-3">
             <div class="pms-controls">
