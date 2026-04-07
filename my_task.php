@@ -35,7 +35,8 @@ if ($status_filter != '') {
 
 if ($order_id != '') {
     $order_id_esc = $conn->real_escape_string($order_id);
-    $where .= " AND (o.order_no LIKE '%$order_id_esc%' OR o.id = '$order_id_esc')";
+    $where .= " AND (o.order_no LIKE '%$order_id_esc%')";
+    // $where .= " AND (o.order_no LIKE '%$order_id_esc%' OR o.id = '$order_id_esc')";
 }
 
 if ($customer != '') {
@@ -71,13 +72,14 @@ $taskRes = $conn->query("
         o.id as order_id_num,
         o.order_no,
         o.customer,
-        o.product,
+        oi.product,
         o.deadline,
         o.status as order_status
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
     LEFT JOIN users ab ON t.assigned_by = ab.id
     LEFT JOIN orders o ON t.order_id = o.id
+    LEFT JOIN order_items oi ON o.order_no = oi.order_id
     WHERE $where
     ORDER BY t.updated_at DESC
     LIMIT $limit OFFSET $offset
