@@ -146,7 +146,7 @@ include "includes/header.php";
                             <input type="text" name="name"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['name']) ?>"
-                                   required autofocus>
+                                    autofocus>
                             <?php if (isset($errors['name'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
@@ -162,7 +162,7 @@ include "includes/header.php";
                             <input type="text" name="username"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['username']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['username'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['username'] ?>
@@ -178,7 +178,7 @@ include "includes/header.php";
                             <input type="email" name="email"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['email']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['email'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>

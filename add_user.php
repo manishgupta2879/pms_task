@@ -112,7 +112,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter full name"
                                    value="<?= htmlspecialchars($form_data['name']) ?>"
-                                   required autofocus>
+                                    autofocus>
                             <?php if (isset($errors['name'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
@@ -129,7 +129,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter username"
                                    value="<?= htmlspecialchars($form_data['username']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['username'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['username'] ?>
@@ -146,7 +146,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter email address"
                                    value="<?= htmlspecialchars($form_data['email']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['email'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>
@@ -162,7 +162,7 @@ include "includes/header.php";
                             <input type="password" name="password"
                                    class="form-control"
                                    placeholder="Enter password"
-                                   required>
+                                   >
                             <?php if (isset($errors['password'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['password'] ?>
