@@ -18,8 +18,13 @@ if (isset($_GET['delete'])) {
     if ($user_data && $user_data['username'] == $_SESSION['user']) {
         $_SESSION['error'] = "You cannot delete your own account.";
     } else {
-        $conn->query("UPDATE users SET deleted_at=NOW() WHERE id=$del_id");
-        $_SESSION['success'] = "User deleted successfully.";
+        $taskCheck = $conn->query("SELECT id FROM tasks WHERE user_id = $del_id LIMIT 1");
+        if ($taskCheck && $taskCheck->num_rows > 0) {
+            $_SESSION['error'] = "User has assigned tasks. Cannot delete.";
+        } else {
+            $conn->query("UPDATE users SET deleted_at=NOW() WHERE id=$del_id");
+            $_SESSION['success'] = "User deleted successfully.";
+        }
     }
 
     header("Location: users.php");
@@ -100,7 +105,11 @@ $qs = '&search=' . urlencode($search);
                 <?php endif; ?>
 
                 <?php $i = $offset + 1; ?>
-                <?php while ($r = $res->fetch_assoc()): ?>
+                <?php while ($r = $res->fetch_assoc()): 
+                    
+                    $taskCheck = $conn->query("SELECT id FROM tasks WHERE user_id = {$r['id']} LIMIT 1");
+                    $hasTask = ($taskCheck && $taskCheck->num_rows > 0);
+                    ?>
                     <tr>
                         <td><?= $i++ ?></td>
 
@@ -141,21 +150,25 @@ $qs = '&search=' . urlencode($search);
                             </a>
 
                             <!-- Delete -->
-                            <?php if ($r['username'] != $_SESSION['user']): ?>
-                                <a href="users.php?delete=<?= $r['id'] ?>"
-                                   class="pms-action-btn pms-action-btn-danger"
-                                   title="Delete"
-                                   onclick="return confirm('Delete user: <?= htmlspecialchars($r['username']) ?> ?')">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            <?php else: ?>
-                                <span class="pms-action-btn" disabled
-                                    title="Protected"
-                                    data-bs-toggle="tooltip" data-bs-placement="top">
+                             <?php if ($r['username'] == $_SESSION['user']): ?>
+                                <span class="pms-action-btn" title="You cannot delete your own account">
                                     <i class="bi bi-trash"></i>
                                 </span>
-                            <?php endif; ?>
+                            <?php elseif ($hasTask): ?>
+                                <span class="pms-action-btn"
+                                    title="User has assigned tasks"
+                                    data-bs-toggle="tooltip">
+                                    <i class="bi bi-trash"></i>
+                                </span>
+                            <?php else: ?>
+                                <a href="users.php?delete=<?= $r['id'] ?>"
+                                class="pms-action-btn pms-action-btn-danger"
+                                title="Delete"
+                                onclick="return confirm('Delete user: <?= htmlspecialchars($r['username']) ?> ?')">
+                                    <i class="bi bi-trash"></i>
+                                </a>
 
+                            <?php endif; ?>                            
                         </td>
                     </tr>
                 <?php endwhile; ?>

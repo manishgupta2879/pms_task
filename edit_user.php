@@ -31,7 +31,22 @@ if (isset($_POST['update_user'])) {
     $name     = $conn->real_escape_string($_POST['name']);
     $password = $_POST['password'];
     $confirm  = $_POST['confirm_password'];
+    $username_error = '';
+    $email_error = '';
 
+    $checkUsername = "SELECT id FROM users WHERE username = '$username' AND id != $id";
+    $resUser = $conn->query($checkUsername);
+
+    if ($resUser && $resUser->num_rows > 0) {
+        $username_error = "Username already taken.";
+    }
+
+    $checkEmail = "SELECT id FROM users WHERE email = '$email' AND id != $id";
+    $resEmail = $conn->query($checkEmail);
+
+    if ($resEmail && $resEmail->num_rows > 0) {
+        $email_error = "Email already registered.";
+    }
     // 🔒 Prevent role change for self
     if ($user['username'] == $_SESSION['user']) {
         $role = $user['role'];
@@ -60,7 +75,7 @@ if (isset($_POST['update_user'])) {
     }
 
     // execute if no error
-    if (!isset($error)) {
+    if (empty($error) && empty($username_error) && empty($email_error)) {
         if ($conn->query($sql)) {
             $_SESSION['success'] = "User updated successfully.";
             header("Location: users.php");
@@ -113,10 +128,14 @@ include "includes/header.php";
                                     <span class="text-danger">*</span> Username
                                 </label>
                                 <input type="text" name="username"
-                                       class="form-control"
+                                       class="form-control <?= !empty($username_error) ? 'is-invalid' : '' ?>"
                                        value="<?= htmlspecialchars($user['username']) ?>"
                                        required autofocus>
-                                <div class="invalid-feedback">Username is required</div>
+                                <?php if (!empty($username_error)): ?>
+                                    <div class="invalid-feedback"><?= $username_error ?></div>
+                                <?php else: ?>
+                                    <div class="invalid-feedback">Username is required</div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="col-md-6">
@@ -124,10 +143,14 @@ include "includes/header.php";
                                     <span class="text-danger">*</span> Email
                                 </label>
                                 <input type="email" name="email"
-                                       class="form-control"
+                                       class="form-control <?= !empty($email_error) ? 'is-invalid' : '' ?>"
                                        value="<?= htmlspecialchars($user['email']) ?>"
                                        required>
-                                <div class="invalid-feedback">Valid email required</div>
+                                <?php if (!empty($email_error)): ?>
+                                    <div class="invalid-feedback"><?= $email_error ?></div>
+                                <?php else: ?>
+                                    <div class="invalid-feedback">Valid email required</div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="col-md-6">

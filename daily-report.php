@@ -4,6 +4,14 @@ include "includes/rbac.php";
 
 requireAuth();
 
+$today = date("Y-m-d");
+if ($_GET) {
+    if ($_GET['from_date'] > $today || $_GET['to_date'] > $today) {
+        $_SESSION['error'] = "Future dates are not allowed.";
+        header("Location: daily-report.php");
+        exit();
+    }
+}
 // if (isset($_GET['delete'])) {
 //     $delete_id = (int)$_GET['delete'];
 
@@ -14,11 +22,12 @@ requireAuth();
 // }
 
 // search & filter
-$search = $_GET['search'] ?? '';
+// $search = $_GET['search'] ?? '';
 $priority = $_GET['priority'] ?? '';
 $employee = $_GET['employee'] ?? '';
 // $date = $_GET['date'] ?? '';
-$date = $_GET['date'] ?? date("Y-m-d");
+$from_date = $_GET['from_date'] ?? date("Y-m-d");
+$to_date = $_GET['to_date'] ?? date("Y-m-d");
 
 $limit = 10;
 $page = $_GET['page'] ?? 1;
@@ -26,13 +35,13 @@ $page = max(1, (int)$page);
 $offset = ($page - 1) * $limit;
 
 
-$where = "o.deleted_at IS NULL";
+$where = "o.deleted_at IS NULL AND t.status = 'completed'"; 
 
-if ($search != '') {
-    $search_esc = $conn->real_escape_string($search);
-    $where .= " AND (o.order_no LIKE '%$search_esc%')";
-    // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
-}
+// if ($search != '') {
+//     $search_esc = $conn->real_escape_string($search);
+//     $where .= " AND (o.order_no LIKE '%$search_esc%')";
+//     // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
+// }
 
 if ($employee != '') {
     $employee_esc = (int)$employee;
@@ -49,9 +58,10 @@ if ($priority != '') {
     }
 }
 
-if ($date != '') {
-    $date_esc = $conn->real_escape_string($date);
-    $where .= " AND DATE(o.deadline) = '$date_esc'";
+if ($from_date != '' && $to_date != '') {
+    $from_date_esc = $conn->real_escape_string($from_date);
+    $to_date_esc = $conn->real_escape_string($to_date);
+    $where .= " AND DATE(o.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
 }
 // $count_res = $conn->query("
 //     SELECT 
@@ -111,19 +121,20 @@ include "includes/header.php";
         <div class="col-lg-4 col-md-5">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
-                    Filter Orders
+                    Filter
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <div class="col-6">
-                                <label class="pms-form-label">Search</label>
-                                <input type="text" name="search" class="form-control" placeholder="Order" value="<?= $search ?>">
+                                
+                                <label class="pms-form-label">From Date</label>
+                                <input type="date" name="from_date" class="form-control" value="<?= $from_date ?>" max="<?= date('Y-m-d') ?>">
                             </div>
-                            <!-- Deadline -->
+                            
                             <div class="col-6">
-                                <label class="pms-form-label">Date</label>
-                                <input type="date" name="date" class="form-control" value="<?= $date ?>">
+                                <label class="pms-form-label">To Date</label>
+                                <input type="date" name="to_date" class="form-control" value="<?= $to_date ?>" max="<?= date('Y-m-d') ?>">
                             </div>
                             <div class="col-6">
                                 
@@ -164,7 +175,7 @@ include "includes/header.php";
         <div class="col-lg-8 col-md-7">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                    <span>Daily Production Report – <?= date('M d, Y', strtotime($date)) ?> </span>
+                    <span>Production Report (<?= date('M d, Y', strtotime($from_date)) ?> to <?= date('M d, Y', strtotime($to_date)) ?>)</span>
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
                             <i class="bi bi-download me-1"></i> Export
@@ -192,7 +203,9 @@ include "includes/header.php";
                             <th>Task</th>
                             <th>Order #</th>
                             <th>Assigned To</th>
-                            <th>Time</th>
+                            <th>Deadline</th>
+                            <th>Allocated Time</th>
+                            <th>Time Taken</th>
                             <th>Priority </th>
                             <!-- <th class="text-end" style="width: 80px;">Actions</th> -->
                         </tr>
@@ -214,7 +227,25 @@ include "includes/header.php";
                                     <?= date('M d, Y', strtotime($task['deadline'])) ?>
                                     <!-- date("M d, Y", strtotime($row['deadline'])) -->
                                 </td>
+                                <td class="text-dark fw-medium">
+                                    <?= $task['est_time'] ? formatMinutes($task['est_time']): '-' ?>
+                                </td>
+                                <td>
+                                    <?php                                     
+                                    $start_time = new DateTime($task['start_time']);
+                                    $end_time = new DateTime($task['end_time']);
 
+                                $start_time->setTime($start_time->format('H'), $start_time->format('i'), 0);
+                                $end_time->setTime($end_time->format('H'), $end_time->format('i'), 0);
+
+                                if ($end_time < $start_time) {
+                                    $end_time->modify('+1 day');
+                                }
+
+                                $actual_minutes = floor(($end_time->getTimestamp() - $start_time->getTimestamp()) / 60);
+                                    ?>
+                                    <?= formatMinutes($actual_minutes) ?>
+                                </td>
                                 <td>
                                     <?php if ($task['priority'] == 'low' || $task['priority'] == '') { ?>
                                         <span class="pms-status active">Low</span>
@@ -235,11 +266,11 @@ include "includes/header.php";
                     <?php
                     $start = ($total > 0) ? $offset + 1 : 0;
                     $end   = min($total, $offset + $limit);
-                    $qs = "&search=" . urlencode($search) .
-                    "&employee=" . urlencode($employee) .
+                    // "&search=" . urlencode($search) .
+                    $qs = "&employee=" . urlencode($employee) .
                     "&priority=" . urlencode($priority).
-                    "&date=" . urlencode($date)
-                    ;
+                    "&from_date=" . urlencode($from_date) .
+                    "&to_date=" . urlencode($to_date);
                     ?>
 
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> orders</div>

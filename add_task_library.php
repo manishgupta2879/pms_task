@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('tasks');
-include "includes/header.php";
+
 
 $order_id = (int) ($_GET['order_id'] ?? 0);
 
@@ -38,6 +38,7 @@ if (isset($_POST['save'])) {
         }
     }
 }
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">

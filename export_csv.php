@@ -5,18 +5,19 @@ include "includes/rbac.php";
 requireAuth();
 
 // filters
-$search   = $_GET['search'] ?? '';
+// $search   = $_GET['search'] ?? '';
 $priority = $_GET['priority'] ?? '';
 $employee = $_GET['employee'] ?? '';
-$date     = $_GET['date'] ?? date("Y-m-d");
+$from_date = $_GET['from_date'] ?? date("Y-m-d");
+$to_date = $_GET['to_date'] ?? date("Y-m-d");
 
-$where = "o.deleted_at IS NULL";
+$where = "o.deleted_at IS NULL AND t.status = 'completed'";
 
-if ($search != '') {
-    $search_esc = $conn->real_escape_string($search);
-    $where .= " AND (o.order_no LIKE '%$search_esc%')";
-    // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
-}
+// if ($search != '') {
+//     $search_esc = $conn->real_escape_string($search);
+//     $where .= " AND (o.order_no LIKE '%$search_esc%')";
+//     // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
+// }
 
 if ($employee != '') {
     $where .= " AND t.user_id = " . (int)$employee;
@@ -32,9 +33,10 @@ if ($priority != '') {
     }    
 }
 
-if ($date != '') {
-    $date_esc = $conn->real_escape_string($date);
-    $where .= " AND DATE(o.deadline) = '$date_esc'";
+if ($from_date != '' && $to_date != '') {
+    $from_date_esc = $conn->real_escape_string($from_date);
+    $to_date_esc = $conn->real_escape_string($to_date);
+    $where .= " AND DATE(o.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
 }
 
 // query
@@ -44,6 +46,9 @@ $result = $conn->query("
         o.order_no,
         u.name AS employee,
         o.deadline,
+        t.est_time,
+        t.start_time,
+        t.end_time,
         t.priority
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
@@ -59,16 +64,48 @@ header('Content-Disposition: attachment; filename="daily_report.csv"');
 $output = fopen("php://output", "w");
 
 // column headers
-fputcsv($output, ['Task', 'Order #', 'Employee', 'Deadline', 'Priority']);
+fputcsv($output, [
+    'Task',
+    'Order #',
+    'Employee',
+    'Deadline',
+    'Allocated Time',
+    'Time Taken',
+    'Priority'
+]);
 
 // data
 while ($row = $result->fetch_assoc()) {
+
+    // Allocated Time
+    $allocated = $row['est_time'] ? formatMinutes($row['est_time']) : '-';
+
+    // Time Taken Calculation
+    if ($row['start_time'] && $row['end_time']) {
+        $start = new DateTime($row['start_time']);
+        $end   = new DateTime($row['end_time']);
+
+        $start->setTime($start->format('H'), $start->format('i'), 0);
+        $end->setTime($end->format('H'), $end->format('i'), 0);
+
+        if ($end < $start) {
+            $end->modify('+1 day');
+        }
+
+        $minutes = floor(($end->getTimestamp() - $start->getTimestamp()) / 60);
+        $timeTaken = formatMinutes($minutes);
+    } else {
+        $timeTaken = '-';
+    }
+
     fputcsv($output, [
         $row['task_name'],
         $row['order_no'],
         $row['employee'],
         date('M d, Y', strtotime($row['deadline'])),
-        ucfirst($row['priority']?? 'Low')
+        $allocated,
+        $timeTaken,
+        ucfirst($row['priority'] ?? 'Low')
     ]);
 }
 

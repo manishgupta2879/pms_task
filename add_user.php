@@ -2,24 +2,41 @@
 include "includes/config.php";
 
 if (isset($_POST['save_user'])) {
-
+    
     $username = $conn->real_escape_string($_POST['username']);
     $email    = $conn->real_escape_string($_POST['email']);
     $name     = $conn->real_escape_string($_POST['name']);
-    $password = md5($_POST['password']); // ⚠️ consider password_hash() in production
+    $password = md5($_POST['password']);
     $role     = $_POST['role'];
 
-    // Insert user
-    $sql = "INSERT INTO users(name,username,email,password,role)
+    $username_error = '';
+    $email_error = '';
+
+    $checkUsername = "SELECT id FROM users WHERE username = '$username'";
+    $resUser = $conn->query($checkUsername);
+
+    if ($resUser && $resUser->num_rows > 0) {
+        $username_error = "Username already taken.";
+    }
+    $checkEmail = "SELECT id FROM users WHERE email = '$email'";
+    $resEmail = $conn->query($checkEmail);
+    if ($resEmail && $resEmail->num_rows > 0) {
+        $email_error = "Email already registered.";
+    }
+
+    if (empty($username_error) && empty($email_error)) {
+        $sql = "INSERT INTO users(name,username,email,password,role)
             VALUES('$name','$username','$email','$password','$role')";
 
-    if ($conn->query($sql)) {
-        $_SESSION['success'] = ("User added successfully.");
-        header("Location: users.php");
-        exit();
-    } else {
-        $error = "Error: " . $conn->error;
+        if ($conn->query($sql)) {
+            $_SESSION['success'] = ("User added successfully.");
+            header("Location: users.php");
+            exit();
+        } else {
+            $error = "Error: " . $conn->error;
+        } 
     }
+    
 }
 
 include "includes/header.php";
@@ -65,11 +82,15 @@ include "includes/header.php";
                                     <span class="text-danger">*</span> Username
                                 </label>
                                 <input type="text" name="username"
-                                       class="form-control"
+                                       class="form-control <?= !empty($username_error) ? 'is-invalid' : '' ?>"
                                        placeholder="Enter username"
                                        value="<?= htmlspecialchars($username ?? '') ?>"
                                        required autofocus>
-                                <div class="invalid-feedback">Username is required</div>
+                                       <?php if (!empty($username_error)): ?>
+                                            <div class="invalid-feedback"><?= $username_error ?></div>
+                                        <?php else: ?>
+                                            <div class="invalid-feedback">Username is required</div>
+                                        <?php endif; ?>
                             </div>
 
                             <div class="col-md-6">
@@ -77,11 +98,15 @@ include "includes/header.php";
                                     <span class="text-danger">*</span> Email
                                 </label>
                                 <input type="email" name="email"
-                                       class="form-control"
+                                       class="form-control <?= !empty($email_error) ? 'is-invalid' : '' ?>"
                                        placeholder="Enter email"
                                        value="<?= htmlspecialchars($email ?? '') ?>"
                                        required>
-                                <div class="invalid-feedback">Valid email required</div>
+                                <?php if (!empty($email_error)): ?>
+                                    <div class="invalid-feedback"><?= $email_error ?></div>
+                                <?php else: ?>
+                                    <div class="invalid-feedback">Valid email required</div>
+                                <?php endif; ?>
                             </div>
 
                             <div class="col-md-6">
