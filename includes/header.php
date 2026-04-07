@@ -7,6 +7,31 @@ if (!isset($_SESSION['user'])) {
 // Include RBAC system
 require_once(__DIR__ . '/rbac.php');
 
+// Fetch current logged-in user details
+require_once(__DIR__ . '/config.php');
+$user_id = $_SESSION['user_id'] ?? 0;
+$profile_pic = '';
+$user_name = $_SESSION['user'] ?? 'User';
+
+if ($user_id > 0) {
+    $user_res = $conn->query("SELECT name, profile_pic FROM users WHERE id=$user_id LIMIT 1");
+    if ($user_res && $user_row = $user_res->fetch_assoc()) {
+        $user_name = $user_row['name'] ?? $_SESSION['user'];
+        $profile_pic = $user_row['profile_pic'] ?? '';
+    }
+}
+
+// Generate initials for avatar fallback
+$initials = '';
+$parts = explode(' ', $user_name);
+foreach ($parts as $part) {
+    $initials .= strtoupper(substr($part, 0, 1));
+}
+
+// Generate consistent avatar color based on user_id
+$avatarColors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#14b8a6', '#06b6d4'];
+$avatarColor = $avatarColors[crc32($user_id) % count($avatarColors)];
+
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
 
@@ -141,15 +166,46 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </ul>
 
                 <ul class="navbar-nav align-items-center">
-                    <li class="nav-item me-3 text-white">
-                        <i class="bi bi-person-circle"></i> <?= htmlspecialchars($_SESSION['user']) ?>
-                        <span class="badge bg-info"><?= getRoleLabel($_SESSION['role_slug'] ?? 'staff') ?></span>
-                    </li>
+                    <li class="nav-item dropdown">
+                        <!-- <a class="nav-link dropdown-toggle d-flex align-items-center p-0" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"> -->
+                            <div class="d-flex align-items-center me-2">
+                                <div>
+                                    <?php if (!empty($profile_pic) && file_exists($profile_pic)): ?>
+                                        <img src="<?= htmlspecialchars($profile_pic) ?>" alt="Profile" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover; margin-right: 10px; border: 2px solid rgba(255,255,255,0.3);">
+                                    <?php else: ?>
+                                        <div style="
+                                    width: 36px;
+                                    height: 36px;
+                                    border-radius: 50%;
+                                    background-color: <?= $avatarColor ?>;
+                                    color: white;
+                                    display: flex;
+                                    align-items: center;
+                                    justify-content: center;
+                                    font-weight: 700;
+                                    font-size: 13px;
+                                    margin-right: 10px;
+                                    border: 2px solid rgba(255,255,255,0.3);
+                                ">
+                                            <?= htmlspecialchars($initials) ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="text-white text-capitalize  text-nowrap"><?= htmlspecialchars($user_name) ?></span>
+                                    <span class="text-white text-nowrap" style="font-size: 12px;"><?= getRoleLabel($_SESSION['role_slug'] ?? 'staff') ?></span>
+                                </div>
+                                <a class="btn btn-danger btn-sm ms-2" href="logout.php"><i class="bi bi-box-arrow-right"></i> Logout</a>
+                            </div>
 
-                    <li class="nav-item">
-                        <a href="logout.php" class="btn btn-danger btn-sm">
-                            <i class="bi bi-box-arrow-right"></i> Logout
-                        </a>
+                        <!-- </a> -->
+                        <!-- <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="settings.php"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="logout.php"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
+                        </ul> -->
                     </li>
                 </ul>
 

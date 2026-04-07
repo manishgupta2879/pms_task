@@ -34,6 +34,7 @@ $taskRes = $conn->query("
     SELECT 
         u.id as user_id,
         u.name AS user_name,
+        u.profile_pic,
         t.id,
         t.task_name,
         t.status,
@@ -103,7 +104,7 @@ while ($row = $taskRes->fetch_assoc()) {
     ];
 
     if (!isset($employees[$emp])) {
-        $employees[$emp] = ['user_id' => $emp_id, 'days' => []];
+        $employees[$emp] = ['user_id' => $emp_id, 'profile_pic' => $row['profile_pic'] ?? '', 'days' => []];
     }
 
     if (!isset($employees[$emp]['days'][$day])) {
@@ -347,6 +348,7 @@ include "includes/header.php";
 
                                         foreach ($employees as $emp_name => $empData):
                                             $emp_id = $empData['user_id'] ?? null;
+                                            $profile_pic = $empData['profile_pic'] ?? '';
                                             $days = isset($empData['days']) ? $empData['days'] : [];
 
                                             // Generate avatar initials
@@ -365,22 +367,33 @@ include "includes/header.php";
                                                     <div style="display: flex; align-items: center; gap: 10px;">
 
                                                     
-                                                    <div style="
-                                                        width: 36px;
-                                                        height: 36px;
-                                                        border-radius: 50%;
-                                                        background-color: <?= $avatarColor ?>;
-                                                        color: white;
-                                                        display: flex;
-                                                        align-items: center;
-                                                        justify-content: center;
-                                                        font-weight: 700;
-                                                        font-size: 14px;
-                                                        flex-shrink: 0;
-                                                        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                                                    ">
-                                                        <?= $initials ?>
-                                                    </div>
+                                                    <?php if (!empty($profile_pic) && file_exists($profile_pic)): ?>
+                                                        <img src="<?= htmlspecialchars($profile_pic) ?>" alt="<?= htmlspecialchars($emp_name) ?>" style="
+                                                            width: 36px;
+                                                            height: 36px;
+                                                            border-radius: 50%;
+                                                            object-fit: cover;
+                                                            flex-shrink: 0;
+                                                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                                        ">
+                                                    <?php else: ?>
+                                                        <div style="
+                                                            width: 36px;
+                                                            height: 36px;
+                                                            border-radius: 50%;
+                                                            background-color: <?= $avatarColor ?>;
+                                                            color: white;
+                                                            display: flex;
+                                                            align-items: center;
+                                                            justify-content: center;
+                                                            font-weight: 700;
+                                                            font-size: 14px;
+                                                            flex-shrink: 0;
+                                                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                                                        ">
+                                                            <?= $initials ?>
+                                                        </div>
+                                                    <?php endif; ?>
                                                     <div style="font-weight: 600; color: #1e293b; font-size: 13px;"><?= htmlspecialchars($emp_name) ?></div>
                                                     </div>
                                                 </td>
