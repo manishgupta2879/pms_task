@@ -124,7 +124,7 @@ include "includes/header.php";
 
 <div class="pms-wrap">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
 
             <form method="POST">
                 <div class="pms-panel">
@@ -137,8 +137,9 @@ include "includes/header.php";
 
                     <!-- Body -->
                     <div class="pms-panel-body">
+                        <div class="row g-3">
                         <!-- Name -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Name
                             </label>
@@ -154,7 +155,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Username -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Username
                             </label>
@@ -170,7 +171,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Email
                             </label>
@@ -186,7 +187,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">New Password</label>
                             <input type="password" name="password"
                                    class="form-control"
@@ -199,7 +200,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Confirm Password</label>
                             <input type="password" name="confirm_password"
                                    class="form-control"
@@ -212,7 +213,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Role -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Role</label>
 
                             <?php if ($user['username'] == $_SESSION['user']): ?>
@@ -239,7 +240,7 @@ include "includes/header.php";
                             <i class="bi bi-check-lg me-1"></i>Update User
                         </button>
                     </div>
-
+                    </div>
                 </div>
             </form>
 

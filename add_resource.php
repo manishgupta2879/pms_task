@@ -17,7 +17,6 @@ $form_data = [
     'email' => '',
     'password' => '',
     'type' => 'Regular',
-    'status' => 'Active',
     'hours' => 0,
     'minutes' => 0
 ];
@@ -29,7 +28,6 @@ if ($id) {
         $form_data['name'] = $row['name'];
         $form_data['email'] = $row['email'];
         $form_data['type'] = $row['type'] ?? 'Regular';
-        $form_data['status'] = $row['status'] ?? 'Active';
         $working_hours = $row['working_hours'] ?? 0;
         $form_data['hours'] = floor($working_hours / 60);
         $form_data['minutes'] = $working_hours % 60;
@@ -42,7 +40,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_resource'])) {
     $form_data['email'] = trim($_POST['email'] ?? '');
     $form_data['password'] = $_POST['password'] ?? '';
     $form_data['type'] = $_POST['type'] ?? 'Regular';
-    $form_data['status'] = $_POST['status'] ?? 'Active';
     $form_data['hours'] = (int) ($_POST['hours'] ?? 0);
     $form_data['minutes'] = (int) ($_POST['minutes'] ?? 0);
 
@@ -96,17 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_resource'])) {
             // Update existing resource
             if (!empty($form_data['password'])) {
                 $hashed_pass = md5($form_data['password']);
-                $stmt = $conn->prepare("UPDATE users SET name=?, email=?, username=?, password=?, type=?, working_hours=?, status=? WHERE id=?");
-                $stmt->bind_param("sssssssi", $form_data['name'], $form_data['email'], $form_data['email'], $hashed_pass, $form_data['type'], $working_hours, $form_data['status'], $id);
+                $stmt = $conn->prepare("UPDATE users SET name=?, email=?, username=?, password=?, type=?, working_hours=? WHERE id=?");
+                $stmt->bind_param("ssssssi", $form_data['name'], $form_data['email'], $form_data['email'], $hashed_pass, $form_data['type'], $working_hours, $id);
             } else {
-                $stmt = $conn->prepare("UPDATE users SET name=?, email=?, username=?, type=?, working_hours=?, status=? WHERE id=?");
-                $stmt->bind_param("ssssssi", $form_data['name'], $form_data['email'], $form_data['email'], $form_data['type'], $working_hours, $form_data['status'], $id);
+                $stmt = $conn->prepare("UPDATE users SET name=?, email=?, username=?, type=?, working_hours=? WHERE id=?");
+$stmt->bind_param("sssssi", $form_data['name'], $form_data['email'], $form_data['email'], $form_data['type'], $working_hours, $id);
             }
         } else {
             // Create new resource
             $hashed_pass = md5($form_data['password']);
-            $stmt = $conn->prepare("INSERT INTO users (name, username, email, password, type, working_hours, role_id, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssii", $form_data['name'], $form_data['email'], $form_data['email'], $hashed_pass, $form_data['type'], $working_hours, $staff_id_global, $form_data['status']);
+            $stmt = $conn->prepare("INSERT INTO users (name, username, email, password, type, working_hours, role_id) VALUES (?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("ssssssi", $form_data['name'], $form_data['email'], $form_data['email'], $hashed_pass, $form_data['type'], $working_hours, $staff_id_global);
         }
 
         if ($stmt->execute()) {
@@ -215,14 +212,7 @@ include "includes/header.php";
                             <?php endif; ?>
                         </div>
 
-                        <!-- Status -->
-                        <div class="col-md-6">
-                            <label class="pms-form-label">Status</label>
-                            <select name="status" class="form-select">
-                                <option value="Active" <?= $form_data['status'] == 'Active' ? 'selected' : '' ?>>Active</option>
-                                <option value="Inactive" <?= $form_data['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
-                            </select>
-                        </div>
+                        
                         </div>
                     </div>
 
