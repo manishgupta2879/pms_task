@@ -132,12 +132,12 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             </a>
                         </li>
                     <?php endif; ?>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link <?= ($current_page == 'scheduling.php') ? 'active' : '' ?>"
                             href="scheduling.php">
                             <i class="bi bi-people"></i> Scheduling
                         </a>
-                    </li>
+                    </li> -->
                 </ul>
 
                 <ul class="navbar-nav align-items-center">
