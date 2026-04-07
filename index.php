@@ -13,7 +13,7 @@ if (isset($_POST['login'])) {
                          u.name
                          FROM users u 
                          LEFT JOIN roles r ON u.role_id = r.id 
-                         WHERE u.username='$username' AND u.password='$password' AND u.deleted_at IS NULL");
+                         WHERE u.username='$username' AND u.password='$password' AND u.deleted_at IS NULL AND r.role_name = 'Super Admin'");
 
     if ($res->num_rows == 1) {
         $row = $res->fetch_assoc();
