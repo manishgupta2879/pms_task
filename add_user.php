@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_user'])) {
             $_SESSION['error'] = "Error creating user: " . $stmt->error;
         }
     }
+    
 }
 
 include "includes/header.php";

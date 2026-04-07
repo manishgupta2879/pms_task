@@ -133,8 +133,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </li>
                     <?php endif; ?>
                     <!-- <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'scheduling.php') ? 'active' : '' ?>"
-                            href="scheduling.php">
+                        <a class="nav-link <?= ($current_page == 'scheduling.php') ? 'active' : '' ?>" href="scheduling.php">
                             <i class="bi bi-people"></i> Scheduling
                         </a>
                     </li> -->

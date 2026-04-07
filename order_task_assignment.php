@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
-include "includes/header.php";
+
 
 if (!isset($_GET['order_id'])) {
     header("Location: orders.php");
@@ -20,6 +20,7 @@ if (!$tasks) {
 }
 
 // we will fetch resources per task to check time / leave availability
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
