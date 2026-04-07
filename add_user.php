@@ -87,7 +87,7 @@ include "includes/header.php";
 
 <div class="pms-wrap">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
 
             <form method="POST">
                 <div class="pms-panel">
@@ -100,8 +100,10 @@ include "includes/header.php";
 
                     <!-- Body -->
                     <div class="pms-panel-body">
+                        <div class="row g-3">
+                        
                         <!-- Name -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Name
                             </label>
@@ -118,7 +120,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Username -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Username
                             </label>
@@ -135,7 +137,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Email
                             </label>
@@ -152,7 +154,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Password
                             </label>
@@ -168,12 +170,13 @@ include "includes/header.php";
                         </div>
 
                         <!-- Role -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Role</label>
                             <select name="role" class="form-select">
                                 <option value="staff" <?= $form_data['role'] == 'staff' ? 'selected' : '' ?>>Staff</option>
                                 <option value="superadmin" <?= $form_data['role'] == 'superadmin' ? 'selected' : '' ?>>Super Admin</option>
                             </select>
+                        </div>
                         </div>
                     </div>
 

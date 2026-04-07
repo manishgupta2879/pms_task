@@ -136,7 +136,8 @@ include "includes/header.php";
 
                     <div class="pms-panel-body">
                         <!-- Resource Name -->
-                        <div class="mb-3">
+                         <div class="row g-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label"><span class="text-danger">*</span> Resource Name</label>
                             <input type="text" name="name" class="form-control"
                                 placeholder="Enter full name..."
@@ -150,7 +151,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label"><span class="text-danger">*</span> Email / Username</label>
                             <input type="email" name="email" class="form-control"
                                 placeholder="Enter email..."
@@ -164,7 +165,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <?= $id ? 'Password' : '<span class="text-danger">*</span> Password' ?>
                                 <?php if ($id): ?>
@@ -182,7 +183,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Resource Type -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Resource Type</label>
                             <select name="type" id="resource_type" class="form-select">
                                 <option value="Regular" <?= $form_data['type'] == 'Regular' ? 'selected' : '' ?>>Regular</option>
@@ -191,7 +192,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Working Hours (for Part-time) -->
-                        <div class="mb-3" id="working_hours_div" style="<?= $form_data['type'] == 'Part-time' ? '' : 'display: none;' ?>">
+                        <div class="col-md-6" id="working_hours_div" style="<?= $form_data['type'] == 'Part-time' ? '' : 'display: none;' ?>">
                             <label class="pms-form-label"><span class="text-danger">*</span> Working Hours</label>
                             <div class="input-group" style="max-width: 300px;">
                                 <input type="number" id="hours" name="hours" class="form-control text-center"
@@ -215,12 +216,13 @@ include "includes/header.php";
                         </div>
 
                         <!-- Status -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Status</label>
                             <select name="status" class="form-select">
                                 <option value="Active" <?= $form_data['status'] == 'Active' ? 'selected' : '' ?>>Active</option>
                                 <option value="Inactive" <?= $form_data['status'] == 'Inactive' ? 'selected' : '' ?>>Inactive</option>
                             </select>
+                        </div>
                         </div>
                     </div>
 
@@ -255,14 +257,6 @@ include "includes/header.php";
             minutesInput.removeAttribute('required');
         }
     });
-</script>
-
-<?php include "includes/footer.php"; ?>
-hoursInput.removeAttribute('required');
-minutesInput.removeAttribute('required');
-}
-});
-})()
 </script>
 
 <?php include "includes/footer.php"; ?>
