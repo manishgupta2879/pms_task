@@ -124,7 +124,7 @@ include "includes/header.php";
 
 <div class="pms-wrap">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
 
             <form method="POST">
                 <div class="pms-panel">
@@ -137,15 +137,16 @@ include "includes/header.php";
 
                     <!-- Body -->
                     <div class="pms-panel-body">
+                        <div class="row g-3">
                         <!-- Name -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Name
                             </label>
                             <input type="text" name="name"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['name']) ?>"
-                                   required autofocus>
+                                    autofocus>
                             <?php if (isset($errors['name'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
@@ -154,14 +155,14 @@ include "includes/header.php";
                         </div>
 
                         <!-- Username -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Username
                             </label>
                             <input type="text" name="username"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['username']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['username'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['username'] ?>
@@ -170,14 +171,14 @@ include "includes/header.php";
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Email
                             </label>
                             <input type="email" name="email"
                                    class="form-control"
                                    value="<?= htmlspecialchars($form_data['email']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['email'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>
@@ -186,7 +187,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">New Password</label>
                             <input type="password" name="password"
                                    class="form-control"
@@ -199,7 +200,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Confirm Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Confirm Password</label>
                             <input type="password" name="confirm_password"
                                    class="form-control"
@@ -212,7 +213,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Role -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Role</label>
 
                             <?php if ($user['username'] == $_SESSION['user']): ?>
@@ -239,7 +240,7 @@ include "includes/header.php";
                             <i class="bi bi-check-lg me-1"></i>Update User
                         </button>
                     </div>
-
+                    </div>
                 </div>
             </form>
 

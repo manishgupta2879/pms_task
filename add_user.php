@@ -80,6 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_user'])) {
             $_SESSION['error'] = "Error creating user: " . $stmt->error;
         }
     }
+    
 }
 
 include "includes/header.php";
@@ -87,7 +88,7 @@ include "includes/header.php";
 
 <div class="pms-wrap">
     <div class="row">
-        <div class="col-md-8">
+        <div class="col-md-12">
 
             <form method="POST">
                 <div class="pms-panel">
@@ -100,8 +101,10 @@ include "includes/header.php";
 
                     <!-- Body -->
                     <div class="pms-panel-body">
+                        <div class="row g-3">
+                        
                         <!-- Name -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Name
                             </label>
@@ -109,7 +112,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter full name"
                                    value="<?= htmlspecialchars($form_data['name']) ?>"
-                                   required autofocus>
+                                    autofocus>
                             <?php if (isset($errors['name'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
@@ -118,7 +121,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Username -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Username
                             </label>
@@ -126,7 +129,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter username"
                                    value="<?= htmlspecialchars($form_data['username']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['username'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['username'] ?>
@@ -135,7 +138,7 @@ include "includes/header.php";
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Email
                             </label>
@@ -143,7 +146,7 @@ include "includes/header.php";
                                    class="form-control"
                                    placeholder="Enter email address"
                                    value="<?= htmlspecialchars($form_data['email']) ?>"
-                                   required>
+                                   >
                             <?php if (isset($errors['email'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>
@@ -152,14 +155,14 @@ include "includes/header.php";
                         </div>
 
                         <!-- Password -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">
                                 <span class="text-danger">*</span> Password
                             </label>
                             <input type="password" name="password"
                                    class="form-control"
                                    placeholder="Enter password"
-                                   required>
+                                   >
                             <?php if (isset($errors['password'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['password'] ?>
@@ -168,12 +171,13 @@ include "includes/header.php";
                         </div>
 
                         <!-- Role -->
-                        <div class="mb-3">
+                        <div class="col-md-6">
                             <label class="pms-form-label">Role</label>
                             <select name="role" class="form-select">
                                 <option value="staff" <?= $form_data['role'] == 'staff' ? 'selected' : '' ?>>Staff</option>
                                 <option value="superadmin" <?= $form_data['role'] == 'superadmin' ? 'selected' : '' ?>>Super Admin</option>
                             </select>
+                        </div>
                         </div>
                     </div>
 
