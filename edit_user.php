@@ -2,7 +2,7 @@
 include "includes/config.php";
 
 // check role
-if ($_SESSION['role'] != 'superadmin') {
+if ($_SESSION['role'] != 'super-admin') {
     die("Access denied");
 }
 
