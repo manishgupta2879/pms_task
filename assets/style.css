@@ -347,9 +347,12 @@ td {
     border-radius: 50%;
     background-color: #0ea5e9;
 }
+
 .pms-status.danger {
-    background-color: #fee2e2; /* light red */
-    color: #991b1b;            /* dark red text */
+    background-color: #fee2e2;
+    /* light red */
+    color: #991b1b;
+    /* dark red text */
 }
 
 .pms-status.danger::before {
@@ -358,11 +361,15 @@ td {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #ef4444; /* red dot */
+    background-color: #ef4444;
+    /* red dot */
 }
+
 .pms-status.warning {
-    background-color: #ffedd5; /* light orange */
-    color: #9a3412;            /* dark orange text */
+    background-color: #ffedd5;
+    /* light orange */
+    color: #9a3412;
+    /* dark orange text */
 }
 
 .pms-status.warning::before {
@@ -371,8 +378,10 @@ td {
     width: 6px;
     height: 6px;
     border-radius: 50%;
-    background-color: #f97316; /* orange dot */
+    background-color: #f97316;
+    /* orange dot */
 }
+
 .pms-footer {
     padding: 10px 15px;
     display: flex;
@@ -456,7 +465,7 @@ td {
     pointer-events: none;
 }
 
-/* 🛑 Remove Bootstrap Validation Icons and Colors 🛑 */
+
 .was-validated .form-control:valid,
 .was-validated .form-control:invalid,
 .was-validated .form-select:valid,
