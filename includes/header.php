@@ -16,7 +16,6 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <title>My System</title>
 
-    <!-- ✅ Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <!-- Optional Icons -->
@@ -24,6 +23,9 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
     <!-- Custom CSS -->
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
     <link rel="stylesheet" href="assets/style.css">
 </head>
 
@@ -61,8 +63,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link <?= ($current_page == 'my_task.php') ? 'active' : '' ?>"
-                                href="my_task.php">
+                            <a class="nav-link <?= ($current_page == 'my_task.php') ? 'active' : '' ?>" href="my_task.php">
                                 <i class="bi bi-list-check"></i> My Tasks
                             </a>
                         </li>
@@ -92,11 +93,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             </a>
                         </li> -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle <?= ($current_page == 'reports.php') ? 'active' : '' ?>" 
-                            href="#" 
-                            role="button" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false">
+                            <a class="nav-link dropdown-toggle <?= ($current_page == 'reports.php') ? 'active' : '' ?>"
+                                href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 <i class="bi bi-bar-chart"></i> Reports
                             </a>
 
@@ -120,7 +118,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
                     <?php if (hasPermission('settings')): ?>
                         <li class="nav-item">
-                            <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>" href="settings.php">
+                            <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>"
+                                href="settings.php">
                                 <i class="bi bi-gear"></i> Settings
                             </a>
                         </li>
@@ -134,7 +133,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </li>
                     <?php endif; ?>
                     <li class="nav-item">
-                        <a class="nav-link <?= ($current_page == 'scheduling.php') ? 'active' : '' ?>" href="scheduling.php">
+                        <a class="nav-link <?= ($current_page == 'scheduling.php') ? 'active' : '' ?>"
+                            href="scheduling.php">
                             <i class="bi bi-people"></i> Scheduling
                         </a>
                     </li>

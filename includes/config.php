@@ -53,6 +53,7 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
             )";
 
     $res = $conn->query($sql);
+    
     $resources = [];
     if ($res) {
         while ($u = $res->fetch_assoc()) {
@@ -76,6 +77,7 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
             }
         }
     }
+    
     return $resources;
 }
 ?>

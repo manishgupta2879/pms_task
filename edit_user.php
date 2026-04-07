@@ -1,10 +1,9 @@
 <?php 
 include "includes/config.php";
+include "includes/rbac.php";
 
-// check role
-if ($_SESSION['role'] != 'super-admin') {
-    die("Access denied");
-}
+requireAuth();
+requireSuperAdmin();
 
 // check id
 if (!isset($_GET['id'])) {
@@ -13,6 +12,7 @@ if (!isset($_GET['id'])) {
 }
 
 $id = (int)$_GET['id'];
+$errors = [];
 
 // fetch user
 $res  = $conn->query("SELECT * FROM users WHERE id=$id");
@@ -23,50 +23,98 @@ if (!$user) {
     exit();
 }
 
+// Initialize form data with current user data
+$form_data = [
+    'name' => $user['name'],
+    'username' => $user['username'],
+    'email' => $user['email'],
+    'role' => $user['role'],
+    'password' => '',
+    'confirm_password' => ''
+];
+
 // update logic
 if (isset($_POST['update_user'])) {
-
-    $username = $conn->real_escape_string($_POST['username']);
-    $email    = $conn->real_escape_string($_POST['email']);
-    $name     = $conn->real_escape_string($_POST['name']);
-    $password = $_POST['password'];
-    $confirm  = $_POST['confirm_password'];
-
-    // 🔒 Prevent role change for self
+    $form_data['name'] = trim($_POST['name'] ?? '');
+    $form_data['username'] = trim($_POST['username'] ?? '');
+    $form_data['email'] = trim($_POST['email'] ?? '');
+    $form_data['password'] = $_POST['password'] ?? '';
+    $form_data['confirm_password'] = $_POST['confirm_password'] ?? '';
+    
+    // Prevent role change for self
     if ($user['username'] == $_SESSION['user']) {
-        $role = $user['role'];
+        $form_data['role'] = $user['role'];
     } else {
-        $role = $_POST['role'];
+        $form_data['role'] = $_POST['role'] ?? 'staff';
     }
 
-    // password logic
-    if (!empty($password)) {
+    // Validation
+    if (empty($form_data['name'])) {
+        $errors['name'] = "Name is required.";
+    }
 
-        if ($password !== $confirm) {
-            $error = "Password and Confirm Password do not match!";
+    if (empty($form_data['username'])) {
+        $errors['username'] = "Username is required.";
+    }
+
+    if (empty($form_data['email'])) {
+        $errors['email'] = "Email is required.";
+    } elseif (!filter_var($form_data['email'], FILTER_VALIDATE_EMAIL)) {
+        $errors['email'] = "Please enter a valid email address.";
+    }
+
+    // Check for duplicate username if no errors
+    if (empty($errors['username']) && !empty($form_data['username'])) {
+        $check_sql = "SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND deleted_at IS NULL AND id != ?";
+        $stmt_check = $conn->prepare($check_sql);
+        $stmt_check->bind_param("si", $form_data['username'], $id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+
+        if ($stmt_check->num_rows > 0) {
+            $errors['username'] = "This username is already taken.";
+        }
+    }
+
+    // Check for duplicate email if no errors
+    if (empty($errors['email']) && !empty($form_data['email'])) {
+        $check_sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND deleted_at IS NULL AND id != ?";
+        $stmt_check = $conn->prepare($check_sql);
+        $stmt_check->bind_param("si", $form_data['email'], $id);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+
+        if ($stmt_check->num_rows > 0) {
+            $errors['email'] = "This email address is already registered.";
+        }
+    }
+
+    // Validate password if provided
+    if (!empty($form_data['password'])) {
+        if (empty($form_data['confirm_password'])) {
+            $errors['confirm_password'] = "Please confirm your new password.";
+        } elseif ($form_data['password'] !== $form_data['confirm_password']) {
+            $errors['password'] = "Passwords do not match.";
+        }
+    }
+
+    // If no errors, update the user
+    if (empty($errors)) {
+        if (!empty($form_data['password'])) {
+            $hashed_password = md5($form_data['password']);
+            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, password=?, role=? WHERE id=?");
+            $stmt->bind_param("sssssi", $form_data['name'], $form_data['username'], $form_data['email'], $hashed_password, $form_data['role'], $id);
         } else {
-            $hashed = md5($password); // ⚠️ use password_hash in production
-
-            $sql = "UPDATE users 
-                    SET name='$name', username='$username', email='$email', password='$hashed', role='$role' 
-                    WHERE id=$id";
+            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, role=? WHERE id=?");
+            $stmt->bind_param("ssssi", $form_data['name'], $form_data['username'], $form_data['email'], $form_data['role'], $id);
         }
 
-    } else {
-
-        $sql = "UPDATE users 
-                SET name='$name', username='$username', email='$email', role='$role' 
-                WHERE id=$id";
-    }
-
-    // execute if no error
-    if (!isset($error)) {
-        if ($conn->query($sql)) {
+        if ($stmt->execute()) {
             $_SESSION['success'] = "User updated successfully.";
             header("Location: users.php");
             exit();
         } else {
-            $error = "Error: " . $conn->error;
+            $_SESSION['error'] = "Error updating user: " . $stmt->error;
         }
     }
 }
@@ -76,101 +124,119 @@ include "includes/header.php";
 
 <div class="pms-wrap">
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-8">
 
-            <form method="POST" class="needs-validation" novalidate>
+            <form method="POST">
                 <div class="pms-panel">
 
                     <!-- Header -->
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
                         Edit User
-                        <a href="users.php" class="btn btn-outline-secondary btn-sm">Back to Users</a>
+                        <a href="users.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
                     <!-- Body -->
                     <div class="pms-panel-body">
-                        <div class="row g-3">
-
-                            <?php if (!empty($error)): ?>
-                                <div class="col-12">
-                                    <div class="alert alert-danger"><?= $error ?></div>
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">
+                                <span class="text-danger">*</span> Name
+                            </label>
+                            <input type="text" name="name"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($form_data['name']) ?>"
+                                   required autofocus>
+                            <?php if (isset($errors['name'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
                                 </div>
                             <?php endif; ?>
-                            
-                            <div class="col-md-6">
-                                <label class="pms-form-label">
-                                    <span class="text-danger">*</span> Name
-                                </label>
-                                <input type="text" name="name"
+                        </div>
+
+                        <!-- Username -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">
+                                <span class="text-danger">*</span> Username
+                            </label>
+                            <input type="text" name="username"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($form_data['username']) ?>"
+                                   required>
+                            <?php if (isset($errors['username'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['username'] ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">
+                                <span class="text-danger">*</span> Email
+                            </label>
+                            <input type="email" name="email"
+                                   class="form-control"
+                                   value="<?= htmlspecialchars($form_data['email']) ?>"
+                                   required>
+                            <?php if (isset($errors['email'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">New Password</label>
+                            <input type="password" name="password"
+                                   class="form-control"
+                                   placeholder="Leave blank to keep current">
+                            <?php if (isset($errors['password'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['password'] ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">Confirm Password</label>
+                            <input type="password" name="confirm_password"
+                                   class="form-control"
+                                   placeholder="Re-enter new password">
+                            <?php if (isset($errors['confirm_password'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['confirm_password'] ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+
+                        <!-- Role -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">Role</label>
+
+                            <?php if ($user['username'] == $_SESSION['user']): ?>
+                                <!-- 🔒 Self protected -->
+                                <input type="text"
                                        class="form-control"
-                                       value="<?= htmlspecialchars($user['name']) ?>"
-                                       required autofocus>
-                                <div class="invalid-feedback">Name is required</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="pms-form-label">
-                                    <span class="text-danger">*</span> Username
-                                </label>
-                                <input type="text" name="username"
-                                       class="form-control"
-                                       value="<?= htmlspecialchars($user['username']) ?>"
-                                       required autofocus>
-                                <div class="invalid-feedback">Username is required</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="pms-form-label">
-                                    <span class="text-danger">*</span> Email
-                                </label>
-                                <input type="email" name="email"
-                                       class="form-control"
-                                       value="<?= htmlspecialchars($user['email']) ?>"
-                                       required>
-                                <div class="invalid-feedback">Valid email required</div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="pms-form-label">New Password</label>
-                                <input type="password" name="password"
-                                       class="form-control"
-                                       placeholder="Leave blank to keep current password">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="pms-form-label">Confirm Password</label>
-                                <input type="password" name="confirm_password"
-                                       class="form-control"
-                                       placeholder="Re-enter new password">
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="pms-form-label">Role</label>
-
-                                <?php if ($user['username'] == $_SESSION['user']): ?>
-                                    <!-- 🔒 Self protected -->
-                                    <input type="text"
-                                           class="form-control"
-                                           value="<?= $user['role'] ?>"
-                                           disabled>
-                                    <input type="hidden" name="role" value="<?= $user['role'] ?>">
-                                    <small class="text-muted">You cannot change your own role</small>
-                                <?php else: ?>
-                                    <select name="role" class="form-select">
-                                        <option value="staff" <?= $user['role']=='staff'?'selected':'' ?>>Staff</option>
-                                        <option value="superadmin" <?= $user['role']=='superadmin'?'selected':'' ?>>Super Admin</option>
-                                    </select>
-                                <?php endif; ?>
-                            </div>
-
+                                       value="<?= ucfirst($form_data['role']) ?>"
+                                       disabled>
+                                <input type="hidden" name="role" value="<?= $form_data['role'] ?>">
+                                <small class="text-muted d-block mt-1">You cannot change your own role</small>
+                            <?php else: ?>
+                                <select name="role" class="form-select">
+                                    <option value="staff" <?= $form_data['role']=='staff'?'selected':'' ?>>Staff</option>
+                                    <option value="superadmin" <?= $form_data['role']=='superadmin'?'selected':'' ?>>Super Admin</option>
+                                </select>
+                            <?php endif; ?>
                         </div>
                     </div>
 
                     <!-- Footer -->
                     <div class="pms-panel-footer text-end">
-                        <a href="users.php" class="btn btn-outline-secondary btn-sm me-2">Cancel</a>
+                        <a href="users.php" class="pms-btn-cancel"><i class="bi bi-x me-1"></i>Cancel</a>
                         <button type="submit" name="update_user" class="pms-btn-dark">
-                            <i class="bi bi-check-circle"></i> Update User
+                            <i class="bi bi-check-lg me-1"></i>Update User
                         </button>
                     </div>
 
@@ -180,23 +246,5 @@ include "includes/header.php";
         </div>
     </div>
 </div>
-
-<!-- Validation Script -->
-<script>
-(function () {
-    'use strict'
-    var forms = document.querySelectorAll('.needs-validation')
-    Array.prototype.slice.call(forms)
-        .forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
-                form.classList.add('was-validated')
-            }, false)
-        })
-})();
-</script>
 
 <?php include "includes/footer.php"; ?>

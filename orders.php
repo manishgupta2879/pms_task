@@ -10,13 +10,18 @@ requirePermission('orders');
 if (isset($_GET['delete'])) {
     $delete_id = (int)$_GET['delete'];
 
-    // delete tasks first (important)
-    // $conn->query("DELETE FROM tasks WHERE order_id=$delete_id");
+    // Check if order has any tasks
+    $check_tasks = $conn->query("SELECT COUNT(*) as task_count FROM tasks WHERE order_id=$delete_id");
+    $task_result = $check_tasks->fetch_assoc();
 
-    // delete order
-    // $conn->query("DELETE FROM orders WHERE id=$delete_id");
-    $conn->query("UPDATE orders SET deleted_at = NOW() WHERE id = $delete_id");
-    $_SESSION['success'] = "Order deleted successfully.";
+    if ($task_result['task_count'] > 0) {
+        $_SESSION['error'] = "Cannot delete this order. It has " . $task_result['task_count'] . " task(s) assigned to it. Please delete all tasks first.";
+    } else {
+        // delete order
+        $conn->query("UPDATE orders SET deleted_at = NOW() WHERE id = $delete_id");
+        $_SESSION['success'] = "Order deleted successfully.";
+    }
+    
     header("Location: orders.php");
     exit();
 }
@@ -182,10 +187,10 @@ include "includes/header.php";
                                             <a href="orders.php?delete=<?= $row['id'] ?>" class="pms-action-btn pms-action-btn-danger" onclick="return confirm('Delete this order?')"><i class="bi bi-trash"></i></a>
                                         <?php } else { ?>
                                         
-                                            <span class="pms-action-btn pms-action-btn-danger me-1" disabled
+                                            <span class="pms-action-btn me-1" disabled
                                                 title="Order has tasks, delete them first"
                                                 data-bs-toggle="tooltip" data-bs-placement="top">
-                                                <i class="bi bi-trash"></i>
+                                                <i class="bi bi-lock-fill"></i>
                                             </span>
                                         <?php } ?>
                                     </div>

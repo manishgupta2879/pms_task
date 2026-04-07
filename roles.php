@@ -26,8 +26,8 @@ if (isset($_GET['delete'])) {
             $_SESSION['success'] = "Role deleted successfully.";
         }
     }
-    header("Location: roles.php");
-    exit();
+    // header("Location: roles.php");
+    // exit();
 }
 
 $search   = $_GET['search'] ?? '';

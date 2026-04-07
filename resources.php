@@ -15,11 +15,19 @@ if (isset($_GET['delete'])) {
     if ($u_data && $u_data['slug'] == 'super-admin') {
         $_SESSION['error'] = "Cannot delete Superadmin using resource module";
     } else {
-        $conn->query("UPDATE users SET deleted_at=NOW() WHERE id=$del_id");
-        $_SESSION['success'] = "Resource deleted successfully.";
+        // Check if resource is assigned to any tasks
+        $check_tasks = $conn->query("SELECT COUNT(*) as task_count FROM tasks WHERE assigned_to=$del_id OR user_id=$del_id");
+        $task_result = $check_tasks->fetch_assoc();
+
+        if ($task_result['task_count'] > 0) {
+            $_SESSION['error'] = "Cannot delete this resource. It has " . $task_result['task_count'] . " task(s) assigned to it. Please reassign or delete all tasks first.";
+        } else {
+            $conn->query("UPDATE users SET deleted_at=NOW() WHERE id=$del_id");
+            $_SESSION['success'] = "Resource deleted successfully.";
+        }
     }
-    header("Location: resources.php");
-    exit();
+    // header("Location: resources.php");
+    // exit();
 }
 
 $search   = $_GET['search'] ?? '';
@@ -116,9 +124,22 @@ $qs  = '&search=' . urlencode($search);
                                 </a>
 
                                 <?php if ($r['role_slug'] != 'super-admin'): ?>
-                                    <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this resource?')">
-                                        <i class="bi bi-trash"></i>
-                                    </a>
+                                    <?php 
+                                        // Check if resource has any tasks assigned
+                                        $task_check = $conn->query("SELECT COUNT(*) as task_count FROM tasks WHERE (assigned_to={$r['id']} OR user_id={$r['id']}) AND status != 'completed'");
+                                        $task_data = $task_check->fetch_assoc();
+                                        $has_active_tasks = $task_data['task_count'] > 0;
+                                    ?>
+                                    
+                                    <?php if ($has_active_tasks): ?>
+                                        <span class="pms-action-btn" title="This resource has tasks assigned. Cannot delete.">
+                                            <i class="bi bi-lock-fill"></i>
+                                        </span>
+                                    <?php else: ?>
+                                        <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this resource?')">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                         </tr>
