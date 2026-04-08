@@ -141,19 +141,18 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         </li>
                     <?php endif; ?>
 
+                    <?php if (hasPermission('users')): ?>
+                        <li class="nav-item">
+                            <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
+                                <i class="bi bi-people"></i> Users
+                            </a>
+                        </li>
+                    <?php endif; ?>
                     <?php if (hasPermission('settings')): ?>
                         <li class="nav-item">
                             <a class="nav-link <?= ($current_page == 'settings.php') ? 'active' : '' ?>"
                                 href="settings.php">
                                 <i class="bi bi-gear"></i> Settings
-                            </a>
-                        </li>
-                    <?php endif; ?>
-
-                    <?php if (hasPermission('users')): ?>
-                        <li class="nav-item">
-                            <a class="nav-link <?= ($current_page == 'users.php') ? 'active' : '' ?>" href="users.php">
-                                <i class="bi bi-people"></i> Users
                             </a>
                         </li>
                     <?php endif; ?>
