@@ -33,7 +33,7 @@ $customer = $_GET['customer'] ?? '';
 $deadline = $_GET['deadline'] ?? '';
 
 // pagination
-$limit = 25;
+$limit = 10;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int)$page);
 $offset = ($page - 1) * $limit;

@@ -83,9 +83,9 @@ include "includes/header.php";
 // Server-Side Pagination for Leave History
 // -----------------------------------------------------
 $page     = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 2;
+$per_page = 10;
 $offset   = ($page - 1) * $per_page;
-
+$user_id = $user['id'];
 $count_sql = "SELECT COUNT(*) as cnt FROM leaves WHERE user_id=$user_id AND deleted_at IS NULL";
 $count_res = $conn->query($count_sql);
 $total     = $count_res->fetch_assoc()['cnt'];
