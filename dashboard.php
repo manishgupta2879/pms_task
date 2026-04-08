@@ -1,8 +1,4 @@
 <?php include "includes/config.php";
-// Total Active Orders
-// Orders Due This Week
-// Overdue Tasks
-// Staff Utilization
 
 $result = $conn->query("SELECT COUNT(*) AS total_active_orders FROM orders WHERE status = 'active' AND deleted_at IS NULL");
 $row = $result->fetch_assoc();
@@ -12,7 +8,7 @@ $result = $conn->query("
     SELECT COUNT(*) AS orders_due_this_week
     FROM orders
     WHERE
-        status = 'active'
+        status != 'completed'
         AND deleted_at IS NULL
         AND YEARWEEK(deadline, 1) = YEARWEEK(CURDATE(), 1)
 ");
@@ -24,14 +20,16 @@ $result = $conn->query("
     FROM tasks t
     JOIN orders o ON t.order_id = o.id
     WHERE t.status != 'completed'
-    AND o.deadline < CURDATE();
+    AND DATE(o.deadline) < CURDATE()
 ");
 $row = $result->fetch_assoc();
 $overdue_tasks = $row['overdue_tasks'];
 
 $urgent_tasks = $conn->query("
     SELECT 
-        t.task_name, 
+        t.task_name,
+        t.est_time,
+        t.priority, 
         o.order_no, 
         u.name AS assigned_to, 
         DATE(o.deadline) AS due_date, 
@@ -53,9 +51,15 @@ $result = $conn->query("
     FROM tasks t
     JOIN orders o ON t.order_id = o.id
     LEFT JOIN users u ON t.user_id = u.id
-    WHERE o.deadline BETWEEN CURDATE() - INTERVAL (WEEKDAY(CURDATE())) DAY 
-                        AND CURDATE() + INTERVAL (4 - WEEKDAY(CURDATE())) DAY
-    ORDER BY FIELD(DAYNAME(o.deadline), 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'), o.deadline ASC;
+    WHERE 
+        t.status != 'completed'
+        AND o.deadline >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND o.deadline <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+    ORDER BY 
+        FIELD(DAYNAME(o.deadline), 
+            'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'
+        ),
+        o.deadline ASC
 ");
 
 $weekly_tasks = [
@@ -63,7 +67,9 @@ $weekly_tasks = [
     'Tue' => [],
     'Wed' => [],
     'Thu' => [],
-    'Fri' => []
+    'Fri' => [],
+    'Sat' => [],
+    'Sun' => []
 ];
 
 $dayMap = [
@@ -71,7 +77,9 @@ $dayMap = [
     'Tuesday' => 'Tue',
     'Wednesday' => 'Wed',
     'Thursday' => 'Thu',
-    'Friday' => 'Fri'
+    'Friday' => 'Fri',
+    'Saturday' => 'Sat',
+    'Sunday' => 'Sun'
 ];
 
 while ($task = $result->fetch_assoc()) {
@@ -168,7 +176,7 @@ include "includes/header.php"; ?>
         <div class="mt-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    <i class="bi bi-calendar-week me-2"></i>Weekly Task Timeline
+                    <i class="bi bi-calendar-week me-2"></i>Weekly Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to  <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="pms-table">
@@ -179,13 +187,15 @@ include "includes/header.php"; ?>
                                 <th style="width: 100px;">Wednesday</th>
                                 <th style="width: 100px;">Thursday</th>
                                 <th style="width: 100px;">Friday</th>
+                                <th style="width: 100px;">Saturday</th>
+                                <th style="width: 100px;">Sunday</th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr>
                                 <?php
                                 // Example structure: $weekly_tasks[day] = array of tasks
-                                $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+                                $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
                                 // $weekly_tasks = [
                                 //     'Mon' => [
                                 //         ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
@@ -246,7 +256,9 @@ include "includes/header.php"; ?>
                                     <th>Order #</th>
                                     <th>Assigned To</th>
                                     <th>Due Date</th>
-                                    <th style="width: 100px;">Status</th>
+                                    <th>Est. Time</th>
+                                    <th>Priority</th>
+                                    <!-- <th style="width: 100px;">Status</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -257,11 +269,17 @@ include "includes/header.php"; ?>
                                             <td><?php echo htmlspecialchars($task['order_no']); ?></td>
                                             <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
                                             <td><?php echo date("d M Y", strtotime($task['due_date'])); ?></td>
+                                            <td><?php echo htmlspecialchars($task['est_time'] ? formatMinutes($task['est_time']) : 'N/A'); ?></td>
                                             <td>
+                                                <span class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
+                                                    <?php echo ucfirst($task['priority']); ?>
+                                                </span>
+                                            </td>
+                                            <!-- <td>
                                                 <span class="badge p-2 text-md bg-<?php echo $task['status'] == 'pending' ? 'warning' : ($task['status'] == 'active' ? 'success' : 'secondary'); ?>">
                                                     <?php echo $task['status']; ?>
                                                 </span>
-                                            </td>
+                                            </td> -->
                                         </tr>
                                     <?php } ?>
                                 <?php } else { ?>

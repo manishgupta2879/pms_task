@@ -159,7 +159,7 @@ include "includes/header.php";
                                         <input type="file" name="profile_pic" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp">
                                         <small class="text-muted d-block mt-1">
                                             Supported formats: JPG, PNG, GIF, WebP<br>
-                                            Maximum file size: 5MB
+                                            <!-- Maximum file size: 5MB -->
                                         </small>
                                         <?php if (isset($errors['profile_pic'])): ?>
                                             <div class="text-danger small mt-2">

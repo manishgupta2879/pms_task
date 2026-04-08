@@ -138,11 +138,11 @@ include "includes/header.php";
                             </div>
                             <div class="col-6">
                                 
-                                <label class="pms-form-label">Employee</label>
+                                <label class="pms-form-label">Resources</label>
                                 <select name="employee" class="form-select">
-                                    <option value="">All Employee</option>
+                                    <option value="">All Resource</option>
                                     <?php
-                                        $users = $conn->query("SELECT id, name FROM users");
+                                        $users = $conn->query("SELECT id, name FROM users WHERE role != 'superadmin' ORDER BY name");
                                         while ($u = $users->fetch_assoc()) {
                                         ?>
                                         <option value="<?= $u['id'] ?>" <?= $employee == $u['id'] ? 'selected' : '' ?>>
