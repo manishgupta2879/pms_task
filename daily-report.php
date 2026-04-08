@@ -139,7 +139,7 @@ include "includes/header.php";
                             <div class="col-6">
                                 
                                 <label class="pms-form-label">Resources</label>
-                                <select name="employee" class="form-select">
+                                <select name="employee" class="form-select select2">
                                     <option value="">All Resource</option>
                                     <?php
                                         $users = $conn->query("SELECT id, name FROM users WHERE role != 'superadmin' ORDER BY name");
@@ -153,8 +153,8 @@ include "includes/header.php";
                             </div>
                             <div class="col-6">
                                 <label class="pms-form-label">Priority</label>
-                                <select name="priority" class="form-select">
-                                    <option value="">All Statuses</option>
+                                <select name="priority" class="form-select select2">
+                                    <option value="">All Priority</option>
                                     <option value="low" <?= $priority == 'low' ? 'selected' : '' ?>>Low</option>
                                     <option value="medium" <?= $priority == 'medium' ? 'selected' : '' ?>>Medium</option>
                                     <option value="high" <?= $priority == 'high' ? 'selected' : '' ?>>High</option>

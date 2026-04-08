@@ -134,7 +134,7 @@ include "includes/header.php";
                             <div class="row g-3">
                                 <div class="">
                                     <label class="pms-form-label">Resources</label>
-                                    <select name="resource" class="form-select" id="select2">
+                                    <select name="resource" class="form-select select2" id="select2">
                                         <option value="">All Resources</option>
                                         <?php foreach ($resources as $resource): ?>
                                             <option value="<?= $resource['id'] ?>" <?= $resource_filter == $resource['id'] ? 'selected' : '' ?>><?= $resource['name'] ?></option>

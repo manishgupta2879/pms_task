@@ -5,9 +5,9 @@ include "includes/rbac.php";
 requireAuth();
 // include "includes/header.php";
 
-$user_id = $_GET['id'] ?? 0;
+$resource_id = $_GET['id'] ?? 0;
 
-if (!$user_id) {
+if (!$resource_id) {
     session_start();
     $_SESSION['error'] = "Invalid Resource ID.";
     header("Location: resources.php");
@@ -15,16 +15,16 @@ if (!$user_id) {
 }
 
 // Fetch user data
-$q = $conn->query("SELECT * FROM users WHERE id=" . (int)$user_id . " AND deleted_at IS NULL");
+$q = $conn->query("SELECT * FROM users WHERE id=" . (int)$resource_id . " AND deleted_at IS NULL");
 if ($q->num_rows == 0) {
     session_start();
     $_SESSION['error'] = "Resource not found.";
     header("Location: resources.php");
     exit();
 }
-$user = $q->fetch_assoc();
-$name = htmlspecialchars($user['name'] ?? $user['username']);
-$u_type = $user['type'];
+$resource = $q->fetch_assoc();
+$name = htmlspecialchars($resource['name'] ?? $resource['username']);
+$u_type = $resource['type'];
 
 // Handle Leave Submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_leave'])) {
@@ -43,12 +43,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_leave'])) {
         $_SESSION['error'] = "'To Date' must be greater than or equal to 'From Date'.";
     } else {
         $stmt = $conn->prepare("INSERT INTO leaves (user_id, from_date, to_date, remarks) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isss", $user_id, $from_date, $to_date, $remarks);
+        $stmt->bind_param("isss", $resource_id, $from_date, $to_date, $remarks);
 
         if ($stmt->execute()) {
             session_start();
             $_SESSION['success'] = "Leave added successfully.";
-            header("Location: leave_management.php?id=" . $user_id);
+            header("Location: leave_management.php?id=" . $resource_id);
             exit();
         } else {
             session_start();
@@ -60,7 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_leave'])) {
 // Handle Leave Deletion
 if (isset($_GET['delete'])) {
     $del_id = (int)$_GET['delete'];
-    $check_leave = $conn->query("SELECT from_date FROM leaves WHERE id=$del_id AND user_id=$user_id");
+    $check_leave = $conn->query("SELECT from_date FROM leaves WHERE id=$del_id AND user_id=$resource_id");
     
     if ($check_leave->num_rows > 0) {
         $ld = $check_leave->fetch_assoc();
@@ -73,7 +73,7 @@ if (isset($_GET['delete'])) {
             $_SESSION['error'] = "Cannot remove leave records that have already started.";
         }
     }
-    header("Location: leave_management.php?id=" . $user_id);
+    header("Location: leave_management.php?id=" . $resource_id);
     exit();
 }
 
@@ -85,15 +85,15 @@ include "includes/header.php";
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 10;
 $offset   = ($page - 1) * $per_page;
-$user_id = $user['id'];
-$count_sql = "SELECT COUNT(*) as cnt FROM leaves WHERE user_id=$user_id AND deleted_at IS NULL";
+$resource_id = $resource['id'];
+$count_sql = "SELECT COUNT(*) as cnt FROM leaves WHERE user_id=$resource_id AND deleted_at IS NULL";
 $count_res = $conn->query($count_sql);
 $total     = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, (int)ceil($total / $per_page));
 
-$sql_leaves = "SELECT * FROM leaves WHERE user_id=$user_id AND deleted_at IS NULL ORDER BY from_date DESC LIMIT $per_page OFFSET $offset";
+$sql_leaves = "SELECT * FROM leaves WHERE user_id=$resource_id AND deleted_at IS NULL ORDER BY from_date DESC LIMIT $per_page OFFSET $offset";
 $res_leaves = $conn->query($sql_leaves);
-$qs = '&id=' . $user_id;
+$qs = '&id=' . $resource_id;
 
 ?>
 
@@ -153,7 +153,7 @@ $qs = '&id=' . $user_id;
                         <div class="text-start">
                             <h5 class="mb-1 fw-bold text-dark" style="font-size: 16px;"><?= $name ?></h5>
                             <div class="text-muted small mb-2 d-flex align-items-center justify-content-center gap-2">
-                                <i class="bi bi-envelope"></i> <?= htmlspecialchars($user['email']) ?>
+                                <i class="bi bi-envelope"></i> <?= htmlspecialchars($resource['email']) ?>
                             </div>
                             <span class="badge border text-dark fw-normal" style="background: #f1f5f9; border-color: #cbd5e1 !important; font-size: 12px;">
                                 <?= $u_type ?>
@@ -213,7 +213,7 @@ $qs = '&id=' . $user_id;
                                     </td>
                                     <td class="text-end">
                                         <?php if ($leave['from_date'] > date('Y-m-d')): ?>
-                                        <a href="leave_management.php?id=<?= $user_id ?>&delete=<?= $leave['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete Leave" onclick="return confirm('Are you sure you want to remove this leave record?')">
+                                        <a href="leave_management.php?id=<?= $resource_id ?>&delete=<?= $leave['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete Leave" onclick="return confirm('Are you sure you want to remove this leave record?')">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                         <?php else: ?>
