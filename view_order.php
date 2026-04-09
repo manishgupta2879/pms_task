@@ -107,11 +107,9 @@ include "includes/header.php";
                     <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">
                         <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
-                    <?php if ($taskRes->num_rows == 0): ?>
-                        <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
+                    <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
                             <i class="bi bi-pencil me-1"></i> Edit
-                        </a>
-                    <?php endif; ?>
+                    </a>
                 </div>
             </div>
 
@@ -225,7 +223,7 @@ include "includes/header.php";
                                 <th>Assigned To</th>
                                 <th>Product</th>
                                 <th>Deadline</th>
-                                <th>Est. Time</th>
+                                <th>Duration</th>
                                 <th>Status</th>
                                 <th>Priority</th>
                                 <th>Start Time</th>

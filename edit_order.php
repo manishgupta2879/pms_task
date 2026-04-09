@@ -79,31 +79,60 @@ if (isset($_POST['update'])) {
     try {
 
         $order_no = $order['order_no'];
-        $conn->query("UPDATE orders 
-                SET customer='$customer', deadline='$deadline', status='$status'
-                WHERE id='$order_id'");
 
-        $conn->query("DELETE FROM order_items WHERE order_id='$order_no'");
+        $conn->query("UPDATE orders 
+            SET customer='$customer', deadline='$deadline', status='$status'
+            WHERE id='$order_id'");
+
+        $existing_ids = [];
 
         for ($i = 0; $i < count($products); $i++) {
 
+            $item_id = $_POST['item_id'][$i] ?? '';
+
             $product = $conn->real_escape_string($products[$i]);
             $species = $conn->real_escape_string($species_list[$i]);
-            $qty     = $conn->real_escape_string($qtys[$i]);
+            $qty     = (int)$qtys[$i];
 
-            $conn->query("INSERT INTO order_items(order_id, product, species, qty)
-                VALUES('$order_no', '$product', '$species', '$qty')");
+            if (!empty($item_id)) {
+                $existing_ids[] = $item_id;
+
+                $conn->query("UPDATE order_items 
+                    SET product='$product', species='$species', qty='$qty'
+                    WHERE id='$item_id'");
+            } else {
+
+                $conn->query("INSERT INTO order_items(order_id, product, species, qty)
+                    VALUES('$order_no', '$product', '$species', '$qty')");
+
+                $existing_ids[] = $conn->insert_id;
+            }
+        }
+
+        $old_items = $conn->query("SELECT id FROM order_items WHERE order_id='$order_no'");
+
+        while ($old = $old_items->fetch_assoc()) {
+
+            if (!in_array($old['id'], $existing_ids)) {
+                $task_check = $conn->query("SELECT id FROM tasks WHERE product='{$old['id']}' LIMIT 1");
+                if ($task_check->num_rows == 0) {
+                    $conn->query("DELETE FROM order_items WHERE id='{$old['id']}'");
+                }
+            }
         }
 
         $conn->commit();
 
-        $_SESSION['success'] = $order_id ? "Order updated successfully." : "Order created successfully.";
-        // header("Location: orders.php");
+        $_SESSION['success'] = "Order updated successfully.";
         header("Location: edit_order.php?id=" . $order_id);
         exit();
     } catch (Exception $e) {
+
         $conn->rollback();
-        die("Error: " . $e->getMessage());
+
+        $_SESSION['error'] = $e->getMessage();
+        header("Location: edit_order.php?id=" . $order_id);
+        exit();
     }
 }
 include "includes/header.php";
@@ -141,7 +170,13 @@ include "includes/header.php";
                                 </div>
                                 <?php if (!empty($items)): ?>
                                     <?php foreach ($items as $item): ?>
+                                        <?php
+                                        // check if task exists for this product
+                                        $task_check = $conn->query("SELECT id FROM tasks WHERE product='{$item['id']}' LIMIT 1");
+                                        $hasTask = $task_check->num_rows > 0;
+                                        ?>
                                         <div class="row g-3 item-row mt-2">
+                                            <input type="hidden" name="item_id[]" value="<?= $item['id'] ?>">
                                             <div class="col-md-4">
                                                 <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
                                                 <input type="text" name="product[]" class="form-control"
@@ -161,12 +196,17 @@ include "includes/header.php";
                                                 <div class="invalid-feedback">Please enter quantity</div>
                                             </div>
                                             <div class="col-md-1">
-                                                <button type="button" class="btn btn-danger remove-row">X</button>
+                                                <?php if ($hasTask): ?>
+                                                    <button type="button" class="btn btn-secondary" disabled title="Task assigned">🔒</button>
+                                                <?php else: ?>
+                                                    <button type="button" class="btn btn-danger remove-row">X</button>
+                                                <?php endif; ?>
                                             </div>
                                         </div>
                                     <?php endforeach; ?>
                                 <?php else: ?>
                                     <div class="row g-3 item-row mt-2">
+                                        <input type="hidden" name="item_id[]" value="">
                                         <div class="col-md-4">
                                             <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
                                             <input type="text" name="product[]" class="form-control" placeholder="Product" required>
@@ -226,14 +266,28 @@ include "includes/header.php";
 
         row.querySelectorAll('input').forEach(input => {
             input.value = '';
-            input.classList.remove('is-invalid'); // reset validation
+            input.classList.remove('is-invalid');
         });
+
+        // ✅ clear hidden ID
+        let hidden = row.querySelector('input[name="item_id[]"]');
+        if (hidden) hidden.value = '';
+
+        // ✅ enable remove button (in case cloned from locked row)
+        let btn = row.querySelector('.btn');
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('btn-secondary');
+            btn.classList.add('btn-danger', 'remove-row');
+            btn.innerText = 'X';
+        }
 
         document.getElementById('order-items').appendChild(row);
     });
 
     document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-row')) {
+            if (e.target.disabled) return;
             if (document.querySelectorAll('.item-row').length > 1) {
                 e.target.closest('.item-row').remove();
             }
@@ -243,17 +297,34 @@ include "includes/header.php";
         let valid = true;
 
         document.querySelectorAll('.item-row').forEach(row => {
-            let inputs = row.querySelectorAll('input');
-            inputs.forEach(input => {
-                if (!input.value.trim()) {
-                    valid = false;
-                    input.classList.add('is-invalid');
-                }
-            });
+
+            let product = row.querySelector('input[name="product[]"]');
+            let species = row.querySelector('input[name="species[]"]');
+            let qty = row.querySelector('input[name="qty[]"]');
+
+            if (!product.value.trim()) {
+                valid = false;
+                product.classList.add('is-invalid');
+            }
+
+            if (!species.value.trim()) {
+                valid = false;
+                species.classList.add('is-invalid');
+            }
+
+            if (!qty.value || qty.value <= 0) {
+                valid = false;
+                qty.classList.add('is-invalid');
+            }
         });
 
         if (!valid) {
             e.preventDefault();
+        }
+    });
+    document.addEventListener('input', function(e) {
+        if (e.target.matches('input')) {
+            e.target.classList.remove('is-invalid');
         }
     });
 </script>
