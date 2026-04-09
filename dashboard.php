@@ -1,7 +1,7 @@
 <?php include "includes/config.php";
 $total_staff = $conn->query("SELECT COUNT(*) AS total_staff FROM users WHERE role IN ('staff')")->fetch_assoc()['total_staff'] ?? 0;
 $task_assigned_staff = $conn->query("SELECT COUNT(DISTINCT user_id) AS task_assigned_staff FROM tasks WHERE status != 'completed' and deadline = CURDATE()")->fetch_assoc()['task_assigned_staff'] ?? 0;
-if($task_assigned_staff){
+if($task_assigned_staff && $total_staff){
     $staff_utilization = $task_assigned_staff / $total_staff * 100;
 }else{
     $staff_utilization = 0;
