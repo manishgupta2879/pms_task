@@ -13,6 +13,21 @@
         $('.select2').select2({
             theme: 'bootstrap-5'
         });
+
+        $('.select2-subtext').select2({
+            theme: 'bootstrap-5',
+            templateResult: function(data) {
+                if (!data.id || !data.element) {
+                    return data.text;
+                }
+
+                var subtext = $(data.element).data('subtext');
+                if (subtext) {
+                    return $('<span>' + data.text + '<br><small style="color: #999;">' + subtext + '</small></span>');
+                }
+                return data.text;
+            }
+        });
     });
 </script>
 </div>

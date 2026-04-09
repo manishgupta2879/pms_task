@@ -23,7 +23,7 @@ if (!$tasks) {
 include "includes/header.php";
 ?>
 
-<div class="pms-wrap">
+<div class="pms-wrap pb-4">
 
     <div class="pms-panel">
 
@@ -40,7 +40,7 @@ include "includes/header.php";
             </div>
         </div>
 
-       
+
 
         <?php if ($tasks->num_rows == 0): ?>
             <div class="alert alert-warning m-3">No tasks found in library.</div>
@@ -54,16 +54,18 @@ include "includes/header.php";
                             <th>Task Name</th>
                             <th>Time</th>
                             <th>Description</th>
+                            <th>Product</th>
                             <th>Deadline</th>
-                            <th>Select Product</th>
+                            <th>Priority</th>
+
                             <th class="text-end">Assign Resource</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <?php $i = 1; ?>
-                        <?php while ($t = $tasks->fetch_assoc()): 
-                            
+                        <?php while ($t = $tasks->fetch_assoc()):
+
                             $products = $conn->query("
                                 SELECT oi.id, oi.product FROM orders o 
                                 left join order_items oi on o.order_no = oi.order_id 
@@ -76,8 +78,8 @@ include "includes/header.php";
                                 )
                                 ORDER BY product ASC
                             ");
-                            ?>
-                        
+                        ?>
+
                             <tr>
                                 <td><?= $i++ ?></td>
 
@@ -94,50 +96,56 @@ include "includes/header.php";
                                 <td>
                                     <?= $t['description'] ?: '-' ?>
                                 </td>
+
                                 <form method="POST" action="add_task_from_lib.php">
                                     <td>
-                                        <input type="date" name="deadline" class="form-control form-control-sm" required>
-                                    </td>
-                                    <td>
-                                        <select name="product" class="form-select form-select-sm select2" required
-                                            style="min-width:220px; max-width: 220px; font-size: 13px;">
-                                            <!-- <option value="">Search Product...</option> -->
-                                             <?php if($products->num_rows == 0): ?>
-                                                <option value="">Product Not Found</option>
-                                            <?php else: ?>
+                                        <?php if ($products->num_rows > 0): ?>
+                                            <select name="product" class="form-select form-select-sm select2" required
+                                                style="width:200px; font-size: 13px;">
                                                 <?php foreach ($products as $p): ?>
                                                     <option value="<?= $p['id'] ?>">
                                                         <?= $p['product'] ?>
                                                     </option>
                                                 <?php endforeach; ?>
-                                            <?php endif; ?>
+
+                                            </select>
+                                        <?php else: ?>
+                                            <span class="text-muted">Assigned to all products</span>
+                                        <?php endif; ?>
+                                    </td>
+                                    <td>
+                                        <input type="date" name="deadline" class="form-control form-control-sm deadline w-auto" <?= $products->num_rows == 0 ? 'disabled' : '' ?> required>
+                                    </td>
+                                    <td>
+                                        <select name="priority" class="form-select form-select-sm select2 w-auto " <?= $products->num_rows == 0 ? 'disabled' : '' ?>>
+                                            <option value="low" selected>Low</option>
+                                            <option value="medium">Medium</option>
+                                            <option value="high">High</option>
                                         </select>
                                     </td>
-                                <td class="text-end" width="300px">
-                                    <!-- ✅ ADD TASK WITH USER -->
-                                    
-                                    <div class="d-flex gap-2 justify-content-end align-items-center">
-                                        <input type="hidden" name="id" value="<?= $t['id'] ?>">
-                                        <input type="hidden" name="order_id" value="<?= $order_id ?>">
-                                        
-                                        <!-- 🔍 SEARCH RESOURCE (Filtered by availability) -->
-                                        <?php $taskResourceList = getAvailableResources($conn, $t['default_time']); ?>
-                                        <select name="user_id" class="form-select form-select-sm select2" required
-                                            style="min-width:220px; font-size: 13px;">
-                                            <option value="">Search resource...</option>
-                                            <?php foreach ($taskResourceList as $r):
-                                                $remText = ($r['type'] == 'Part-time') ? " | Available: " . formatMinutes($r['remaining_mins']) : " | Full-time";
-                                            ?>
-                                                <option value="<?= $r['id'] ?>">
-                                                    <?= $r['name'] ?> (<?= $r['role'] . $remText ?>)
-                                                </option>
-                                            <?php endforeach; ?>
-                                        </select>
+                                    <td class="text-end" width="300px">
+                                        <div class="d-flex gap-2 justify-content-end align-items-center">
+                                            <input type="hidden" name="id" value="<?= $t['id'] ?>">
+                                            <input type="hidden" name="order_id" value="<?= $order_id ?>">
 
-                                        <button class="btn btn-sm btn-success" style="white-space: nowrap;">
-                                            <i class="bi bi-plus-circle"></i> Add
-                                        </button>
-                                    </div>
+                                            <!-- 🔍 SEARCH RESOURCE (Filtered by availability) -->
+                                            <?php $taskResourceList = getAvailableResources($conn, $t['default_time']); ?>
+                                            <select name="user_id" class="form-select form-select-sm select2-subtext" required <?= $products->num_rows == 0 ? 'disabled' : '' ?>
+                                                style="min-width:220px; font-size: 13px;">
+                                                <option value="">Search resource...</option>
+                                                <?php foreach ($taskResourceList as $r):
+                                                    $remText = ($r['type'] == 'Part-time') ? " | Available: " . formatMinutes($r['remaining_mins']) : " | Full-time";
+                                                ?>
+                                                    <option value="<?= $r['id'] ?>" data-subtext="(<?= $r['role'] . $remText ?>)">
+                                                        <?= $r['name'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+
+                                            <button class="btn btn-sm btn-success" style="white-space: nowrap;" <?= $products->num_rows == 0 ? 'disabled' : '' ?>>
+                                                <i class="bi bi-plus-circle"></i> Add
+                                            </button>
+                                        </div>
                                     </td>
                                 </form>
 
@@ -152,8 +160,12 @@ include "includes/header.php";
     </div>
 </div>
 
-<script>
-    
-</script>
-
 <?php include "includes/footer.php"; ?>
+<script>
+    const today = new Date().toISOString().split('T')[0];
+    const dateInputs = document.getElementsByClassName('deadline');
+
+    for (const dateInput of dateInputs) {
+        dateInput.setAttribute('min', today);
+    }
+</script>

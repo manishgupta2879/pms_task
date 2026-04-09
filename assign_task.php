@@ -126,13 +126,13 @@ include "includes/header.php";
 
                             <div class="col-md-6 mb-2">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Assign Resource</label>
-                                <select name="user_id" class="form-select select2" required>
+                                <select name="user_id" class="form-select select2-subtext" required>
                                     <option value="">Search Resource...</option>
                                     <?php foreach ($resourcesArr as $r): 
                                         $remText = ($r['type'] == 'Part-time') ? " | Available: " . formatMinutes($r['remaining_mins']) : " | Full-time";
                                     ?>
-                                        <option value="<?= $r['id'] ?>">
-                                            <?= $r['name'] ?> (<?= $r['role'] . $remText ?>)
+                                        <option value="<?= $r['id'] ?>" data-subtext="(<?= $r['role'] . $remText ?>)">
+                                            <?= $r['name'] ?> 
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
