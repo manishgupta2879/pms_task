@@ -36,7 +36,7 @@ if ($priority != '') {
 if ($from_date != '' && $to_date != '') {
     $from_date_esc = $conn->real_escape_string($from_date);
     $to_date_esc = $conn->real_escape_string($to_date);
-    $where .= " AND DATE(o.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
+    $where .= " AND DATE(t.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
 }
 
 $result = $conn->query("
@@ -44,14 +44,16 @@ $result = $conn->query("
         t.task_name,
         o.order_no,
         u.name AS employee,
-        o.deadline,
+        t.deadline,
         t.est_time,
         t.start_time,
         t.end_time,
-        t.priority
+        t.priority,
+        oi.product
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
     LEFT JOIN orders o ON t.order_id = o.id
+    left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
     WHERE $where
     ORDER BY t.updated_at DESC
 ");
@@ -82,6 +84,7 @@ $result = $conn->query("
         <th>Task</th>
         <th>Order #</th>
         <th>Employee</th>
+        <th>Product</th>
         <th>Deadline</th>
         <th>Allocated Time</th>
         <th>Time Taken</th>
@@ -116,6 +119,7 @@ $result = $conn->query("
     <td><?= $row['task_name'] ?></td>
     <td><?= $row['order_no'] ?></td>
     <td><?= $row['employee'] ?></td>
+    <td><?= $row['product'] ?? '-' ?></td>
     <td><?= date('M d, Y', strtotime($row['deadline'])) ?></td>
     <td><?= $allocated ?></td>
     <td><?= $timeTaken ?></td>

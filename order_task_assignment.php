@@ -54,13 +54,30 @@ include "includes/header.php";
                             <th>Task Name</th>
                             <th>Time</th>
                             <th>Description</th>
+                            <th>Deadline</th>
+                            <th>Select Product</th>
                             <th class="text-end">Assign Resource</th>
                         </tr>
                     </thead>
 
                     <tbody>
                         <?php $i = 1; ?>
-                        <?php while ($t = $tasks->fetch_assoc()): ?>
+                        <?php while ($t = $tasks->fetch_assoc()): 
+                            
+                            $products = $conn->query("
+                                SELECT oi.id, oi.product FROM orders o 
+                                left join order_items oi on o.order_no = oi.order_id 
+                                WHERE o.id = $order_id
+                                AND oi.id NOT IN (
+                                    SELECT product 
+                                    FROM tasks 
+                                    WHERE order_id = $order_id
+                                    AND task_name = '{$t['task_name']}'
+                                )
+                                ORDER BY product ASC
+                            ");
+                            ?>
+                        
                             <tr>
                                 <td><?= $i++ ?></td>
 
@@ -77,12 +94,29 @@ include "includes/header.php";
                                 <td>
                                     <?= $t['description'] ?: '-' ?>
                                 </td>
-
+                                <form method="POST" action="add_task_from_lib.php">
+                                    <td>
+                                        <input type="date" name="deadline" class="form-control form-control-sm" required>
+                                    </td>
+                                    <td>
+                                        <select name="product" class="form-select form-select-sm select2" required
+                                            style="min-width:220px; max-width: 220px; font-size: 13px;">
+                                            <!-- <option value="">Search Product...</option> -->
+                                             <?php if($products->num_rows == 0): ?>
+                                                <option value="">Product Not Found</option>
+                                            <?php else: ?>
+                                                <?php foreach ($products as $p): ?>
+                                                    <option value="<?= $p['id'] ?>">
+                                                        <?= $p['product'] ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            <?php endif; ?>
+                                        </select>
+                                    </td>
                                 <td class="text-end" width="300px">
                                     <!-- ✅ ADD TASK WITH USER -->
-                                    <form method="POST" action="add_task_from_lib.php"
-                                        class="d-flex gap-2 justify-content-end align-items-center">
-
+                                    
+                                    <div class="d-flex gap-2 justify-content-end align-items-center">
                                         <input type="hidden" name="id" value="<?= $t['id'] ?>">
                                         <input type="hidden" name="order_id" value="<?= $order_id ?>">
                                         
@@ -103,9 +137,9 @@ include "includes/header.php";
                                         <button class="btn btn-sm btn-success" style="white-space: nowrap;">
                                             <i class="bi bi-plus-circle"></i> Add
                                         </button>
-
-                                    </form>
-                                </td>
+                                    </div>
+                                    </td>
+                                </form>
 
                             </tr>
                         <?php endwhile; ?>

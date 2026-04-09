@@ -31,6 +31,7 @@ $search = $_GET['search'] ?? '';
 $status = $_GET['status'] ?? '';
 $customer = $_GET['customer'] ?? '';
 $deadline = $_GET['deadline'] ?? '';
+$due = $_GET['due'] ?? '';
 
 // pagination
 $limit = 10;
@@ -49,13 +50,15 @@ if ($status != '') {
     $where .= " AND orders.status='$status'";
 }
 if ($deadline != '') {
-    $where .= " AND deadline='$deadline'";
+    $where .= " AND orders.deadline='$deadline'";
 }
 
 if ($customer != '') {
     $where .= " AND customer LIKE '%$customer%'";
 }
-
+if ($due == 'this_week') {
+    $where .= " AND YEARWEEK(orders.deadline, 1) = YEARWEEK(CURDATE(), 1)";
+}
 // total count
 $totalRes = $conn->query("SELECT COUNT(*) as total FROM orders $where");
 $total = $totalRes->fetch_assoc()['total'];
@@ -209,7 +212,10 @@ include "includes/header.php";
                     // build query string (preserve filters)
                     $qs = "&search=" . urlencode($search) .
                         "&customer=" . urlencode($customer) .
-                        "&status=" . urlencode($status);
+                        "&status=" . urlencode($status) .
+                        "&due=" . urlencode($due).
+                        "&deadline=" . urlencode($deadline)
+                        ;
                     ?>
 
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> orders</div>

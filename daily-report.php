@@ -60,7 +60,7 @@ if ($priority != '') {
 if ($from_date != '' && $to_date != '') {
     $from_date_esc = $conn->real_escape_string($from_date);
     $to_date_esc = $conn->real_escape_string($to_date);
-    $where .= " AND DATE(o.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
+    $where .= " AND DATE(t.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
 }
 // $count_res = $conn->query("
 //     SELECT 
@@ -94,14 +94,16 @@ $taskRes = $conn->query("
     u.name AS user_name,
     ab.id AS assigned_by_id,
     ab.name AS assigned_by_name,
-    o.deadline,
+    t.deadline,
     o.id AS order_id,
-    o.order_no
+    o.order_no,
+    oi.product
 
 FROM tasks t
 LEFT JOIN users u ON t.user_id = u.id
 LEFT JOIN users ab ON t.assigned_by = ab.id
 LEFT JOIN orders o ON t.order_id = o.id
+left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
 WHERE $where
 ORDER BY t.updated_at DESC
 LIMIT $limit OFFSET $offset");
@@ -187,7 +189,7 @@ include "includes/header.php";
                         <ul class="dropdown-menu dropdown-menu-end">
                             <li>
                                 <a class="dropdown-item" href="export_csv.php?<?= http_build_query($_GET) ?>">
-                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export CSV
+                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
                                 </a>
                             </li>
                             <li>
@@ -207,6 +209,7 @@ include "includes/header.php";
                                 <th>Task</th>
                                 <th>Order #</th>
                                 <th>Assigned To</th>
+                                <th>Product</th>
                                 <th>Deadline</th>
                                 <th>Allocated Time</th>
                                 <th>Time Taken</th>
@@ -227,6 +230,7 @@ include "includes/header.php";
                                     <td class="text-dark fw-medium"><?= $task['task_name'] ?></td>
                                     <td class="text-dark fw-medium"><?= $task['order_no'] ?></td>
                                     <td class="text-dark fw-medium"><?= $task['user_name'] ?? '-' ?></td>
+                                    <td class="text-dark fw-medium"><?= $task['product'] ?? '-' ?></td>
                                     <td class="text-dark fw-medium">
                                         <?= date('M d, Y', strtotime($task['deadline'])) ?>
                                         <!-- date("M d, Y", strtotime($row['deadline'])) -->
