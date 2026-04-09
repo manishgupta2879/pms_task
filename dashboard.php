@@ -1,4 +1,11 @@
 <?php include "includes/config.php";
+$total_staff = $conn->query("SELECT COUNT(*) AS total_staff FROM users WHERE role IN ('staff')")->fetch_assoc()['total_staff'] ?? 0;
+$task_assigned_staff = $conn->query("SELECT COUNT(DISTINCT user_id) AS task_assigned_staff FROM tasks WHERE status != 'completed' and deadline = CURDATE()")->fetch_assoc()['task_assigned_staff'] ?? 0;
+if($task_assigned_staff){
+    $staff_utilization = $task_assigned_staff / $total_staff * 100;
+}else{
+    $staff_utilization = 0;
+}
 
 $result = $conn->query("SELECT COUNT(*) AS total_active_orders FROM orders WHERE status = 'active' AND deleted_at IS NULL");
 $row = $result->fetch_assoc();
@@ -257,7 +264,7 @@ include "includes/header.php"; ?>
                                             <td><?php echo htmlspecialchars($task['task_name']); ?></td>
                                             <td><?php echo htmlspecialchars($task['order_no']); ?></td>
                                             <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
-                                            <td><?php echo date("d M Y", strtotime($task['due_date'])); ?></td>
+                                            <td><?php echo $task['due_date'] ? date("d M Y", strtotime($task['due_date'])) : 'N/A'; ?></td>
                                             <td><?php echo htmlspecialchars($task['est_time'] ? formatMinutes($task['est_time']) : 'N/A'); ?></td>
                                             <td>
                                                 <span class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
