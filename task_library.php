@@ -37,7 +37,7 @@ $tasks = $conn->query("SELECT * FROM task_library");
                 <tr>
                     <th style="width: 60px;">#</th>
                     <th>Task Name</th>
-                    <th>Time</th>
+                    <th>Duration</th>
                     <th>Description</th>
                     <th class="text-end">Actions</th>
                 </tr>

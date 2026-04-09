@@ -170,7 +170,7 @@ $qs = '&search=' . urlencode($search) . '&status=' . urlencode($status_filter) .
                             <th class="w-auto">Customer</th>
                             <th class="w-auto">Product</th>
                             <th class="w-auto">Task Name</th>
-                            <th class="w-auto">Est. Time</th>
+                            <th class="w-auto">Duration</th>
                             <th class="w-auto">Assigned By</th>
                             <th class="w-auto">Status</th>
                             <th class="w-auto">Start Time</th>

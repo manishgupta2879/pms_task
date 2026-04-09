@@ -52,7 +52,7 @@ include "includes/header.php";
                         <tr>
                             <th style="width: 60px;">#</th>
                             <th>Task Name</th>
-                            <th>Time</th>
+                            <th>Duration</th>
                             <th>Description</th>
                             <th>Product</th>
                             <th>Deadline</th>

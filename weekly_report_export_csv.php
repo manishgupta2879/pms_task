@@ -65,17 +65,6 @@ $output = fopen("php://output", "w");
 
 // Column headers
 fputcsv($output, [
-    // "Task",
-    // "Order No.",
-    // "Employee",
-    // "Product",
-    // "Deadline",
-    // "Allocated Time",
-    // "Time Taken",
-    // "Priority",
-    // "Status",
-
-
     "Order No.",
     "Need date", //Deadline
     "Current Task", //Task
@@ -83,7 +72,7 @@ fputcsv($output, [
     "Qty.",
     "Product",
     "Species",
-    "Allocated Time",
+    "Duration", 
     "Time Taken",
     "Priority",
     "Status",

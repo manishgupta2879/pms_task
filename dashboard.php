@@ -2,7 +2,7 @@
 $total_staff = $conn->query("SELECT COUNT(*) AS total_staff FROM users
 join roles on users.role_id = roles.id
  WHERE roles.role_name IN ('staff')")->fetch_assoc()['total_staff'] ?? 0;
-$task_assigned_staff = $conn->query("SELECT COUNT(DISTINCT user_id) AS task_assigned_staff FROM tasks WHERE status != 'completed' and deadline = CURDATE()")->fetch_assoc()['task_assigned_staff'] ?? 0;
+$task_assigned_staff = $conn->query("SELECT COUNT(DISTINCT user_id) AS task_assigned_staff FROM tasks WHERE status != 'completed'")->fetch_assoc()['task_assigned_staff'] ?? 0;
 if ($task_assigned_staff && $total_staff) {
     $staff_utilization = round(($task_assigned_staff / $total_staff) * 100, 2);
 } else {
@@ -256,7 +256,7 @@ include "includes/header.php"; ?>
                                     <th>Order #</th>
                                     <th>Assigned To</th>
                                     <th>Due Date</th>
-                                    <th>Est. Time</th>
+                                    <th>Duration</th>
                                     <th>Priority</th>
                                 </tr>
                             </thead>

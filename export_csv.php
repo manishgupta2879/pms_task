@@ -72,7 +72,7 @@ fputcsv($output, [
     'Employee',
     'Product',
     'Deadline',
-    'Allocated Time',
+    'Duration',
     'Time Taken',
     'Priority'
 ]);
@@ -80,7 +80,7 @@ fputcsv($output, [
 // data
 while ($row = $result->fetch_assoc()) {
 
-    // Allocated Time
+    // Duration
     $allocated = $row['est_time'] ? formatMinutes($row['est_time']) : '-';
 
     // Time Taken Calculation

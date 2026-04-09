@@ -68,7 +68,7 @@ include "includes/header.php";
                         <th>Assigned To</th>
                         <th>Product</th>
                         <th>Deadline</th>
-                        <th>Allocated Time</th>
+                        <th>Duration</th>
                         <th>Priority </th>
                     </tr>
                 </thead>

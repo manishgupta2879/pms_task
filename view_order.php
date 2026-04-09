@@ -225,7 +225,7 @@ include "includes/header.php";
                                 <th>Assigned To</th>
                                 <th>Product</th>
                                 <th>Deadline</th>
-                                <th>Est. Time</th>
+                                <th>Duration</th>
                                 <th>Status</th>
                                 <th>Priority</th>
                                 <th>Start Time</th>

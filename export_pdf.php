@@ -86,7 +86,7 @@ $result = $conn->query("
         <th>Employee</th>
         <th>Product</th>
         <th>Deadline</th>
-        <th>Allocated Time</th>
+        <th>Duration</th>
         <th>Time Taken</th>
         <th>Priority</th>
     </tr>
