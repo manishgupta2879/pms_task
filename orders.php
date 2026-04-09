@@ -57,7 +57,7 @@ if ($customer != '') {
     $where .= " AND customer LIKE '%$customer%'";
 }
 if ($due == 'this_week') {
-    $where .= " AND YEARWEEK(orders.deadline, 1) = YEARWEEK(CURDATE(), 1)";
+    $where .= " AND YEARWEEK(orders.deadline, 1) = YEARWEEK(CURDATE(), 1) AND orders.status != 'completed'";
 }
 // total count
 $totalRes = $conn->query("SELECT COUNT(*) as total FROM orders $where");

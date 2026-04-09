@@ -63,6 +63,21 @@ $productivityRes = $conn->query("
     WHERE t.order_id=$id
     GROUP BY u.id, u.username
 ");
+$taskRes = $conn->query("
+    SELECT t.*, 
+            t.deadline as task_deadline,
+            u.username,
+            u.role_id,
+            r.role_name,
+            r.slug,
+            oi.product
+    FROM tasks t
+    LEFT JOIN users u ON t.user_id = u.id
+    LEFT JOIN roles r ON u.role_id = r.id
+    LEFT JOIN orders o ON t.order_id = o.id
+    left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
+    WHERE t.order_id=$id
+");
 include "includes/header.php";
 ?>
 
@@ -92,9 +107,11 @@ include "includes/header.php";
                     <a href="orders.php" class="btn btn-outline-secondary btn-sm me-2">
                         <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
-                    <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
-                        <i class="bi bi-pencil me-1"></i> Edit
-                    </a>
+                    <?php if ($taskRes->num_rows == 0): ?>
+                        <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-pencil me-1"></i> Edit
+                        </a>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -193,24 +210,6 @@ include "includes/header.php";
                     <?php endif; ?>
                 </div>
             </div>
-
-            <?php
-            $taskRes = $conn->query("
-                SELECT t.*, 
-                       t.deadline as task_deadline,
-                       u.username,
-                       u.role_id,
-                       r.role_name,
-                       r.slug,
-                       oi.product
-                FROM tasks t
-                LEFT JOIN users u ON t.user_id = u.id
-                LEFT JOIN roles r ON u.role_id = r.id
-                LEFT JOIN orders o ON t.order_id = o.id
-                left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
-                WHERE t.order_id=$id
-            ");
-            ?>
 
             <?php if ($taskRes->num_rows == 0): ?>
                 <div class="alert alert-info text-center py-4" style="margin: 15px 20px;">

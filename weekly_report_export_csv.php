@@ -127,7 +127,7 @@ while ($row = $result->fetch_assoc()) {
         formatMinutes($row['est_time']),
         $timeTaken,
         $row['priority'] ?? 'low',
-        ucfirst($row['status']),
+        ucfirst($row['status'] ? ($row['status'] == 'completed' ? 'Completed' : ($row['status'] == 'in_progress' ? 'In Progress' : 'Not Started')) : 'Not Started'),
         $row['notes'] ?? ''
     ]);
 }
