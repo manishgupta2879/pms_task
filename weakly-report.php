@@ -23,7 +23,7 @@ if (!empty($week) && strpos($week, '-W') !== false) {
     $dto->modify('+6 days');
     $end_date = $dto->format('Y-m-d');
 
-    $where .= " AND DATE(o.deadline) BETWEEN '$start_date' AND '$end_date'";
+    $where .= " AND DATE(t.deadline) BETWEEN '$start_date' AND '$end_date'";
 }
 if ($resource_filter != '') {
     $resource_esc = (int) $resource_filter;
@@ -42,12 +42,14 @@ $taskRes = $conn->query("
         t.start_time,
         t.end_time,
         o.order_no,
-        o.deadline,
-        DATE(o.deadline) as task_date,
-        DAYNAME(o.deadline) as day_name
+        t.deadline,
+        DATE(t.deadline) as task_date,
+        DAYNAME(t.deadline) as day_name,
+        oi.product
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
     LEFT JOIN orders o ON t.order_id = o.id
+    left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
     WHERE $where
     ORDER BY u.name, o.deadline ASC
 ");
@@ -161,11 +163,31 @@ include "includes/header.php";
         <!-- Scheduling/Workload Panel -->
         <div class="col-md-8 col-lg-9">
             <div class="pms-panel mb-2">
-                <div class="pms-panel-header">
-                    <i class="bi bi-list-check me-2"></i>Scheduling / Workload
-                    <?php if (!empty($week)): ?>
-                        ( <?= date('M d, Y', strtotime($start_date)) ?> - <?= date('M d, Y', strtotime($end_date)) ?> )
-                    <?php endif; ?>
+                <div class="pms-panel-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="bi bi-list-check me-2"></i>Scheduling / Workload
+                        <?php if (!empty($week)): ?>
+                            ( <?= date('M d, Y', strtotime($start_date)) ?> - <?= date('M d, Y', strtotime($end_date)) ?> )
+                        <?php endif; ?>
+                    </div>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                            data-bs-toggle="dropdown">
+                            <i class="bi bi-download me-1"></i> Export
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="weekly_report_export_csv.php?<?= http_build_query($_GET) ?>">
+                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
+                                </a>
+                            </li>
+                            <!-- <li>
+                                <a class="dropdown-item" href="export_pdf.php?<?= http_build_query($_GET) ?>">
+                                    <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
+                                </a>
+                            </li> -->
+                        </ul>
+                    </div>
                 </div>
 
                 <?php if (count($employees) == 0): ?>

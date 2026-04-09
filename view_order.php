@@ -197,13 +197,17 @@ include "includes/header.php";
             <?php
             $taskRes = $conn->query("
                 SELECT t.*, 
+                       t.deadline as task_deadline,
                        u.username,
                        u.role_id,
                        r.role_name,
-                       r.slug
+                       r.slug,
+                       oi.product
                 FROM tasks t
                 LEFT JOIN users u ON t.user_id = u.id
                 LEFT JOIN roles r ON u.role_id = r.id
+                LEFT JOIN orders o ON t.order_id = o.id
+                left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
                 WHERE t.order_id=$id
             ");
             ?>
@@ -220,6 +224,8 @@ include "includes/header.php";
                                 <th style="width: 50px;">#</th>
                                 <th>Task Name</th>
                                 <th>Assigned To</th>
+                                <th>Product</th>
+                                <th>Deadline</th>
                                 <th>Est. Time</th>
                                 <th>Status</th>
                                 <th>Priority</th>
@@ -278,6 +284,12 @@ include "includes/header.php";
                                         <?php else: ?>
                                             <span class="text-muted">Not Assigned</span>
                                         <?php endif; ?>
+                                    </td>
+                                    <td class="text-dark fw-medium"><?= htmlspecialchars($t['product']) ?></td>
+                                    <td>
+                                        <span class="<?= ($t['task_deadline'] < date("Y-m-d")) ? 'text-danger' : 'text-dark' ?>">
+                                            <?= date("M d, Y", strtotime($t['task_deadline'])) ?>
+                                        </span>
                                     </td>
                                     <td>
                                         <span class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
@@ -440,7 +452,7 @@ include "includes/header.php";
 
         <div style="padding: 20px;">
             <form method="POST">
-                <textarea name="notes" class="form-control mb-3" rows="6" placeholder="Add order notes..."
+                <textarea name="notes" class="form-control mb-3" rows="6" placeholder="Add order notes..." required
                     style="font-size: 14px; border-radius: 6px; border: 1px solid #e2e8f0;"><?= htmlspecialchars($order['notes'] ?? '') ?></textarea>
                 <div class="text-end">
                     <button type="submit" name="save_notes" class="pms-btn-dark btn-sm">

@@ -20,7 +20,7 @@ $result = $conn->query("
     FROM tasks t
     JOIN orders o ON t.order_id = o.id
     WHERE t.status != 'completed'
-    AND DATE(o.deadline) < CURDATE()
+    AND DATE(t.deadline) < CURDATE()
 ");
 $row = $result->fetch_assoc();
 $overdue_tasks = $row['overdue_tasks'];
@@ -32,13 +32,13 @@ $urgent_tasks = $conn->query("
         t.priority, 
         o.order_no, 
         u.name AS assigned_to, 
-        DATE(o.deadline) AS due_date, 
-        o.status
+        DATE(t.deadline) AS due_date, 
+        t.status
     FROM tasks t
     LEFT JOIN orders o ON t.order_id = o.id
     LEFT JOIN users u ON t.user_id = u.id
     WHERE t.priority = 'high' AND t.status <> 'completed'
-    ORDER BY o.deadline ASC;
+    ORDER BY t.deadline ASC;
 ");
 
 $result = $conn->query("
@@ -46,13 +46,14 @@ $result = $conn->query("
         t.task_name,
         o.order_no,
         u.name AS assigned_to,
-        DAYNAME(o.deadline) AS deadline_day,
-        o.deadline
+        DAYNAME(t.deadline) AS deadline_day,
+        t.deadline
     FROM tasks t
     JOIN orders o ON t.order_id = o.id
     LEFT JOIN users u ON t.user_id = u.id
     WHERE 
         t.status != 'completed'
+        AND t.priority = 'high'
         AND o.deadline >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
         AND o.deadline <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
     ORDER BY 
@@ -106,23 +107,26 @@ include "includes/header.php"; ?>
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card text-white bg-primary shadow-sm">
                     <div class="card-body">
-                        <div class="">
-                            <h6 class="card-title text-nowrap overflow-hidden text-truncate">Total Active Orders</h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h2 class="fw-bold">
-                                    <?php echo $totalActiveOrders ?? 0; ?>
-                                </h2>
-                                <i class="bi bi-bag-check fs-2"></i>
+                        <a href="orders.php?status=active" class="text-decoration-none text-white">
+                            <div class="">
+                                <h6 class="card-title text-nowrap overflow-hidden text-truncate">Total Active Orders</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="fw-bold">
+                                        <?php echo $totalActiveOrders ?? 0; ?>
+                                    </h2>
+                                    <i class="bi bi-bag-check fs-2"></i>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 </div>
             </div>
 
             <!-- Orders Due This Week -->
-            <div class="col-12 col-sm-6 col-md-3">
-                <div class="card text-white bg-success shadow-sm">
-                    <div class="card-body">
+             <div class="col-12 col-sm-6 col-md-3">
+                 <div class="card text-white bg-success shadow-sm">
+                     <div class="card-body">
+                        <a href="orders.php?due=this_week" class="text-decoration-none text-white">
                         <div>
                             <h6 class="card-title text-nowrap overflow-hidden text-truncate">Orders Due This Week</h6>
                             <div class="d-flex justify-content-between align-items-center">
@@ -132,14 +136,15 @@ include "includes/header.php"; ?>
                                 <i class="bi bi-calendar-week fs-2"></i>
                             </div>
                         </div>
+                    </a>
                     </div>
                 </div>
             </div>
-
             <!-- Overdue Tasks -->
             <div class="col-12 col-sm-6 col-md-3">
                 <div class="card text-white bg-danger shadow-sm">
                     <div class="card-body">
+                        <a href="orders.php?filter=overdue_tasks" class="text-decoration-none text-white">
                         <div>
                             <h6 class="card-title text-nowrap overflow-hidden text-truncate">Overdue Tasks</h6>
                             <div class="d-flex justify-content-between align-items-center">
@@ -149,6 +154,7 @@ include "includes/header.php"; ?>
                                 <i class="bi bi-exclamation-triangle fs-2"></i>
                             </div>
                         </div>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -176,7 +182,7 @@ include "includes/header.php"; ?>
         <div class="mt-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    <i class="bi bi-calendar-week me-2"></i>Weekly Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to  <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
+                    <i class="bi bi-calendar-week me-2"></i>Weekly Urgent Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to  <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="pms-table">
@@ -196,22 +202,7 @@ include "includes/header.php"; ?>
                                 <?php
                                 // Example structure: $weekly_tasks[day] = array of tasks
                                 $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                // $weekly_tasks = [
-                                //     'Mon' => [
-                                //         ['name' => 'Order #101 Packing', 'assigned_to' => 'Rahul'],
-                                //         ['name' => 'Inventory Check', 'assigned_to' => 'Amit']
-                                //     ],
-                                //     'Tue' => [
-                                //         ['name' => 'Dispatch Order #102', 'assigned_to' => 'Neha']
-                                //     ],
-                                //     'Wed' => [],
-                                //     'Thu' => [
-                                //         ['name' => 'Client Follow-up', 'assigned_to' => 'Priya']
-                                //     ],
-                                //     'Fri' => [
-                                //         ['name' => 'Weekly Report', 'assigned_to' => 'Manager']
-                                //     ]
-                                // ];
+                                
                                 foreach ($days as $day) {
                                     echo "<td>";
 
@@ -242,7 +233,6 @@ include "includes/header.php"; ?>
 
     <div class="mt-4">
         <div class="row g-4">
-            <!-- Urgent Tasks Panel -->
             <div class="col-lg-8">
                 <div class="pms-panel">
                     <div class="pms-panel-header">
@@ -258,7 +248,6 @@ include "includes/header.php"; ?>
                                     <th>Due Date</th>
                                     <th>Est. Time</th>
                                     <th>Priority</th>
-                                    <!-- <th style="width: 100px;">Status</th> -->
                                 </tr>
                             </thead>
                             <tbody>
@@ -274,12 +263,7 @@ include "includes/header.php"; ?>
                                                 <span class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
                                                     <?php echo ucfirst($task['priority']); ?>
                                                 </span>
-                                            </td>
-                                            <!-- <td>
-                                                <span class="badge p-2 text-md bg-<?php echo $task['status'] == 'pending' ? 'warning' : ($task['status'] == 'active' ? 'success' : 'secondary'); ?>">
-                                                    <?php echo $task['status']; ?>
-                                                </span>
-                                            </td> -->
+                                            </td>  
                                         </tr>
                                     <?php } ?>
                                 <?php } else { ?>

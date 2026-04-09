@@ -16,7 +16,8 @@ $order_id = (int)$_POST['order_id'];
 
 $user_id     = (int)($_POST['user_id'] ?? 0);
 $resource_id = (int)($_POST['resource_id'] ?? 0);
-
+$deadline    = $_POST['deadline'] ?? null;
+$product_id    = (int)($_POST['product'] ?? 0);
 if($user_id == 0 && $resource_id == 0){
     die("Please select user or resource");
 }
@@ -35,7 +36,10 @@ $sql = "INSERT INTO tasks(
             status, 
             user_id, 
             resource_id,
-            assigned_by
+            assigned_by,
+            deadline,
+            product,
+            priority
         )
         VALUES(
             '$order_id',
@@ -44,7 +48,11 @@ $sql = "INSERT INTO tasks(
             'not_started',
             ".($user_id ?: "NULL").",
             ".($resource_id ?: "NULL").",
-            ".$_SESSION['user_id']."
+            ".$_SESSION['user_id'].",
+            '$deadline',
+            $product_id,
+            'low'
+
         )";
 
 if(!$conn->query($sql)){
