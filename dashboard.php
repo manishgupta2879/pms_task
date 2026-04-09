@@ -3,9 +3,9 @@ $total_staff = $conn->query("SELECT COUNT(*) AS total_staff FROM users
 join roles on users.role_id = roles.id
  WHERE roles.role_name IN ('staff')")->fetch_assoc()['total_staff'] ?? 0;
 $task_assigned_staff = $conn->query("SELECT COUNT(DISTINCT user_id) AS task_assigned_staff FROM tasks WHERE status != 'completed' and deadline = CURDATE()")->fetch_assoc()['task_assigned_staff'] ?? 0;
-if($task_assigned_staff && $total_staff){
+if ($task_assigned_staff && $total_staff) {
     $staff_utilization = round(($task_assigned_staff / $total_staff) * 100, 2);
-}else{
+} else {
     $staff_utilization = 0;
 }
 
@@ -114,9 +114,10 @@ include "includes/header.php"; ?>
         <div class="row g-4">
             <!-- Total Active Orders -->
             <div class="col-12 col-sm-6 col-md-3">
-                <div class="card text-white bg-primary shadow-sm">
-                    <div class="card-body">
-                        <a href="orders.php?status=active" class="text-decoration-none text-white">
+                <a href="orders.php?status=active" class="text-decoration-none text-white">
+                    <div class="card text-white bg-primary shadow-sm">
+                        <div class="card-body">
+
                             <div class="">
                                 <h6 class="card-title text-nowrap overflow-hidden text-truncate">Total Active Orders</h6>
                                 <div class="d-flex justify-content-between align-items-center">
@@ -126,46 +127,46 @@ include "includes/header.php"; ?>
                                     <i class="bi bi-bag-check fs-2"></i>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Orders Due This Week -->
-             <div class="col-12 col-sm-6 col-md-3">
-                 <div class="card text-white bg-success shadow-sm">
-                     <div class="card-body">
-                        <a href="orders.php?due=this_week" class="text-decoration-none text-white">
-                        <div>
-                            <h6 class="card-title text-nowrap overflow-hidden text-truncate">Orders Due This Week</h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h2 class="fw-bold">
-                                    <?php echo $orders_due_this_week ?? 0; ?>
-                                </h2>
-                                <i class="bi bi-calendar-week fs-2"></i>
+            <div class="col-12 col-sm-6 col-md-3">
+                <a href="orders.php?due=this_week" class="text-decoration-none text-white">
+                    <div class="card text-white bg-success shadow-sm">
+                        <div class="card-body">
+                            <div>
+                                <h6 class="card-title text-nowrap overflow-hidden text-truncate">Orders Due This Week</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="fw-bold">
+                                        <?php echo $orders_due_this_week ?? 0; ?>
+                                    </h2>
+                                    <i class="bi bi-calendar-week fs-2"></i>
+                                </div>
                             </div>
                         </div>
-                    </a>
                     </div>
-                </div>
+                </a>
             </div>
             <!-- Overdue Tasks -->
             <div class="col-12 col-sm-6 col-md-3">
-                <div class="card text-white bg-danger shadow-sm">
-                    <div class="card-body">
-                        <a href="orders.php?filter=overdue_tasks" class="text-decoration-none text-white">
-                        <div>
-                            <h6 class="card-title text-nowrap overflow-hidden text-truncate">Overdue Tasks</h6>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <h2 class="fw-bold">
-                                    <?php echo $overdue_tasks ?? 0; ?>
-                                </h2>
-                                <i class="bi bi-exclamation-triangle fs-2"></i>
+                <a href="overdue_task.php?filter=overdue_tasks" class="text-decoration-none text-white">
+                    <div class="card text-white bg-danger shadow-sm">
+                        <div class="card-body">
+                            <div>
+                                <h6 class="card-title text-nowrap overflow-hidden text-truncate">Overdue Tasks</h6>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h2 class="fw-bold">
+                                        <?php echo $overdue_tasks ?? 0; ?>
+                                    </h2>
+                                    <i class="bi bi-exclamation-triangle fs-2"></i>
+                                </div>
                             </div>
                         </div>
-                        </a>
                     </div>
-                </div>
+                </a>
             </div>
 
             <!-- Staff Utilization -->
@@ -191,7 +192,7 @@ include "includes/header.php"; ?>
         <div class="mt-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    <i class="bi bi-calendar-week me-2"></i>Weekly Urgent Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to  <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
+                    <i class="bi bi-calendar-week me-2"></i>Weekly Urgent Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="pms-table">
@@ -211,7 +212,7 @@ include "includes/header.php"; ?>
                                 <?php
                                 // Example structure: $weekly_tasks[day] = array of tasks
                                 $days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-                                
+
                                 foreach ($days as $day) {
                                     echo "<td>";
 
@@ -272,7 +273,7 @@ include "includes/header.php"; ?>
                                                 <span class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
                                                     <?php echo ucfirst($task['priority']); ?>
                                                 </span>
-                                            </td>  
+                                            </td>
                                         </tr>
                                     <?php } ?>
                                 <?php } else { ?>
@@ -312,21 +313,21 @@ include "includes/header.php"; ?>
     </div>
 <?php else: ?>
     <div class="container d-flex justify-content-center align-items-center ">
-    <div class="card welcome-card shadow-lg p-4 text-center" style="max-width: 420px; width: 100%;">
-        
-        <h2 class="mb-2">👋 Welcome, <?php echo $_SESSION['name']; ?>!</h2>
-        <p class="text-secondary mb-4">
-            Glad to have you back. Manage your work efficiently from your dashboard.
-        </p>
+        <div class="card welcome-card shadow-lg p-4 text-center" style="max-width: 420px; width: 100%;">
 
-        <div class="d-grid gap-2">
-            <!-- <a href="profile.php" class="btn btn-primary">View Profile</a> -->
-            <a href="my_task.php" class="btn btn-info text-white">My Tasks</a>
-            <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+            <h2 class="mb-2">👋 Welcome, <?php echo $_SESSION['name']; ?>!</h2>
+            <p class="text-secondary mb-4">
+                Glad to have you back. Manage your work efficiently from your dashboard.
+            </p>
+
+            <div class="d-grid gap-2">
+                <!-- <a href="profile.php" class="btn btn-primary">View Profile</a> -->
+                <a href="my_task.php" class="btn btn-info text-white">My Tasks</a>
+                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+            </div>
+
         </div>
-
     </div>
-</div>
 <?php endif; ?>
 
 
