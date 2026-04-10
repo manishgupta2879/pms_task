@@ -32,7 +32,7 @@ if (isset($_GET['delete'])) {
 
 $search   = $_GET['search'] ?? '';
 $page     = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 10; // pms default style rows per page
+$per_page = $_SESSION['pagination_limit'] ?? 10;
 $offset   = ($page - 1) * $per_page;
 
 $where = "WHERE deleted_at IS NULL";

@@ -4,7 +4,7 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('resources');
-include "includes/header.php";
+
 
 if (isset($_GET['delete'])) {
     $del_id = (int) $_GET['delete'];
@@ -32,7 +32,7 @@ if (isset($_GET['delete'])) {
 
 $search = $_GET['search'] ?? '';
 $page = max(1, (int) ($_GET['page'] ?? 1));
-$per_page = 10;
+$per_page = $_SESSION['pagination_limit'] ?? 10;
 $offset = ($page - 1) * $per_page;
 
 
@@ -49,6 +49,7 @@ $total_pages = max(1, (int) ceil($total / $per_page));
 $sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u  LEFT JOIN roles r ON u.role_id = r.id  $where  ORDER BY u.id DESC LIMIT $per_page OFFSET $offset";
 $res = $conn->query($sql);
 $qs = '&search=' . urlencode($search);
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
