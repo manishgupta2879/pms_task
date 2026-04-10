@@ -105,10 +105,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
         if (!empty($password)) {
             $hashed_password = md5($password);
             $stmt = $conn->prepare("UPDATE users SET name=?, email=?, password=?, profile_pic=?, pagination_limit=? WHERE id=?");
-            $stmt->bind_param("ssssii", $form_data['name'], $form_data['email'], $hashed_password, $form_data['profile_pic'], $form_data['pagination_limit'],$user_id);
+            $stmt->bind_param("ssssii", $form_data['name'], $form_data['email'], $hashed_password, $form_data['profile_pic'], $form_data['pagination_limit'], $user_id);
         } else {
             $stmt = $conn->prepare("UPDATE users SET name=?, email=?, profile_pic=?, pagination_limit=? WHERE id=?");
-            $stmt->bind_param("sssii", $form_data['name'], $form_data['email'], $form_data['profile_pic'], $form_data['pagination_limit'],$user_id);
+            $stmt->bind_param("sssii", $form_data['name'], $form_data['email'], $form_data['profile_pic'], $form_data['pagination_limit'], $user_id);
         }
 
         if ($stmt->execute()) {
@@ -136,126 +136,122 @@ include "includes/header.php";
 
                     <!-- Header -->
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        My Profile Settings
-                        <a href="dashboard.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
+                        <h5 class="mb-0">Settings</h5>
                     </div>
 
                     <!-- Body -->
-                    <div class="pms-panel-body">
+                    <div class="pms-panel-body pt-0">
+                        <h6 class="my-2 fw-bold text-muted bg-body-secondary px-2 py-1">Profile</h6>
                         <!-- Profile Picture Section -->
-                        <div class="mb-4 pb-4" style="border-bottom: 1px solid #e2e8f0;">
-                            <label class="pms-form-label fw-bold mb-3">Profile Picture</label>
-                            
-                            <div class="row align-items-center">
-                                <div class="col-md-3 text-center mb-3 mb-md-0">
-                                    <div style="width: 150px; height: 150px; border-radius: 8px; overflow: hidden; background: #f1f5f9; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
-                                        <?php if (!empty($form_data['profile_pic']) && file_exists($form_data['profile_pic'])): ?>
-                                            <img src="<?= htmlspecialchars($form_data['profile_pic']) ?>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                                        <?php else: ?>
-                                            <i class="bi bi-person-circle" style="font-size: 80px; color: #cbd5e1;"></i>
-                                        <?php endif; ?>
-                                    </div>
+                        <div class="row align-items-center">
+                            <div class="col-1 text-center mb-3 mb-md-0">
+                                <div
+                                    style="width: 60px; height: 60px; border-radius: 8px; overflow: hidden; background: #f1f5f9; margin: 0 auto; display: flex; align-items: center; justify-content: center;">
+                                    <?php if (!empty($form_data['profile_pic']) && file_exists($form_data['profile_pic'])): ?>
+                                        <img src="<?= htmlspecialchars($form_data['profile_pic']) ?>" alt="Profile"
+                                            style="width: 100%; height: 100%; object-fit: cover;">
+                                    <?php else: ?>
+                                        <i class="bi bi-person-circle" style="font-size: 80px; color: #cbd5e1;"></i>
+                                    <?php endif; ?>
                                 </div>
+                            </div>
 
-                                <div class="col-md-9">
-                                    <div class="mb-3">
-                                        <label class="pms-form-label">Upload New Picture</label>
-                                        <input type="file" name="profile_pic" class="form-control" accept="image/jpeg,image/png,image/gif,image/webp">
-                                        <small class="text-muted d-block mt-1">
-                                            Supported formats: JPG, PNG, GIF, WebP<br>
-                                            <!-- Maximum file size: 5MB -->
-                                        </small>
-                                        <?php if (isset($errors['profile_pic'])): ?>
-                                            <div class="text-danger small mt-2">
-                                                <i class="bi bi-exclamation-circle me-1"></i><?= $errors['profile_pic'] ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
+                            <div class="col-11">
+                                <div class="mb-3">
+                                    <label class="pms-form-label">Upload New Picture</label>
+                                    <input type="file" name="profile_pic" class="form-control"
+                                        accept="image/jpeg,image/png,image/gif,image/webp">
+                                    <?php if (isset($errors['profile_pic'])): ?>
+                                        <div class="text-danger small mt-2">
+                                            <i class="bi bi-exclamation-circle me-1"></i>
+                                            <?= $errors['profile_pic'] ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Name -->
-                        <div class="mb-3">
-                            <label class="pms-form-label">
-                                <span class="text-danger">*</span> Full Name
-                            </label>
-                            <input type="text" name="name"
-                                   class="form-control"
-                                   placeholder="Enter your full name"
-                                   value="<?= htmlspecialchars($form_data['name']) ?>"
-                                   required>
-                            <?php if (isset($errors['name'])): ?>
-                                <div class="text-danger small mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['name'] ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                        <div class="row">
+                            <!-- Name -->
+                            <div class="col-6">
+                                <label class="pms-form-label">
+                                    <span class="text-danger">*</span> Full Name
+                                </label>
+                                <input type="text" name="name" class="form-control" placeholder="Enter your full name"
+                                    value="<?= htmlspecialchars($form_data['name']) ?>" required>
+                                <?php if (isset($errors['name'])): ?>
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        <?= $errors['name'] ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
-                        <!-- Email -->
-                        <div class="mb-3">
-                            <label class="pms-form-label">
-                                <span class="text-danger">*</span> Email Address
-                            </label>
-                            <input type="email" name="email"
-                                   class="form-control"
-                                   placeholder="Enter your email address"
-                                   value="<?= htmlspecialchars($form_data['email']) ?>"
-                                   required>
-                            <?php if (isset($errors['email'])): ?>
-                                <div class="text-danger small mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['email'] ?>
-                                </div>
-                            <?php endif; ?>
+                            <!-- Email -->
+                            <div class="col-6">
+                                <label class="pms-form-label">
+                                    <span class="text-danger">*</span> Email Address
+                                </label>
+                                <input type="email" name="email" class="form-control"
+                                    placeholder="Enter your email address"
+                                    value="<?= htmlspecialchars($form_data['email']) ?>" required>
+                                <?php if (isset($errors['email'])): ?>
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        <?= $errors['email'] ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
                         <!-- Divider -->
-                        <hr class="my-4">
+                        <!-- <hr class="my-3"> -->
 
                         <!-- Password Section -->
-                        <h6 class="mb-3 fw-bold text-muted">Change Password (Optional)</h6>
+                        <h6 class="mt-3 my-2 fw-bold text-muted bg-body-secondary px-2 py-1">Change Password</h6>
 
-                        <!-- New Password -->
-                        <div class="mb-3">
-                            <label class="pms-form-label">New Password</label>
-                            <input type="password" name="password"
-                                   class="form-control"
-                                   placeholder="Leave blank to keep current password">
-                            <?php if (isset($errors['password']) && $errors['password'] !== "Passwords do not match."): ?>
-                                <div class="text-danger small mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['password'] ?>
-                                </div>
-                            <?php endif; ?>
+                        <div class="row">
+                            <!-- New Password -->
+                            <div class="col-6">
+                                <label class="pms-form-label">New Password</label>
+                                <input type="password" name="password" class="form-control"
+                                    placeholder="Leave blank to keep current password">
+                                <?php if (isset($errors['password']) && $errors['password'] !== "Passwords do not match."): ?>
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        <?= $errors['password'] ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+
+                            <!-- Confirm Password -->
+                            <div class="col-6">
+                                <label class="pms-form-label">Confirm Password</label>
+                                <input type="password" name="confirm_password" class="form-control"
+                                    placeholder="Re-enter your new password">
+                                <?php if (isset($errors['password']) && $errors['password'] === "Passwords do not match."): ?>
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        <?= $errors['password'] ?>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if (isset($errors['confirm_password'])): ?>
+                                    <div class="text-danger small mt-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        <?= $errors['confirm_password'] ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
                         </div>
 
-                        <!-- Confirm Password -->
-                        <div class="mb-3">
-                            <label class="pms-form-label">Confirm Password</label>
-                            <input type="password" name="confirm_password"
-                                   class="form-control"
-                                   placeholder="Re-enter your new password">
-                            <?php if (isset($errors['password']) && $errors['password'] === "Passwords do not match."): ?>
-                                <div class="text-danger small mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['password'] ?>
-                                </div>
-                            <?php endif; ?>
-                            <?php if (isset($errors['confirm_password'])): ?>
-                                <div class="text-danger small mt-1">
-                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['confirm_password'] ?>
-                                </div>
-                            <?php endif; ?>
-                        </div>
+                        <h6 class="mt-3 my-2 fw-bold text-muted bg-body-secondary px-2 py-1">Config</h6>
                         <!-- Pagination Limit -->
                         <div class="mb-3">
                             <label class="pms-form-label">
                                 Pagination Limit
                             </label>
-                            <input type="number" 
-                                name="pagination_limit"
-                                class="form-control"
-                                value="<?= htmlspecialchars($form_data['pagination_limit']) ?>"
-                                min="1"
-                                step="1"
+                            <input type="number" name="pagination_limit" class="form-control"
+                                value="<?= htmlspecialchars($form_data['pagination_limit']) ?>" min="1" step="1"
                                 placeholder="Enter pagination limit">
 
                             <?php if (isset($errors['pagination_limit'])): ?>
@@ -283,7 +279,7 @@ include "includes/header.php";
         <div class="col-md-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    Account Information
+                    <h5 class="mb-0">Account Information</h5>
                 </div>
                 <div class="pms-panel-body">
                     <div class="mb-3">
