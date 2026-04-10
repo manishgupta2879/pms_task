@@ -99,10 +99,7 @@ include "includes/header.php";
     <div class="pms-panel mb-3">
         <div class="pms-panel-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
             data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="true">
-            <span>
-                <i class="bi bi-funnel me-2"></i>Filter My Tasks
-            </span>
-            <i class="bi bi-chevron-down"></i>
+            <h5 class="mb-0">Filter My Tasks</h5>
         </div>
         <div id="filterPanel" class="collapse show">
             <form method="GET">
@@ -166,7 +163,7 @@ include "includes/header.php";
     <!-- BOTTOM - TASK TABLE (Full Width) -->
     <div class="pms-panel">
         <div class="pms-panel-header">
-            <i class="bi bi-list-check me-2"></i>My Tasks
+            <h5 class="mb-0">My Tasks</h5>
         </div>
 
         <?php if ($taskRes->num_rows == 0): ?>
