@@ -34,7 +34,7 @@ if (isset($_GET['delete'])) {
 // Search + Pagination
 $search   = $_GET['search'] ?? '';
 $page     = max(1, (int)($_GET['page'] ?? 1));
-$per_page = 10;
+$per_page = $_SESSION['pagination_limit'] ?? 10;
 $offset   = ($page - 1) * $per_page;
 
 $where = "WHERE 1 = 1";

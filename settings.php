@@ -17,6 +17,7 @@ $form_data = [
     'name' => $current_user['name'] ?? '',
     'email' => $current_user['email'] ?? '',
     'profile_pic' => $current_user['profile_pic'] ?? '',
+    'pagination_limit' => $current_user['pagination_limit'] ?? 10,
 ];
 
 // Create uploads directory if it doesn't exist
@@ -31,6 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
     $form_data['email'] = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
+    $form_data['pagination_limit'] = isset($_POST['pagination_limit']) ? (int) $_POST['pagination_limit'] : 10;
 
     // Validation
     if (empty($form_data['name'])) {
@@ -64,7 +66,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
             $errors['password'] = "Passwords do not match.";
         }
     }
-
+    if ($form_data['pagination_limit'] <= 0) {
+        $errors['pagination_limit'] = "Pagination limit must be greater than 0.";
+    }
     // Handle profile picture upload
     if (!empty($_FILES['profile_pic']['name'])) {
         $file = $_FILES['profile_pic'];
@@ -100,18 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
     if (empty($errors)) {
         if (!empty($password)) {
             $hashed_password = md5($password);
-            $stmt = $conn->prepare("UPDATE users SET name=?, email=?, password=?, profile_pic=? WHERE id=?");
-            $stmt->bind_param("ssssi", $form_data['name'], $form_data['email'], $hashed_password, $form_data['profile_pic'], $user_id);
+            $stmt = $conn->prepare("UPDATE users SET name=?, email=?, password=?, profile_pic=?, pagination_limit=? WHERE id=?");
+            $stmt->bind_param("ssssii", $form_data['name'], $form_data['email'], $hashed_password, $form_data['profile_pic'], $form_data['pagination_limit'],$user_id);
         } else {
-            $stmt = $conn->prepare("UPDATE users SET name=?, email=?, profile_pic=? WHERE id=?");
-            $stmt->bind_param("sssi", $form_data['name'], $form_data['email'], $form_data['profile_pic'], $user_id);
+            $stmt = $conn->prepare("UPDATE users SET name=?, email=?, profile_pic=?, pagination_limit=? WHERE id=?");
+            $stmt->bind_param("sssii", $form_data['name'], $form_data['email'], $form_data['profile_pic'], $form_data['pagination_limit'],$user_id);
         }
 
         if ($stmt->execute()) {
             // Update session data
             $_SESSION['user'] = $form_data['name'];
             $_SESSION['profile_pic'] = $form_data['profile_pic'];
-            
+            $_SESSION['pagination_limit'] = $form_data['pagination_limit'];
             $_SESSION['success'] = "Profile updated successfully.";
             header("Location: settings.php");
             exit();
@@ -238,6 +242,25 @@ include "includes/header.php";
                             <?php if (isset($errors['confirm_password'])): ?>
                                 <div class="text-danger small mt-1">
                                     <i class="bi bi-exclamation-circle me-1"></i><?= $errors['confirm_password'] ?>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <!-- Pagination Limit -->
+                        <div class="mb-3">
+                            <label class="pms-form-label">
+                                Pagination Limit
+                            </label>
+                            <input type="number" 
+                                name="pagination_limit"
+                                class="form-control"
+                                value="<?= htmlspecialchars($form_data['pagination_limit']) ?>"
+                                min="1"
+                                step="1"
+                                placeholder="Enter pagination limit">
+
+                            <?php if (isset($errors['pagination_limit'])): ?>
+                                <div class="text-danger small mt-1">
+                                    <i class="bi bi-exclamation-circle me-1"></i><?= $errors['pagination_limit'] ?>
                                 </div>
                             <?php endif; ?>
                         </div>

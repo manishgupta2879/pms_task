@@ -17,7 +17,7 @@ $employee = $_GET['employee'] ?? '';
 $from_date = $_GET['from_date'] ?? date("Y-m-d");
 $to_date = $_GET['to_date'] ?? date("Y-m-d");
 
-$limit = 10;
+$limit = $_SESSION['pagination_limit'] ?? 10;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int) $page);
 $offset = ($page - 1) * $limit;

@@ -34,7 +34,7 @@ $deadline = $_GET['deadline'] ?? '';
 $due = $_GET['due'] ?? '';
 
 // pagination
-$limit = 10;
+$limit = $_SESSION['pagination_limit'] ?? 10;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int)$page);
 $offset = ($page - 1) * $limit;

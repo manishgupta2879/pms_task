@@ -4,7 +4,6 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('tasks');
-include "includes/header.php";
 
 $user_id = $_SESSION['user_id'];
 $search = $_GET['search'] ?? '';
@@ -15,7 +14,7 @@ $deadline = $_GET['deadline'] ?? '';
 $product = $_GET['product'] ?? '';
 
 // pagination
-$limit = 10;
+$limit = $_SESSION['pagination_limit'] ?? 10;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 
@@ -51,13 +50,15 @@ if ($deadline != '') {
 
 if ($product != '') {
     $product_esc = $conn->real_escape_string($product);
-    $where .= " AND o.product LIKE '%$product_esc%'";
+    $where .= " AND oi.product LIKE '%$product_esc%'";
 }
 
 // total count
 $count_res = $conn->query("
-    SELECT COUNT(DISTINCT t.id) as cnt FROM tasks t 
-    LEFT JOIN orders o ON t.order_id = o.id 
+    SELECT COUNT(DISTINCT t.id) as cnt 
+    FROM tasks t 
+    INNER JOIN orders o ON t.order_id = o.id
+    INNER JOIN order_items oi ON o.order_no = oi.order_id
     WHERE $where
 ");
 $total = $count_res->fetch_assoc()['cnt'];
@@ -90,6 +91,7 @@ $taskRes = $conn->query("
 $qs = '&search=' . urlencode($search) . '&status=' . urlencode($status_filter) .
     '&order_id=' . urlencode($order_id) . '&customer=' . urlencode($customer) .
     '&deadline=' . urlencode($deadline) . '&product=' . urlencode($product);
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
@@ -296,7 +298,7 @@ $qs = '&search=' . urlencode($search) . '&status=' . urlencode($status_filter) .
             </div>
 
             <!-- Pagination -->
-            <?php if ($total_pages > 1): ?>
+            <?php if ($total_pages > 0): ?>
                 <div class="pms-footer">
                     <?php
                     $start = ($total > 0) ? $offset + 1 : 0;

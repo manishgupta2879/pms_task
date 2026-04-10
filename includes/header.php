@@ -14,9 +14,10 @@ $profile_pic = '';
 $user_name = $_SESSION['user'] ?? 'User';
 
 if ($user_id > 0) {
-    $user_res = $conn->query("SELECT name, profile_pic FROM users WHERE id=$user_id LIMIT 1");
+    $user_res = $conn->query("SELECT name, profile_pic, pagination_limit FROM users WHERE id=$user_id LIMIT 1");
     if ($user_res && $user_row = $user_res->fetch_assoc()) {
         $user_name = $user_row['name'] ?? $_SESSION['user'];
+        $_SESSION['pagination_limit'] = $user_row['pagination_limit'] ?? 10;
         $profile_pic = $user_row['profile_pic'] ?? '';
     }
 }
