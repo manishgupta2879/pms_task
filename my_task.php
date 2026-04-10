@@ -113,7 +113,7 @@ include "includes/header.php";
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Order ID</label>
-                            <input type="text" name="order_id" class="form-control" placeholder="Order #"
+                            <input type="text" name="order_id" class="form-control" placeholder="Order No"
                                 value="<?= htmlspecialchars($order_id) ?>">
                         </div>
 

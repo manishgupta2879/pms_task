@@ -154,7 +154,7 @@ include "includes/header.php";
 
                     <!-- Header -->
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        Edit User
+                        <h5 class="mb-0 fw-bold" style="color: #1e293b;">Edit User</h5>
                         <a href="users.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 

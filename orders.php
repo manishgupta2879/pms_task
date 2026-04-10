@@ -89,14 +89,15 @@ include "includes/header.php";
         <div class="col-lg-3 col-md-4">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
-                    Filter
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
+                    
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <div class="col-6">
                                 <label class="pms-form-label">Search</label>
-                                <input type="text" name="search" class="form-control" placeholder="Order #" value="<?= $search ?>">
+                                <input type="text" name="search" class="form-control" placeholder="Order No" value="<?= $search ?>">
                             </div>
                            
                             <div class="col-6">
@@ -127,8 +128,8 @@ include "includes/header.php";
         <div class="col-lg-9 col-md-8">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                    <span>Orders List</span>
-                    <a href="add_order.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-plus-circle me-1"></i>Add Order</a>
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Orders List</h5>
+                    <a href="add_order.php" class="btn btn-outline-secondary btn-sm">+ Add Order</a>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -136,7 +137,7 @@ include "includes/header.php";
 
                         <thead class="table-dark">
                             <tr>
-                                <th>Order #</th>
+                                <th>Order No</th>
                                 <th>Customer</th>
                                 <th>Status</th>
                                 <th class="text-end" style="width: 80px;">Actions</th>

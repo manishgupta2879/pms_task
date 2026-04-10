@@ -90,7 +90,7 @@ include "includes/header.php";
         <div class="col-lg-3 col-md-4">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
-                    Filter
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
@@ -147,8 +147,9 @@ include "includes/header.php";
         <div class="col-lg-9 col-md-8">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                    <span>Production Report (<?= date('M d, Y', strtotime($from_date)) ?> to
-                        <?= date('M d, Y', strtotime($to_date)) ?>)</span>
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">
+                        Production Report (<?= date('M d, Y', strtotime($from_date)) ?> to <?= date('M d, Y', strtotime($to_date)) ?>)
+                    </h5>
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
                             data-bs-toggle="dropdown">

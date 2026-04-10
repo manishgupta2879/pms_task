@@ -89,7 +89,7 @@ include "includes/header.php";
         <div class="pms-panel mb-3">
             <div class="pms-controls">
                 <div class="pms-controls-left">
-                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Order #<?= $order['order_no'] ?></h5>
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Order No. #<?= $order['order_no'] ?></h5>
                 </div>
                 <div>
 

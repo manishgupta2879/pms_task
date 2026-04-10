@@ -81,7 +81,7 @@ include "includes/header.php";
                 <div class="pms-panel">
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        Add New Task
+                        <h5 class="mb-0 fw-bold" style="color: #334155;">Add New Task</h5>
                         <?php $back_url = ($order_id > 0) ? "order_task_assignment.php?order_id=$order_id" : "task_library.php"; ?>
                         <a href="<?= $back_url ?>" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>

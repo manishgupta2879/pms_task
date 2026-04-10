@@ -127,7 +127,7 @@ include "includes/header.php";
                 <div class="pms-panel">
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        <?= $id ? 'Edit Resource' : 'Add New Resource' ?>
+                        <h5 class="mb-0 fw-bold" style="color: #1e293b;"><?= $id ? 'Edit Resource' : 'Add New Resource' ?></h5>
                         <a href="resources.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 

@@ -58,7 +58,7 @@ include "includes/header.php";
 
         <div class="pms-controls">
             <div class="pms-controls-left">
-                <h5 class="mb-0 fw-bold" style="color: #334155;">Resources</h5>
+                <h5 class="mb-0 fw-bold" style="color: #1e293b;">Resources</h5>
             </div>
 
             <div class="pms-controls-right">
