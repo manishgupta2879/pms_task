@@ -10,15 +10,20 @@ $form_data = [
     'name' => '',
     'username' => '',
     'email' => '',
-    'role' => 'staff'
+    'role_id' => ''
 ];
+$roles = [];
+$role_q = $conn->query("SELECT id, role_name FROM roles WHERE deleted_at IS NULL");
 
+while ($row = $role_q->fetch_assoc()) {
+    $roles[] = $row;
+}
 // Process form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_user'])) {
     $form_data['name'] = trim($_POST['name'] ?? '');
     $form_data['username'] = trim($_POST['username'] ?? '');
     $form_data['email'] = trim($_POST['email'] ?? '');
-    $form_data['role'] = $_POST['role'] ?? 'staff';
+    $form_data['role_id'] = $_POST['role_id'] ?? '';
     $password = $_POST['password'] ?? '';
 
     // Validation
@@ -69,8 +74,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['save_user'])) {
     // If no errors, insert the user
     if (empty($errors)) {
         $hashed_password = md5($password);
-        $stmt = $conn->prepare("INSERT INTO users (name, username, email, password, role) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("sssss", $form_data['name'], $form_data['username'], $form_data['email'], $hashed_password, $form_data['role']);
+        $stmt = $conn->prepare("INSERT INTO users (name, username, email, password, role_id) VALUES (?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssss", $form_data['name'], $form_data['username'], $form_data['email'], $hashed_password, $form_data['role_id']);
 
         if ($stmt->execute()) {
             $_SESSION['success'] = "User added successfully.";
@@ -173,9 +178,14 @@ include "includes/header.php";
                         <!-- Role -->
                         <div class="col-md-6">
                             <label class="pms-form-label">Role</label>
-                            <select name="role" class="form-select">
-                                <option value="staff" <?= $form_data['role'] == 'staff' ? 'selected' : '' ?>>Staff</option>
-                                <option value="superadmin" <?= $form_data['role'] == 'superadmin' ? 'selected' : '' ?>>Super Admin</option>
+                            <select name="role_id" class="form-select" required>
+                                <option value="">Select Role</option>
+                                <?php foreach ($roles as $role): ?>
+                                    <option value="<?= $role['id'] ?>"
+                                        <?= $form_data['role_id'] == $role['id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($role['role_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
                             </select>
                         </div>
                         </div>
