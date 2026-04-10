@@ -45,11 +45,11 @@ $deadline = $order['deadline'];
 $deadline_class = "";
 $deadline_text = "";
 if ($deadline < $today) {
-    $deadline_class = "bg-danger";
-    $deadline_text = "⚠️ Deadline passed!";
+    // $deadline_class = "bg-danger";
+    // $deadline_text = "⚠️ Deadline passed!";
 } elseif ($deadline == $today) {
-    $deadline_class = "bg-warning";
-    $deadline_text = "⚠️ Deadline is today!";
+    // $deadline_class = "bg-warning";
+    // $deadline_text = "⚠️ Deadline is today!";
 }
 
 // ✅ productivity - users only
@@ -108,7 +108,7 @@ include "includes/header.php";
                         <i class="bi bi-arrow-left me-1"></i> Back
                     </a>
                     <a href="edit_order.php?id=<?= $id ?>" class="btn btn-outline-secondary btn-sm">
-                            <i class="bi bi-pencil me-1"></i> Edit
+                        <i class="bi bi-pencil me-1"></i> Edit
                     </a>
                 </div>
             </div>
@@ -134,7 +134,7 @@ include "includes/header.php";
                         </div>
                     </div>
                 </div> -->
-                <div class="col-md-3">
+                <!-- <div class="col-md-3">
                     <div style="background: #f8fafc; padding: 10px 12px; border-radius: 6px;">
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Deadline
                         </div>
@@ -143,7 +143,7 @@ include "includes/header.php";
                             <?= date("M d, Y", strtotime($order['deadline'])) ?>
                         </div>
                     </div>
-                </div>
+                </div> -->
                 <div class="col-md-3">
                     <div style="background: #f8fafc; padding: 6px 12px; border-radius: 6px;">
                         <div style="font-size: 11px; color: #64748b; margin-bottom: 4px; font-weight: 500;">Status</div>
@@ -159,7 +159,8 @@ include "includes/header.php";
         <div class="pms-panel mb-3">
             <div class="pms-controls">
                 <div class="pms-controls-left">
-                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-list-task me-2"></i>Product List</h5>
+                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-list-task me-2"></i>Product List
+                    </h5>
                 </div>
             </div>
 
@@ -181,7 +182,7 @@ include "includes/header.php";
                         <tbody>
                             <?php $counter = 1;
                             while ($item = $order_items->fetch_assoc()):
-                            ?>
+                                ?>
                                 <tr>
                                     <td class="text-muted fw-medium"><?= $counter++ ?></td>
                                     <td class="text-dark fw-medium"><?= htmlspecialchars($item['product']) ?></td>
@@ -251,7 +252,7 @@ include "includes/header.php";
 
                                     $actual_minutes = floor(($end->getTimestamp() - $start->getTimestamp()) / 60);
 
-                                    $est_minutes = (int)$t['est_time'];
+                                    $est_minutes = (int) $t['est_time'];
 
                                     if ($actual_minutes > $est_minutes) {
                                         $is_delayed = true;
@@ -271,7 +272,7 @@ include "includes/header.php";
                                     }
                                 }
 
-                            ?>
+                                ?>
                                 <tr>
                                     <td class="text-muted fw-medium"><?= $task_counter++ ?></td>
                                     <td class="text-dark fw-medium"><?= htmlspecialchars($t['task_name']) ?></td>
@@ -284,12 +285,14 @@ include "includes/header.php";
                                     </td>
                                     <td class="text-dark fw-medium"><?= htmlspecialchars($t['product']) ?></td>
                                     <td>
-                                        <span class="<?= ($t['task_deadline'] < date("Y-m-d")) ? 'text-danger' : 'text-dark' ?>">
+                                        <span
+                                            class="<?= ($t['task_deadline'] < date("Y-m-d")) ? 'text-danger' : 'text-dark' ?>">
                                             <?= date("M d, Y", strtotime($t['task_deadline'])) ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
+                                        <span
+                                            class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
                                     </td>
                                     <td>
                                         <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>">
@@ -297,17 +300,25 @@ include "includes/header.php";
                                         </span>
                                     </td>
                                     <td>
-                                        <select name="priority" class="form-select form-select-sm select2 py-0 <?= $t['status'] == 'completed' ? 'disabled' : 'priority-change' ?> " data-task-id="<?= $t['id'] ?>" <?= $t['status'] == 'completed' ? 'disabled' : '' ?>>
+                                        <select name="priority"
+                                            class="form-select form-select-sm select2 py-0 <?= $t['status'] == 'completed' ? 'disabled' : 'priority-change' ?> "
+                                            data-task-id="<?= $t['id'] ?>" <?= $t['status'] == 'completed' ? 'disabled' : '' ?>>
                                             <option value="low" <?= $t['priority'] == 'low' ? 'selected' : '' ?>>Low</option>
-                                            <option value="medium" <?= $t['priority'] == 'medium' ? 'selected' : '' ?>>Medium</option>
+                                            <option value="medium" <?= $t['priority'] == 'medium' ? 'selected' : '' ?>>Medium
+                                            </option>
                                             <option value="high" <?= $t['priority'] == 'high' ? 'selected' : '' ?>>High</option>
                                         </select>
                                     </td>
-                                    <td><span class="text-muted" style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span></td>
-                                    <td><span class="text-muted" style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span></td>
+                                    <td><span class="text-muted"
+                                            style="font-size: 13px;"><?= ($t['start_time']) ? date("M d, H:i", strtotime($t['start_time'])) : '-' ?></span>
+                                    </td>
+                                    <td><span class="text-muted"
+                                            style="font-size: 13px;"><?= ($t['end_time']) ? date("M d, H:i", strtotime($t['end_time'])) : '-' ?></span>
+                                    </td>
                                     <td>
                                         <?php if ($t['status'] == 'completed'): ?>
-                                            <span class="badge <?= $is_delayed ? 'bg-danger' : 'bg-success' ?>" style="font-size: 11px;">
+                                            <span class="badge <?= $is_delayed ? 'bg-danger' : 'bg-success' ?>"
+                                                style="font-size: 11px;">
                                                 <?= $delay_text ?>
                                             </span>
                                         <?php else: ?>
@@ -317,20 +328,24 @@ include "includes/header.php";
                                     <td class="text-end">
                                         <?php if ($order['status'] != 'completed'): ?>
                                             <?php if ($t['status'] == 'not_started'): ?>
-                                                <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success" title="Start Task">
+                                                <a href="start_task.php?id=<?= $t['id'] ?>"
+                                                    class="pms-action-btn pms-action-btn-success" title="Start Task">
                                                     <i class="bi bi-play-fill"></i> Start Task
                                                 </a>
                                             <?php elseif ($t['status'] == 'in_progress'): ?>
-                                                <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="End Task">
+                                                <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger"
+                                                    title="End Task">
                                                     <i class="bi bi-stop-fill"></i> End Task
                                                 </a>
                                             <?php else: ?>
                                                 <span class="text-success fw-medium">✓ Done</span>
                                             <?php endif; ?>
-                                            <?php if(!$t['start_time'] && !$t['end_time']): ?>
-                                            <a href="delete_task.php?id=<?= $t['id'] ?>&order_id=<?= $id ?>" class="pms-action-btn pms-action-btn-danger" title="Delete Task" onclick="return confirm('Delete this task?')">
-                                                <i class="bi bi-trash"></i>
-                                            </a>
+                                            <?php if (!$t['start_time'] && !$t['end_time']): ?>
+                                                <a href="delete_task.php?id=<?= $t['id'] ?>&order_id=<?= $id ?>"
+                                                    class="pms-action-btn pms-action-btn-danger" title="Delete Task"
+                                                    onclick="return confirm('Delete this task?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </a>
                                             <?php endif; ?>
                                         <?php else: ?>
                                             <span class="text-muted">Locked</span>
@@ -374,7 +389,7 @@ include "includes/header.php";
                             <?php $prod_counter = 1;
                             while ($p = $productivityRes->fetch_assoc()):
                                 $eff = ($p['total'] > 0) ? round(($p['completed'] / $p['total']) * 100) : 0;
-                            ?>
+                                ?>
                                 <tr>
                                     <td class="text-muted fw-medium"><?= $prod_counter++ ?></td>
                                     <td class="text-dark fw-medium"><?= htmlspecialchars($p['person']) ?></td>
@@ -400,8 +415,8 @@ include "includes/header.php";
         <div class="col-12">
             <div class="pms-panel">
                 <div class="pms-controls">
-                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i
-                            class="bi bi-binoculars-fill me-2"></i>Progress</h5>
+                    <h5 class="mb-0 fw-bold" style="color: #334155;"><i class="bi bi-binoculars-fill me-2"></i>Progress
+                    </h5>
                 </div>
                 <div style="padding: 30px 20px;">
                     <!-- Progress Bar -->
@@ -409,8 +424,7 @@ include "includes/header.php";
                         <div
                             style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                             <!-- <span style="font-size: 14px; font-weight: 600; color: #334155;">Completion</span> -->
-                            <span
-                                style="font-size: 18px; font-weight: 900; color: #10b981;"><?= $progress ?>%</span>
+                            <span style="font-size: 18px; font-weight: 900; color: #10b981;"><?= $progress ?>%</span>
                         </div>
                         <div
                             style="background-color: #e2e8f0; border-radius: 10px; height: 12px; overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05);">
@@ -467,18 +481,18 @@ include "includes/header.php";
 <?php include "includes/footer.php"; ?>
 
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
         $('.select2').select2({
             placeholder: "Search...",
             width: '100%',
             theme: 'bootstrap-5',
 
-            
+
         });
     });
 </script>
 <script>
-    $(document).on('change', '.priority-change', function() {
+    $(document).on('change', '.priority-change', function () {
         let priority = $(this).val();
         let task_id = $(this).data('task-id');
 
@@ -489,12 +503,12 @@ include "includes/header.php";
                 task_id: task_id,
                 priority: priority
             },
-            success: function(res) {
+            success: function (res) {
                 // optional success feedback
                 // console.log("Priority updated");
                 showAlert('success', 'Priority updated successfully');
             },
-            error: function() {
+            error: function () {
                 // alert("Failed to update priority");
                 showAlert('danger', 'Failed to update priority');
             }

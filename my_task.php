@@ -15,7 +15,7 @@ $product = $_GET['product'] ?? '';
 
 // pagination
 $limit = $_SESSION['pagination_limit'] ?? 10;
-$page = max(1, (int)($_GET['page'] ?? 1));
+$page = max(1, (int) ($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 
 // base query - only user's tasks
@@ -45,7 +45,7 @@ if ($customer != '') {
 
 if ($deadline != '') {
     $deadline_esc = $conn->real_escape_string($deadline);
-    $where .= " AND o.deadline = '$deadline_esc'";
+    $where .= " AND t.deadline = '$deadline_esc'";
 }
 
 if ($product != '') {
@@ -62,7 +62,7 @@ $count_res = $conn->query("
     WHERE $where
 ");
 $total = $count_res->fetch_assoc()['cnt'];
-$total_pages = max(1, (int)ceil($total / $limit));
+$total_pages = max(1, (int) ceil($total / $limit));
 
 // main query
 $taskRes = $conn->query("
@@ -97,7 +97,8 @@ include "includes/header.php";
 <div class="pms-wrap">
     <!-- TOP - FILTERS (Collapsible) -->
     <div class="pms-panel mb-3">
-        <div class="pms-panel-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="true">
+        <div class="pms-panel-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
+            data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="true">
             <span>
                 <i class="bi bi-funnel me-2"></i>Filter My Tasks
             </span>
@@ -109,42 +110,51 @@ include "includes/header.php";
                     <div class="row g-3">
                         <div class="col-md-2">
                             <label class="pms-form-label">Task Name</label>
-                            <input type="text" name="search" class="form-control" placeholder="Search task..." value="<?= htmlspecialchars($search) ?>">
+                            <input type="text" name="search" class="form-control" placeholder="Search task..."
+                                value="<?= htmlspecialchars($search) ?>">
                         </div>
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Order ID</label>
-                            <input type="text" name="order_id" class="form-control" placeholder="Order #" value="<?= htmlspecialchars($order_id) ?>">
+                            <input type="text" name="order_id" class="form-control" placeholder="Order #"
+                                value="<?= htmlspecialchars($order_id) ?>">
                         </div>
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Customer</label>
-                            <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= htmlspecialchars($customer) ?>">
+                            <input type="text" name="customer" class="form-control" placeholder="Customer Name"
+                                value="<?= htmlspecialchars($customer) ?>">
                         </div>
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Product</label>
-                            <input type="text" name="product" class="form-control" placeholder="Product Name" value="<?= htmlspecialchars($product) ?>">
+                            <input type="text" name="product" class="form-control" placeholder="Product Name"
+                                value="<?= htmlspecialchars($product) ?>">
                         </div>
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Deadline</label>
-                            <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($deadline) ?>">
+                            <input type="date" name="deadline" class="form-control"
+                                value="<?= htmlspecialchars($deadline) ?>">
                         </div>
 
                         <div class="col-md-2">
                             <label class="pms-form-label">Status</label>
                             <select name="status" class="form-select">
                                 <option value="">All Status</option>
-                                <option value="not_started" <?= $status_filter == 'not_started' ? 'selected' : '' ?>>Not Started</option>
-                                <option value="in_progress" <?= $status_filter == 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                                <option value="completed" <?= $status_filter == 'completed' ? 'selected' : '' ?>>Completed</option>
+                                <option value="not_started" <?= $status_filter == 'not_started' ? 'selected' : '' ?>>Not
+                                    Started</option>
+                                <option value="in_progress" <?= $status_filter == 'in_progress' ? 'selected' : '' ?>>In
+                                    Progress</option>
+                                <option value="completed" <?= $status_filter == 'completed' ? 'selected' : '' ?>>Completed
+                                </option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="pms-panel-footer d-flex gap-2 text-end">
-                    <a href="my_task.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+                    <a href="my_task.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i>
+                        Reset</a>
                     <button type="submit" class="pms-btn-dark btn-sm">
                         <i class="bi bi-funnel"></i> Apply Filters
                     </button>
@@ -174,6 +184,8 @@ include "includes/header.php";
                             <th class="w-auto">Product</th>
                             <th class="w-auto">Task Name</th>
                             <th class="w-auto">Duration</th>
+                            <th class="w-auto">Deadline</th>
+
                             <th class="w-auto">Assigned By</th>
                             <th class="w-auto">Status</th>
                             <th class="w-auto">Start Time</th>
@@ -191,23 +203,23 @@ include "includes/header.php";
 
                                 // $start_timestamp = strtotime($t['start_time']);
                                 // $end_timestamp = strtotime($t['end_time']);
-                            
+                    
                                 // $actual_seconds = $end_timestamp - $start_timestamp;
                                 // $est_seconds = $t['est_time'] * 60; // assuming est_time is in minutes
-                            
+                    
                                 // if ($actual_seconds > $est_seconds) {
                                 //     $is_delayed = true;
-                            
+                    
                                 //     $diff_seconds = $actual_seconds - $est_seconds;
                                 //     $diff_hours = floor($diff_seconds / 3600);
                                 //     $diff_minutes = floor(($diff_seconds % 3600) / 60);
-                            
+                    
                                 //     if ($diff_hours > 0) {
                                 //         $delay_text = $diff_hours . 'h ' . $diff_minutes . 'm late';
                                 //     } else {
                                 //         $delay_text = $diff_minutes . 'm late';
                                 //     }
-                            
+                    
                                 // } else {
                                 //     $delay_text = '✓ On Time';
                                 // }
@@ -223,7 +235,7 @@ include "includes/header.php";
 
                                 $actual_minutes = floor(($end->getTimestamp() - $start->getTimestamp()) / 60);
 
-                                $est_minutes = (int)$t['est_time'];
+                                $est_minutes = (int) $t['est_time'];
 
                                 if ($actual_minutes > $est_minutes) {
                                     $is_delayed = true;
@@ -243,7 +255,7 @@ include "includes/header.php";
                                     $delay_text = '✓ On Time';
                                 }
                             }
-                        ?>
+                            ?>
                             <tr>
                                 <td class="text-start"><?= $task_counter++ ?></td>
                                 <td>#<?= $t['order_no'] ?></td>
@@ -251,27 +263,33 @@ include "includes/header.php";
                                 <td><?= htmlspecialchars(substr($t['product'], 0, 20)) ?></td>
                                 <td><?= htmlspecialchars(substr($t['task_name'], 0, 25)) ?></td>
                                 <td>
-                                    <span class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
+                                    <span
+                                        class="badge bg-info text-dark"><?= $t['est_time'] ? formatMinutes($t['est_time']) : '-' ?></span>
+                                </td>
+                                <td>
+                                    <?= $t['deadline'] ? date('M d,Y', strtotime($t['deadline'])) : '-' ?>
                                 </td>
                                 <td class="text-dark">
                                     <?= htmlspecialchars($t['assigned_by_user'] ?? 'N/A') ?>
                                 </td>
 
                                 <td>
-                                    <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>" style="font-size: 11px;">
+                                    <span class="pms-status <?= str_replace('_', ' ', $t['status']) ?>"
+                                        style="font-size: 11px;">
                                         <?= ucfirst(str_replace('_', ' ', $t['status'])) ?>
                                     </span>
                                 </td>
-                               
+
                                 <td class="text-dark">
                                     <?= $t['start_time'] ? date('M d, H:i', strtotime($t['start_time'])) : '-' ?>
                                 </td>
                                 <td class="text-dark">
                                     <?= $t['end_time'] ? date('M d, H:i', strtotime($t['end_time'])) : '-' ?>
                                 </td>
-                                 <td>
+                                <td>
                                     <?php if ($t['status'] == 'completed'): ?>
-                                        <span class="badge <?= $is_delayed ? 'bg-danger' : 'bg-success' ?>" style="font-size: 11px;">
+                                        <span class="badge <?= $is_delayed ? 'bg-danger' : 'bg-success' ?>"
+                                            style="font-size: 11px;">
                                             <?= $delay_text ?>
                                         </span>
                                     <?php else: ?>
@@ -280,11 +298,13 @@ include "includes/header.php";
                                 </td>
                                 <td class="text-center">
                                     <?php if ($t['status'] == 'not_started'): ?>
-                                        <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success" title="Start Task">
+                                        <a href="start_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-success"
+                                            title="Start Task">
                                             <i class="bi bi-play-fill"></i> Start Task
                                         </a>
                                     <?php elseif ($t['status'] == 'in_progress'): ?>
-                                        <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="End Task">
+                                        <a href="stop_task.php?id=<?= $t['id'] ?>" class="pms-action-btn pms-action-btn-danger"
+                                            title="End Task">
                                             <i class="bi bi-stop-fill"></i> End Task
                                         </a>
                                     <?php else: ?>
@@ -307,25 +327,32 @@ include "includes/header.php";
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> tasks</div>
 
                     <div class="pms-pagination">
-                        <a href="?page=<?= max(1, $page - 1) ?><?= $qs ?>" class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
+                        <a href="?page=<?= max(1, $page - 1) ?><?= $qs ?>"
+                            class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
 
                         <?php
                         $start_page = max(1, $page - 2);
                         $end_page = min($total_pages, $page + 2);
 
-                        if ($start_page > 1) echo '<a href="?page=1' . $qs . '" class="pms-page-btn">1</a>';
-                        if ($start_page > 2) echo '<span class="pms-page-btn disabled">...</span>';
+                        if ($start_page > 1)
+                            echo '<a href="?page=1' . $qs . '" class="pms-page-btn">1</a>';
+                        if ($start_page > 2)
+                            echo '<span class="pms-page-btn disabled">...</span>';
 
                         for ($i = $start_page; $i <= $end_page; $i++):
-                        ?>
-                            <a href="?page=<?= $i ?><?= $qs ?>" class="pms-page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+                            ?>
+                            <a href="?page=<?= $i ?><?= $qs ?>"
+                                class="pms-page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
                         <?php endfor;
 
-                        if ($end_page < $total_pages - 1) echo '<span class="pms-page-btn disabled">...</span>';
-                        if ($end_page < $total_pages) echo '<a href="?page=' . $total_pages . $qs . '" class="pms-page-btn">' . $total_pages . '</a>';
+                        if ($end_page < $total_pages - 1)
+                            echo '<span class="pms-page-btn disabled">...</span>';
+                        if ($end_page < $total_pages)
+                            echo '<a href="?page=' . $total_pages . $qs . '" class="pms-page-btn">' . $total_pages . '</a>';
                         ?>
 
-                        <a href="?page=<?= min($total_pages, $page + 1) ?><?= $qs ?>" class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">Next</a>
+                        <a href="?page=<?= min($total_pages, $page + 1) ?><?= $qs ?>"
+                            class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">Next</a>
                     </div>
                 </div>
             <?php endif; ?>

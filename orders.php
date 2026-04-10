@@ -55,10 +55,10 @@ if ($customer != '') {
     $where .= " AND customer LIKE '%$customer%'";
 }
 if ($due == 'this_week') {
-    $where .= " AND orders.status != 'completed'";
+    $where .= " AND orders.status != 'completed' AND orders.deleted_at IS NULL AND YEARWEEK(tasks.deadline, 1) = YEARWEEK(CURDATE(), 1) ";
 }
 // total count
-$totalRes = $conn->query("SELECT COUNT(*) as total FROM orders $where");
+$totalRes = $conn->query("SELECT COUNT( distinct orders.id) as total FROM orders LEFT JOIN tasks ON tasks.order_id = orders.id $where");
 $total = $totalRes->fetch_assoc()['total'];
 $total_pages = ceil($total / $limit);
 
@@ -69,8 +69,7 @@ $query = "
         orders.*, 
         COUNT(tasks.id) AS task_count
     FROM orders
-    LEFT JOIN tasks 
-        ON tasks.order_id = orders.id
+    LEFT JOIN tasks ON tasks.order_id = orders.id
     $where
     GROUP BY orders.id
     ORDER BY orders.id DESC
@@ -87,7 +86,7 @@ include "includes/header.php";
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
             <div class="alert alert-danger text-center">Order deleted successfully</div>
         <?php } ?>
-        <div class="col-lg-4 col-md-5">
+        <div class="col-lg-3 col-md-4">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
                     Filter
@@ -125,7 +124,7 @@ include "includes/header.php";
                 </form>
             </div>
         </div>
-        <div class="col-lg-8 col-md-7">
+        <div class="col-lg-9 col-md-8">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <span>Orders List</span>

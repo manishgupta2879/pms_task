@@ -115,7 +115,9 @@ include "includes/header.php"; ?>
         <div class="row g-4">
             <!-- Total Active Orders -->
             <div class="col-12 col-sm-6 col-md-3">
-                <a href="orders.php?status=active" class="text-decoration-none text-white">
+                <?php if ($totalActiveOrders > 0): ?>
+                    <a href="orders.php?status=active" class="text-decoration-none text-white">
+                    <?php endif; ?>
                     <div class="card text-white bg-primary shadow-sm">
                         <div class="card-body">
 
@@ -130,12 +132,16 @@ include "includes/header.php"; ?>
                             </div>
                         </div>
                     </div>
-                </a>
+                    <?php if ($totalActiveOrders > 0): ?>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <!-- Orders Due This Week -->
             <div class="col-12 col-sm-6 col-md-3">
-                <a href="orders.php?due=this_week" class="text-decoration-none text-white">
+                <?php if ($orders_due_this_week > 0): ?>
+                    <a href="orders.php?due=this_week" class="text-decoration-none text-white">
+                    <?php endif; ?>
                     <div class="card text-white bg-success shadow-sm">
                         <div class="card-body">
                             <div>
@@ -149,11 +155,15 @@ include "includes/header.php"; ?>
                             </div>
                         </div>
                     </div>
-                </a>
+                    <?php if ($orders_due_this_week > 0): ?>
+                    </a>
+                <?php endif; ?>
             </div>
             <!-- Overdue Tasks -->
             <div class="col-12 col-sm-6 col-md-3">
-                <a href="overdue_task.php?filter=overdue_tasks" class="text-decoration-none text-white">
+                <?php if ($overdue_tasks > 0): ?>
+                    <a href="overdue_task.php?filter=overdue_tasks" class="text-decoration-none text-white">
+                    <?php endif; ?>
                     <div class="card text-white bg-danger shadow-sm">
                         <div class="card-body">
                             <div>
@@ -167,7 +177,9 @@ include "includes/header.php"; ?>
                             </div>
                         </div>
                     </div>
-                </a>
+                    <?php if ($overdue_tasks > 0): ?>
+                    </a>
+                <?php endif; ?>
             </div>
 
             <!-- Staff Utilization -->
@@ -193,7 +205,9 @@ include "includes/header.php"; ?>
         <div class="mt-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    <i class="bi bi-calendar-week me-2"></i>Weekly Urgent Task Timeline (<?php echo date('M j,Y', strtotime('this week')); ?> to <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
+                    <i class="bi bi-calendar-week me-2"></i>Weekly Urgent Task Timeline
+                    (<?php echo date('M j,Y', strtotime('this week')); ?> to
+                    <?php echo date('M j,Y', strtotime('this week + 6 days')); ?>)
                 </div>
                 <div style="overflow-x: auto;">
                     <table class="pms-table">
@@ -268,10 +282,13 @@ include "includes/header.php"; ?>
                                             <td><?php echo htmlspecialchars($task['task_name']); ?></td>
                                             <td><?php echo htmlspecialchars($task['order_no']); ?></td>
                                             <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
-                                            <td><?php echo $task['due_date'] ? date("d M Y", strtotime($task['due_date'])) : 'N/A'; ?></td>
-                                            <td><?php echo htmlspecialchars($task['est_time'] ? formatMinutes($task['est_time']) : 'N/A'); ?></td>
+                                            <td><?php echo $task['due_date'] ? date("d M Y", strtotime($task['due_date'])) : 'N/A'; ?>
+                                            </td>
+                                            <td><?php echo htmlspecialchars($task['est_time'] ? formatMinutes($task['est_time']) : 'N/A'); ?>
+                                            </td>
                                             <td>
-                                                <span class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
+                                                <span
+                                                    class="badge p-2 text-md bg-<?php echo $task['priority'] == 'high' ? 'danger' : ($task['priority'] == 'medium' ? 'warning' : 'secondary'); ?>">
                                                     <?php echo ucfirst($task['priority']); ?>
                                                 </span>
                                             </td>

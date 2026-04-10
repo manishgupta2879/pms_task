@@ -15,7 +15,7 @@ if (!empty($week) && strpos($week, '-W') !== false) {
     list($year, $week_num) = explode('-W', $week);
 
     $dto = new DateTime();
-    $dto->setISODate((int)$year, (int)$week_num);
+    $dto->setISODate((int) $year, (int) $week_num);
 
     $start_date = $dto->format('Y-m-d');
 
@@ -27,7 +27,7 @@ if (!empty($week) && strpos($week, '-W') !== false) {
 
 // Resource filter
 if ($resource_filter != '') {
-    $resource_esc = (int)$resource_filter;
+    $resource_esc = (int) $resource_filter;
     $where .= " AND t.user_id = $resource_esc";
 }
 
@@ -72,7 +72,7 @@ fputcsv($output, [
     "Qty.",
     "Product",
     "Species",
-    "Duration", 
+    "Duration",
     "Time Taken",
     "Priority",
     "Status",
@@ -107,7 +107,7 @@ while ($row = $result->fetch_assoc()) {
 
     fputcsv($output, [
         $row['order_no'],
-        date('Y-m-d', strtotime($row['deadline'])),
+        date('M d, Y', strtotime($row['deadline'])),
         $row['task_name'],
         $row['employee'],
         $row['qty'] ?? 1,
