@@ -73,14 +73,15 @@ $taskRes = $conn->query("
         o.order_no,
         o.customer,
         oi.product,
-        o.deadline,
+        t.deadline,
         o.status as order_status
     FROM tasks t
     LEFT JOIN users u ON t.user_id = u.id
     LEFT JOIN users ab ON t.assigned_by = ab.id
-    LEFT JOIN orders o ON t.order_id = o.id
-    LEFT JOIN order_items oi ON o.order_no = oi.order_id
+    INNER JOIN orders o ON t.order_id = o.id
+    INNER JOIN order_items oi ON o.order_no = oi.order_id
     WHERE $where
+    GROUP BY t.id
     ORDER BY t.updated_at DESC
     LIMIT $limit OFFSET $offset
 ");
