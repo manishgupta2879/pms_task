@@ -14,7 +14,7 @@ if (!isset($_GET['id'])) {
 $id = (int)$_GET['id'];
 $errors = [];
 
-// fetch user
+// Fetch user
 $res  = $conn->query("SELECT * FROM users WHERE id=$id");
 $user = $res->fetch_assoc();
 
@@ -23,12 +23,19 @@ if (!$user) {
     exit();
 }
 
+// Fetch roles dynamically
+$roles = [];
+$role_q = $conn->query("SELECT id, role_name FROM roles WHERE deleted_at IS NULL");
+while ($row = $role_q->fetch_assoc()) {
+    $roles[] = $row;
+}
+
 // Initialize form data with current user data
 $form_data = [
     'name' => $user['name'],
     'username' => $user['username'],
     'email' => $user['email'],
-    'role' => $user['role'],
+    'role_id' => $user['role_id'], // changed to role_id
     'password' => '',
     'confirm_password' => ''
 ];
@@ -40,12 +47,12 @@ if (isset($_POST['update_user'])) {
     $form_data['email'] = trim($_POST['email'] ?? '');
     $form_data['password'] = $_POST['password'] ?? '';
     $form_data['confirm_password'] = $_POST['confirm_password'] ?? '';
-    
+
     // Prevent role change for self
     if ($user['username'] == $_SESSION['user']) {
-        $form_data['role'] = $user['role'];
+        $form_data['role_id'] = $user['role_id'];
     } else {
-        $form_data['role'] = $_POST['role'] ?? 'staff';
+        $form_data['role_id'] = (int)($_POST['role_id'] ?? 0);
     }
 
     // Validation
@@ -65,7 +72,7 @@ if (isset($_POST['update_user'])) {
 
     // Check for duplicate username if no errors
     if (empty($errors['username']) && !empty($form_data['username'])) {
-        $check_sql = "SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND deleted_at IS NULL AND id != ?";
+        $check_sql = "SELECT id FROM users WHERE LOWER(username) = LOWER(?) AND id != ?";
         $stmt_check = $conn->prepare($check_sql);
         $stmt_check->bind_param("si", $form_data['username'], $id);
         $stmt_check->execute();
@@ -78,7 +85,7 @@ if (isset($_POST['update_user'])) {
 
     // Check for duplicate email if no errors
     if (empty($errors['email']) && !empty($form_data['email'])) {
-        $check_sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND deleted_at IS NULL AND id != ?";
+        $check_sql = "SELECT id FROM users WHERE LOWER(email) = LOWER(?) AND id != ?";
         $stmt_check = $conn->prepare($check_sql);
         $stmt_check->bind_param("si", $form_data['email'], $id);
         $stmt_check->execute();
@@ -101,12 +108,28 @@ if (isset($_POST['update_user'])) {
     // If no errors, update the user
     if (empty($errors)) {
         if (!empty($form_data['password'])) {
+            // Use better hashing in real apps (password_hash)
             $hashed_password = md5($form_data['password']);
-            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, password=?, role=? WHERE id=?");
-            $stmt->bind_param("sssssi", $form_data['name'], $form_data['username'], $form_data['email'], $hashed_password, $form_data['role'], $id);
+            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, password=?, role_id=? WHERE id=?");
+            $stmt->bind_param(
+                "ssssii", 
+                $form_data['name'], 
+                $form_data['username'], 
+                $form_data['email'], 
+                $hashed_password, 
+                $form_data['role_id'], 
+                $id
+            );
         } else {
-            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, role=? WHERE id=?");
-            $stmt->bind_param("ssssi", $form_data['name'], $form_data['username'], $form_data['email'], $form_data['role'], $id);
+            $stmt = $conn->prepare("UPDATE users SET name=?, username=?, email=?, role_id=? WHERE id=?");
+            $stmt->bind_param(
+                "sssii", 
+                $form_data['name'], 
+                $form_data['username'], 
+                $form_data['email'], 
+                $form_data['role_id'], 
+                $id
+            );
         }
 
         if ($stmt->execute()) {
@@ -138,6 +161,7 @@ include "includes/header.php";
                     <!-- Body -->
                     <div class="pms-panel-body">
                         <div class="row g-3">
+                        
                         <!-- Name -->
                         <div class="col-md-6">
                             <label class="pms-form-label">
@@ -218,18 +242,35 @@ include "includes/header.php";
 
                             <?php if ($user['username'] == $_SESSION['user']): ?>
                                 <!-- 🔒 Self protected -->
+                                <?php 
+                                // Find role name from roles array
+                                $current_role_name = '';
+                                foreach ($roles as $r) {
+                                    if ($r['id'] == $form_data['role_id']) {
+                                        $current_role_name = $r['role_name'];
+                                        break;
+                                    }
+                                }
+                                ?>
                                 <input type="text"
                                        class="form-control"
-                                       value="<?= ucfirst($form_data['role']) ?>"
+                                       value="<?= htmlspecialchars(ucfirst($current_role_name)) ?>"
                                        disabled>
-                                <input type="hidden" name="role" value="<?= $form_data['role'] ?>">
+                                <input type="hidden" name="role_id" value="<?= $form_data['role_id'] ?>">
                                 <small class="text-muted d-block mt-1">You cannot change your own role</small>
                             <?php else: ?>
-                                <select name="role" class="form-select">
-                                    <option value="staff" <?= $form_data['role']=='staff'?'selected':'' ?>>Staff</option>
-                                    <option value="superadmin" <?= $form_data['role']=='superadmin'?'selected':'' ?>>Super Admin</option>
+                                <select name="role_id" class="form-select" required>
+                                    <option value="">Select Role</option>
+                                    <?php foreach ($roles as $role): ?>
+                                        <option value="<?= $role['id'] ?>"
+                                            <?= $form_data['role_id'] == $role['id'] ? 'selected' : '' ?>>
+                                            <?= htmlspecialchars($role['role_name']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             <?php endif; ?>
+                        </div>
+
                         </div>
                     </div>
 
@@ -239,7 +280,6 @@ include "includes/header.php";
                         <button type="submit" name="update_user" class="pms-btn-dark">
                             <i class="bi bi-check-lg me-1"></i>Update User
                         </button>
-                    </div>
                     </div>
                 </div>
             </form>

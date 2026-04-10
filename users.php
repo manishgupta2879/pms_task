@@ -1,6 +1,6 @@
 <?php
 include "includes/config.php";
-include "includes/header.php";
+
 
 // Restrict access
 if ($_SESSION['role'] != 'super-admin') {
@@ -37,7 +37,7 @@ $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = 10;
 $offset   = ($page - 1) * $per_page;
 
-$where = "WHERE deleted_at IS NULL";
+$where = "WHERE 1 = 1";
 
 if ($search != '') {
     $safe = $conn->real_escape_string($search);
@@ -50,9 +50,19 @@ $total       = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, ceil($total / $per_page));
 
 // Fetch data
-$res = $conn->query("SELECT * FROM users $where ORDER BY id DESC LIMIT $per_page OFFSET $offset");
-
+// $res = $conn->query("SELECT * FROM users $where ORDER BY id DESC LIMIT $per_page OFFSET $offset");
+$res = $conn->query("
+     SELECT u.*, r.role_name,
+           (SELECT COUNT(*) FROM tasks t WHERE t.user_id = u.id) as task_count
+    FROM users u
+    LEFT JOIN roles r ON u.role_id = r.id
+    $where
+    and u.deleted_at IS NULL
+    ORDER BY u.id DESC
+    LIMIT $per_page OFFSET $offset
+");
 $qs = '&search=' . urlencode($search);
+include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
@@ -108,7 +118,7 @@ $qs = '&search=' . urlencode($search);
                 <?php while ($r = $res->fetch_assoc()): 
                     
                     $taskCheck = $conn->query("SELECT id FROM tasks WHERE user_id = {$r['id']} LIMIT 1");
-                    $hasTask = ($taskCheck && $taskCheck->num_rows > 0);
+                    $hasTask = $r['task_count'] > 0;
                     ?>
                     <tr>
                         <td><?= $i++ ?></td>
@@ -127,7 +137,7 @@ $qs = '&search=' . urlencode($search);
                         </td>
 
                         <td>
-                            <?php if ($r['role'] == 'superadmin'): ?>
+                            <?php if ($r['role_name'] == 'Super Admin'): ?>
                                 <span class="pms-status active">Super Admin</span>
                             <?php else: ?>
                                 <span class="pms-status inactive">Staff</span>

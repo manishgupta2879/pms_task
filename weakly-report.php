@@ -5,7 +5,8 @@ include "includes/rbac.php";
 requireAuth();
 // requirePermission('tasks');
 
-$resources = $conn->query("SELECT id, name FROM users WHERE role != 'superadmin' ORDER BY name");
+$resources = $conn->query("SELECT u.id, u.name FROM users AS u INNER JOIN roles AS r ON u.role_id = r.id WHERE r.slug = 'staff' ORDER BY u.name");
+// $resources = $conn->query("SELECT id, name FROM users WHERE role != 'superadmin' ORDER BY name");
 
 $resource_filter = $_GET['resource'] ?? '';
 $week = $_GET['week'] ?? date('o-\WW');
