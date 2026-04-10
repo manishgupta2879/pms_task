@@ -14,12 +14,13 @@ $row = $result->fetch_assoc();
 $totalActiveOrders = $row['total_active_orders'];
 
 $result = $conn->query("
-    SELECT COUNT(*) AS orders_due_this_week
-    FROM orders
+    SELECT COUNT(DISTINCT o.id) AS orders_due_this_week
+    FROM orders o
+    INNER JOIN tasks as t ON o.id = t.order_id
     WHERE
-        status != 'completed'
-        AND deleted_at IS NULL
-        AND YEARWEEK(deadline, 1) = YEARWEEK(CURDATE(), 1)
+        o.status != 'completed'
+        AND o.deleted_at IS NULL
+        AND YEARWEEK(t.deadline, 1) = YEARWEEK(CURDATE(), 1)
 ");
 $row = $result->fetch_assoc();
 $orders_due_this_week = $row['orders_due_this_week'];
@@ -241,7 +242,7 @@ include "includes/header.php"; ?>
         </div>
     </div>
 
-    <div class="mt-4">
+    <div class="my-4">
         <div class="row g-4">
             <div class="col-lg-8">
                 <div class="pms-panel">

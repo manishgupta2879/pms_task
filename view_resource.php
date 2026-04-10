@@ -36,7 +36,7 @@ $roleName = htmlspecialchars($user['role_name'] ?? 'No Role');
 $status = htmlspecialchars($user['status'] ?? 'Active');
 $joined = isset($user['created_at']) ? date('M d, Y', strtotime($user['created_at'])) : 'N/A';
 
-// Fetch all approved/pending leaves for this resource to calculate availability
+
 $leaves_q = $conn->query("SELECT from_date, to_date FROM leaves WHERE user_id=$id AND deleted_at IS NULL AND status != 'Rejected'");
 $leave_periods = [];
 while ($lv = $leaves_q->fetch_assoc()) {

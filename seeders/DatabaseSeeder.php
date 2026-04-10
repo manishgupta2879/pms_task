@@ -148,7 +148,7 @@ $orders = [
         'order_no' => '10004',
         'customer' => 'Global Trade Co',
         'product' => 'Testing & QA Services',
-        'status' => 'pending',
+        'status' => 'active',
         'deadline' => date('Y-m-d', strtotime('+3 days'))
     ],
     [

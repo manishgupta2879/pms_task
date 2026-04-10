@@ -8,10 +8,9 @@ requirePermission('orders');
 if (isset($_POST['save_order'])) {
 
     $customer = $_POST['customer'];
-    $deadline = $_POST['deadline'];
     $status = $_POST['status'];
     $customer = $conn->real_escape_string($customer);
-    $deadline = $conn->real_escape_string($deadline);
+
     $status = $conn->real_escape_string($status);
     $products = $_POST['product'];
     $species_list = $_POST['species'];
@@ -21,10 +20,6 @@ if (isset($_POST['save_order'])) {
 
     if (empty(trim($customer))) {
         $errors[] = "Customer name is required.";
-    }
-
-    if (empty($deadline)) {
-        $errors[] = "Deadline is required.";
     }
 
     if (!isset($products) || !is_array($products) || count($products) == 0) {
@@ -61,8 +56,8 @@ if (isset($_POST['save_order'])) {
 
     try {
 
-        $conn->query("INSERT INTO orders(order_no, customer, deadline, status)
-              VALUES('$order_no', '$customer', '$deadline', '$status')");
+        $conn->query("INSERT INTO orders(order_no, customer, status)
+              VALUES('$order_no', '$customer', '$status')");
         $order_id = $conn->insert_id;
 
         for ($i = 0; $i < count($products); $i++) {
@@ -71,14 +66,7 @@ if (isset($_POST['save_order'])) {
             $species = $conn->real_escape_string($species_list[$i]);
             $qty = $conn->real_escape_string($qtys[$i]);
 
-            $conn->query("INSERT INTO order_items(order_id, product, species, qty)
-                    VALUES('$order_no', '$product', '$species', '$qty')");
-            // $sql = "INSERT INTO orders(order_no, customer, product, deadline, status, species, qty)
-            //         VALUES('$order_no', '$customer', '$product', '$deadline', '$status', '$species', '$qty')";
-
-            // if (!$conn->query($sql)) {
-            //     throw new Exception($conn->error);
-            // }
+            $conn->query("INSERT INTO order_items(order_id, product, species, qty) VALUES('$order_no', '$product', '$species', '$qty')");
         }
 
         $conn->commit();
@@ -125,18 +113,11 @@ include "includes/header.php";
                                     value="<?= htmlspecialchars($customer ?? '') ?>" required autofocus>
                                 <div class="invalid-feedback">Please enter customer name</div>
                             </div>
-                            <div class="col-md-3">
-                                <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
-                                <input type="date" name="deadline" class="form-control"
-                                    value="<?= htmlspecialchars($deadline ?? '') ?>" required>
-                                <div class="invalid-feedback">Please select deadline</div>
-                            </div>
 
-                            <div class="col-md-3">
+                            <div class="col-md-6">
                                 <label class="pms-form-label">Status</label>
                                 <select name="status" class="form-select">
                                     <option value="active" <?= (isset($status) && $status == 'active') ? 'selected' : '' ?>>Active</option>
-                                    <option value="pending" <?= (isset($status) && $status == 'pending') ? 'selected' : '' ?>>Pending</option>
                                     <option value="completed" <?= (isset($status) && $status == 'completed') ? 'selected' : '' ?>>Completed</option>
                                 </select>
                             </div>

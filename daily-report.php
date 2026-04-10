@@ -12,20 +12,8 @@ if ($_GET) {
         exit();
     }
 }
-// if (isset($_GET['delete'])) {
-//     $delete_id = (int)$_GET['delete'];
-
-//     $conn->query("UPDATE orders SET deleted_at = NOW() WHERE id = $delete_id");
-//     $_SESSION['success'] = "Order deleted successfully.";
-//     header("Location: orders.php");
-//     exit();
-// }
-
-// search & filter
-// $search = $_GET['search'] ?? '';
 $priority = $_GET['priority'] ?? '';
 $employee = $_GET['employee'] ?? '';
-// $date = $_GET['date'] ?? '';
 $from_date = $_GET['from_date'] ?? date("Y-m-d");
 $to_date = $_GET['to_date'] ?? date("Y-m-d");
 
@@ -35,13 +23,7 @@ $page = max(1, (int) $page);
 $offset = ($page - 1) * $limit;
 
 
-$where = "o.deleted_at IS NULL AND t.status = 'completed'";
-
-// if ($search != '') {
-//     $search_esc = $conn->real_escape_string($search);
-//     $where .= " AND (o.order_no LIKE '%$search_esc%')";
-//     // $where .= " AND (o.order_no LIKE '%$search_esc%' OR o.product LIKE '%$search_esc%')";
-// }
+$where = "o.deleted_at IS NULL";
 
 if ($employee != '') {
     $employee_esc = (int) $employee;
@@ -62,21 +44,7 @@ if ($from_date != '' && $to_date != '') {
     $to_date_esc = $conn->real_escape_string($to_date);
     $where .= " AND DATE(t.deadline) BETWEEN '$from_date_esc' AND '$to_date_esc'";
 }
-// $count_res = $conn->query("
-//     SELECT 
-//     t.*,
-//     u.id AS user_id,
-//     u.name AS user_name,
-//     ab.id AS assigned_by_id,
-//     ab.name AS assigned_by_name,
-//     o.id AS order_id
-// FROM tasks t
-// LEFT JOIN users u ON t.user_id = u.id
-// LEFT JOIN users ab ON t.assigned_by = ab.id
-// LEFT JOIN orders o ON t.order_id = o.id
-// WHERE $where
-// ORDER BY t.updated_at DESC
-// ");
+
 $countRes = $conn->query("
     SELECT COUNT(*) as total
     FROM tasks t
@@ -97,7 +65,10 @@ $taskRes = $conn->query("
     t.deadline,
     o.id AS order_id,
     o.order_no,
-    oi.product
+    oi.product,
+    oi.qty,
+    oi.species,
+    o.notes as extras
 
 FROM tasks t
 LEFT JOIN users u ON t.user_id = u.id
@@ -108,9 +79,6 @@ WHERE $where
 ORDER BY t.updated_at DESC
 LIMIT $limit OFFSET $offset");
 
-// $total = count($taskRes->fetch_all());
-// $total_pages = max(1, (int)ceil($total / $limit));
-
 include "includes/header.php";
 ?>
 
@@ -119,7 +87,7 @@ include "includes/header.php";
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
             <div class="alert alert-danger text-center">Order deleted successfully</div>
         <?php } ?>
-        <div class="col-lg-4 col-md-5">
+        <div class="col-lg-3 col-md-4">
             <div class="pms-panel mb-4">
                 <div class="pms-panel-header">
                     Filter
@@ -147,7 +115,7 @@ include "includes/header.php";
                                     <?php
                                     $users = $conn->query("SELECT u.id, u.name FROM users AS u INNER JOIN roles AS r ON u.role_id = r.id WHERE r.slug = 'staff' ORDER BY u.name");
                                     while ($u = $users->fetch_assoc()) {
-                                        ?>
+                                    ?>
                                         <option value="<?= $u['id'] ?>" <?= $employee == $u['id'] ? 'selected' : '' ?>>
                                             <?= $u['name'] ?>
                                         </option>
@@ -176,7 +144,7 @@ include "includes/header.php";
                 </form>
             </div>
         </div>
-        <div class="col-lg-8 col-md-7">
+        <div class="col-lg-9 col-md-8">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <span>Production Report (<?= date('M d, Y', strtotime($from_date)) ?> to
@@ -206,39 +174,38 @@ include "includes/header.php";
 
                         <thead class="table-dark">
                             <tr>
+                                <th>Order No</th>
+                                <th>Need Date</th>
                                 <th>Task</th>
-                                <th>Order #</th>
-                                <th>Assigned To</th>
+                                <th>Name</th>
+                                <th>Qty</th>
                                 <th>Product</th>
-                                <th>Deadline</th>
+                                <th>Species</th>
                                 <th>Duration</th>
-                                <th>Time Taken</th>
-                                <th>Priority </th>
-                                <!-- <th class="text-end" style="width: 80px;">Actions</th> -->
+                                <th class="text-nowrap">Time Taken</th>
+                                <th>Priority</th>
+                                <th>Extras</th>
                             </tr>
                         </thead>
 
                         <tbody>
                             <?php if ($taskRes->num_rows == 0) { ?>
                                 <tr>
-                                    <td colspan="6" class="text-center">No orders found</td>
+                                    <td colspan="11" class="text-center">No orders found</td>
                                 </tr>
                             <?php } ?>
 
                             <?php while ($task = $taskRes->fetch_assoc()) { ?>
                                 <tr>
-                                    <td class="text-dark fw-medium"><?= $task['task_name'] ?></td>
-                                    <td class="text-dark fw-medium"><?= $task['order_no'] ?></td>
-                                    <td class="text-dark fw-medium"><?= $task['user_name'] ?? '-' ?></td>
-                                    <td class="text-dark fw-medium"><?= $task['product'] ?? '-' ?></td>
-                                    <td class="text-dark fw-medium">
-                                        <?= date('M d, Y', strtotime($task['deadline'])) ?>
-                                        <!-- date("M d, Y", strtotime($row['deadline'])) -->
-                                    </td>
-                                    <td class="text-dark fw-medium">
-                                        <?= $task['est_time'] ? formatMinutes($task['est_time']) : '-' ?>
-                                    </td>
-                                    <td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['order_no'] ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= date('M d, Y', strtotime($task['deadline'])) ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['task_name'] ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['user_name'] ?? '-' ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['qty'] ?? '-' ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['product'] ?? '-' ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['species'] ?? '-' ?></td>
+                                    <td class="text-dark fw-medium text-nowrap"><?= $task['est_time'] ? formatMinutes($task['est_time']) : '-' ?></td>
+                                    <td class=" text-nowrap">
                                         <?php
                                         $start_time = new DateTime($task['start_time']);
                                         $end_time = new DateTime($task['end_time']);
@@ -252,9 +219,10 @@ include "includes/header.php";
 
                                         $actual_minutes = floor(($end_time->getTimestamp() - $start_time->getTimestamp()) / 60);
                                         ?>
-                                        <?= formatMinutes($actual_minutes) ?>
+                                        <?= $task['start_time'] && $task['end_time'] ? formatMinutes($actual_minutes) : '-' ?>
                                     </td>
-                                    <td>
+
+                                    <td class=" text-nowrap">
                                         <?php if ($task['priority'] == 'low' || $task['priority'] == '') { ?>
                                             <span class="pms-status active">Low</span>
                                         <?php } elseif ($task['priority'] == 'medium') { ?>
@@ -263,6 +231,7 @@ include "includes/header.php";
                                             <span class="pms-status pending text-dark">High</span>
                                         <?php } ?>
                                     </td>
+                                    <td class=" text-nowrap"><?= $task['extras'] ?? '-' ?></td>
                                 </tr>
 
                             <?php } ?>

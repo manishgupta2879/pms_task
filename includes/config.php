@@ -7,7 +7,7 @@ if ($conn->connect_error) {
 }
 
 function formatMinutes($total_mins)
-{
+{    
     $total_mins = (int) $total_mins;
     if ($total_mins <= 0)
         return "0m";
@@ -18,6 +18,7 @@ function formatMinutes($total_mins)
         $out .= "{$hrs}h ";
     if ($mins > 0 || $hrs == 0)
         $out .= "{$mins}m";
+    
     return trim($out);
 }
 

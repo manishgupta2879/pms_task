@@ -24,7 +24,6 @@ if (!$order) {
 }
 $order_no = $order['order_no'];
 $customer = $order['customer'];
-$deadline = $order['deadline'];
 $status   = $order['status'];
 $items_res = $conn->query("SELECT * FROM order_items WHERE order_id = $order_no");
 $items = [];
@@ -37,7 +36,6 @@ if (isset($_POST['update'])) {
 
     $order_id = (int)($_POST['order_id'] ?? 0);
     $customer = $conn->real_escape_string($_POST['customer']);
-    $deadline = $conn->real_escape_string($_POST['deadline']);
     $status   = $conn->real_escape_string($_POST['status']);
     $products  = $_POST['product'];
     $species_list  = $_POST['species'];
@@ -48,9 +46,6 @@ if (isset($_POST['update'])) {
         $errors[] = "Customer name is required.";
     }
 
-    if (empty($deadline)) {
-        $errors[] = "Deadline is required.";
-    }
     if (!isset($products) || !is_array($products) || count($products) == 0) {
         $errors[] = "At least one product is required.";
     }
@@ -80,9 +75,7 @@ if (isset($_POST['update'])) {
 
         $order_no = $order['order_no'];
 
-        $conn->query("UPDATE orders 
-            SET customer='$customer', deadline='$deadline', status='$status'
-            WHERE id='$order_id'");
+        $conn->query("UPDATE orders SET customer='$customer', status='$status' WHERE id='$order_id'");
 
         $existing_ids = [];
 
@@ -228,17 +221,11 @@ include "includes/header.php";
                                     </div>
                                 <?php endif; ?>
                             </div>
-                            <div class="col-md-6">
-                                <label class="pms-form-label"><span class="text-danger">*</span> Deadline</label>
-                                <input type="date" name="deadline" class="form-control" value="<?= htmlspecialchars($order['deadline']) ?>" required>
-                                <div class="invalid-feedback">Please select deadline</div>
-                            </div>
 
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Status</label>
                                 <select name="status" class="form-select" required>
                                     <option value="active" <?= ($order['status'] == 'active') ? 'selected' : '' ?>>Active</option>
-                                    <option value="pending" <?= ($order['status'] == 'pending') ? 'selected' : '' ?>>Pending</option>
                                     <option value="completed" <?= ($order['status'] == 'completed') ? 'selected' : '' ?>>Completed</option>
                                 </select>
                                 <div class="invalid-feedback">Please select status</div>

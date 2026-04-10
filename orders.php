@@ -21,7 +21,7 @@ if (isset($_GET['delete'])) {
         $conn->query("UPDATE orders SET deleted_at = NOW() WHERE id = $delete_id");
         $_SESSION['success'] = "Order deleted successfully.";
     }
-    
+
     header("Location: orders.php");
     exit();
 }
@@ -49,15 +49,13 @@ if ($search != '') {
 if ($status != '') {
     $where .= " AND orders.status='$status'";
 }
-if ($deadline != '') {
-    $where .= " AND orders.deadline='$deadline'";
-}
+
 
 if ($customer != '') {
     $where .= " AND customer LIKE '%$customer%'";
 }
 if ($due == 'this_week') {
-    $where .= " AND YEARWEEK(orders.deadline, 1) = YEARWEEK(CURDATE(), 1) AND orders.status != 'completed'";
+    $where .= " AND orders.status != 'completed'";
 }
 // total count
 $totalRes = $conn->query("SELECT COUNT(*) as total FROM orders $where");
@@ -80,7 +78,7 @@ $query = "
 ";
 
 $result = $conn->query($query);
-// die(var_dump($result->fetch_all(MYSQLI_ASSOC)));
+
 include "includes/header.php";
 ?>
 
@@ -101,11 +99,7 @@ include "includes/header.php";
                                 <label class="pms-form-label">Search</label>
                                 <input type="text" name="search" class="form-control" placeholder="Order #" value="<?= $search ?>">
                             </div>
-                            <!-- Deadline -->
-                            <div class="col-6">
-                                <label class="pms-form-label">Deadline</label>
-                                <input type="date" name="deadline" class="form-control" value="<?= $deadline ?>">
-                            </div>
+                           
                             <div class="col-6">
                                 <label class="pms-form-label">Customer</label>
                                 <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= $customer ?>">
@@ -117,7 +111,6 @@ include "includes/header.php";
                                     <option value="">All Statuses</option>
                                     <option value="active" <?= $status == 'active' ? 'selected' : '' ?>>Active</option>
                                     <option value="completed" <?= $status == 'completed' ? 'selected' : '' ?>>Completed</option>
-                                    <option value="pending" <?= $status == 'pending' ? 'selected' : '' ?>>Pending</option>
                                 </select>
                             </div>
 
@@ -140,69 +133,62 @@ include "includes/header.php";
                 </div>
 
                 <div style="overflow-x: auto;">
-                <table class="pms-table">
+                    <table class="pms-table">
 
-                    <thead class="table-dark">
-                        <tr>
-                            <th>Order #</th>
-                            <th>Customer</th>
-                            <!-- <th>Product</th>
-                            <th>Species</th>
-                            <th>Qty</th> -->
-                            <th>Deadline</th>
-                            <th>Status</th>
-                            <th class="text-end" style="width: 80px;">Actions</th>
-                        </tr>
-                    </thead>
-
-                    <tbody>
-                        <?php if ($result->num_rows == 0) { ?>
+                        <thead class="table-dark">
                             <tr>
-                                <td colspan="6" class="text-center">No orders found</td>
+                                <th>Order #</th>
+                                <th>Customer</th>
+                                <th>Status</th>
+                                <th class="text-end" style="width: 80px;">Actions</th>
                             </tr>
-                        <?php } ?>
+                        </thead>
 
-                        <?php while ($row = $result->fetch_assoc()) { ?>
-                            <tr>
-                                <td class="text-dark fw-medium"><?= $row['order_no'] ?></td>
-                                <td class="text-dark fw-medium"><?= $row['customer']?? '-' ?></td>
-                                <!-- <td class="text-dark fw-medium"><?= $row['product'] ?? '-' ?></td>
-                                <td class="text-dark fw-medium"><?= $row['species'] ?? '-' ?></td>
-                                <td class="text-dark fw-medium"><?= $row['qty'] ?? '-' ?></td> -->
-                                <td class="text-dark fw-medium"><?= date("M d, Y", strtotime($row['deadline'])) ?></td>
+                        <tbody>
+                            <?php if ($result->num_rows == 0) { ?>
+                                <tr>
+                                    <td colspan="6" class="text-center">No orders found</td>
+                                </tr>
+                            <?php } ?>
 
-                                <td>
-                                    <?php if ($row['status'] == 'active') { ?>
-                                        <span class="pms-status active">Active</span>
-                                    <?php } elseif ($row['status'] == 'completed') { ?>
-                                        <span class="pms-status completed">Completed</span>
-                                    <?php } else { ?>
-                                        <span class="pms-status pending text-dark">Pending</span>
-                                    <?php } ?>
-                                </td>
+                            <?php while ($row = $result->fetch_assoc()) { ?>
+                                <tr>
+                                    <td class="text-dark fw-medium"><?= $row['order_no'] ?></td>
+                                    <td class="text-dark fw-medium"><?= $row['customer'] ?? '-' ?></td>
+                                    
 
-                                <td class="text-end">
-                                    <div class="d-flex gap-1">
-                                        <a href="view_order.php?id=<?= $row['id'] ?>" class="pms-action-btn me-1"><i class="bi bi-eye"></i></a>
-                                        <a href="edit_order.php?id=<?= $row['id'] ?>" class="pms-action-btn me-1"><i class="bi bi-pencil"></i></a>
-
-                                        <?php if ($row['task_count'] == 0) { ?>
-                                            <a href="orders.php?delete=<?= $row['id'] ?>" class="pms-action-btn pms-action-btn-danger" onclick="return confirm('Delete this order?')"><i class="bi bi-trash"></i></a>
+                                    <td>
+                                        <?php if ($row['status'] == 'active') { ?>
+                                            <span class="pms-status active">Active</span>
+                                        <?php } elseif ($row['status'] == 'completed') { ?>
+                                            <span class="pms-status completed">Completed</span>
                                         <?php } else { ?>
-                                        
-                                            <span class="pms-action-btn me-1" disabled
-                                                title="Order has tasks, delete them first"
-                                                data-bs-toggle="tooltip" data-bs-placement="top">
-                                                <i class="bi bi-lock-fill"></i>
-                                            </span>
+                                            <span class="pms-status pending text-dark">Pending</span>
                                         <?php } ?>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php } ?>
-                    </tbody>
+                                    </td>
 
-                </table>
+                                    <td class="text-end">
+                                        <div class="d-flex gap-1">
+                                            <a href="view_order.php?id=<?= $row['id'] ?>" class="pms-action-btn me-1"><i class="bi bi-eye"></i></a>
+                                            <a href="edit_order.php?id=<?= $row['id'] ?>" class="pms-action-btn me-1"><i class="bi bi-pencil"></i></a>
+
+                                            <?php if ($row['task_count'] == 0) { ?>
+                                                <a href="orders.php?delete=<?= $row['id'] ?>" class="pms-action-btn pms-action-btn-danger" onclick="return confirm('Delete this order?')"><i class="bi bi-trash"></i></a>
+                                            <?php } else { ?>
+
+                                                <span class="pms-action-btn me-1" disabled
+                                                    title="Order has tasks, delete them first"
+                                                    data-bs-toggle="tooltip" data-bs-placement="top">
+                                                    <i class="bi bi-lock-fill"></i>
+                                                </span>
+                                            <?php } ?>
+                                        </div>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        </tbody>
+
+                    </table>
                 </div>
                 <div class="pms-footer">
                     <?php
@@ -213,9 +199,7 @@ include "includes/header.php";
                     $qs = "&search=" . urlencode($search) .
                         "&customer=" . urlencode($customer) .
                         "&status=" . urlencode($status) .
-                        "&due=" . urlencode($due).
-                        "&deadline=" . urlencode($deadline)
-                        ;
+                        "&due=" . urlencode($due);
                     ?>
 
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> orders</div>
