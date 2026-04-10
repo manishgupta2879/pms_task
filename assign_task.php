@@ -77,7 +77,7 @@ include "includes/header.php";
                 <div class="pms-panel">
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        📌 Assign Task: <?= $task['task_name'] ?>
+                        Assign Task: <?= $task['task_name'] ?>
                         <a href="task_library.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
@@ -130,7 +130,7 @@ include "includes/header.php";
                                     <option value="">Search Resource...</option>
                                     <?php foreach ($resourcesArr as $r):
                                         $remText = ($r['type'] == 'Part-time') ? " | Available: " . formatMinutes($r['remaining_mins']) : " | Full-time";
-                                    ?>
+                                        ?>
                                         <option value="<?= $r['id'] ?>" data-subtext="(<?= $r['role'] . $remText ?>)">
                                             <?= $r['name'] ?>
                                         </option>
@@ -178,8 +178,8 @@ include "includes/header.php";
 
 <?php include "includes/footer.php"; ?>
 <script>
-    $(document).ready(function(){
-        $("#selectOrder").on("change", function() {
+    $(document).ready(function () {
+        $("#selectOrder").on("change", function () {
             const orderId = $(this).val();
             if (orderId) {
                 window.location.href = `assign_task.php?id=<?= $task_id ?>&selected_order=${orderId}`;
@@ -188,28 +188,28 @@ include "includes/header.php";
             }
         });
     })
-    // document.getElementById('selectOrder').addEventListener('change', function() {
-    //     const orderId = this.value;
-    //     if (orderId) {
-    //         window.location.href = `assign_task.php?id=<?= $task_id ?>&selected_order=${orderId}`;
-    //     } else {
-    //         window.location.href = `assign_task.php?id=<?= $task_id ?>`;
-    //     }
-    // });
+        // document.getElementById('selectOrder').addEventListener('change', function() {
+        //     const orderId = this.value;
+        //     if (orderId) {
+        //         window.location.href = `assign_task.php?id=<?= $task_id ?>&selected_order=${orderId}`;
+        //     } else {
+        //         window.location.href = `assign_task.php?id=<?= $task_id ?>`;
+        //     }
+        // });
 
-    (() => {
-        'use strict'
-        const forms = document.querySelectorAll('.needs-validation')
+        (() => {
+            'use strict'
+            const forms = document.querySelectorAll('.needs-validation')
 
-        Array.from(forms).forEach(form => {
-            form.addEventListener('submit', event => {
-                if (!form.checkValidity()) {
-                    event.preventDefault()
-                    event.stopPropagation()
-                }
+            Array.from(forms).forEach(form => {
+                form.addEventListener('submit', event => {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
 
-                form.classList.add('was-validated')
-            }, false)
-        })
-    })()
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
 </script>

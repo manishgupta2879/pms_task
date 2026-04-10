@@ -7,7 +7,7 @@ requirePermission('resources');
 include "includes/header.php";
 
 if (isset($_GET['delete'])) {
-    $del_id = (int)$_GET['delete'];
+    $del_id = (int) $_GET['delete'];
 
     $check_user = $conn->query("SELECT r.slug FROM users u JOIN roles r ON u.role_id = r.id WHERE u.id=$del_id");
     $u_data = $check_user->fetch_assoc();
@@ -30,10 +30,10 @@ if (isset($_GET['delete'])) {
     // exit();
 }
 
-$search   = $_GET['search'] ?? '';
-$page     = max(1, (int)($_GET['page'] ?? 1));
+$search = $_GET['search'] ?? '';
+$page = max(1, (int) ($_GET['page'] ?? 1));
 $per_page = 10;
-$offset   = ($page - 1) * $per_page;
+$offset = ($page - 1) * $per_page;
 
 
 $where = "WHERE u.deleted_at IS NULL AND (r.slug != 'super-admin' OR r.slug IS NULL)";
@@ -44,11 +44,11 @@ if ($search != '') {
 $count_sql = "SELECT COUNT(*) as cnt FROM users u LEFT JOIN roles r ON u.role_id = r.id $where";
 $count_res = $conn->query($count_sql);
 $total = $count_res->fetch_assoc()['cnt'];
-$total_pages = max(1, (int)ceil($total / $per_page));
+$total_pages = max(1, (int) ceil($total / $per_page));
 
 $sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u  LEFT JOIN roles r ON u.role_id = r.id  $where  ORDER BY u.id DESC LIMIT $per_page OFFSET $offset";
 $res = $conn->query($sql);
-$qs  = '&search=' . urlencode($search);
+$qs = '&search=' . urlencode($search);
 ?>
 
 <div class="pms-wrap">
@@ -64,7 +64,8 @@ $qs  = '&search=' . urlencode($search);
                 <form method="GET" class="d-flex gap-2">
                     <div class="pms-search-wrap">
                         <i class="bi bi-search"></i>
-                        <input type="text" name="search" class="form-control ps-5" placeholder="Search..." value="<?= htmlspecialchars($search) ?>" style="font-size: 13px; width: 220px;">
+                        <input type="text" name="search" class="form-control ps-5" placeholder="Search..."
+                            value="<?= htmlspecialchars($search) ?>" style="font-size: 13px; width: 220px;">
                     </div>
                 </form>
                 <a href="add_resource.php" class="btn btn-outline-secondary btn-sm">
@@ -99,7 +100,8 @@ $qs  = '&search=' . urlencode($search);
                             <td class="text-dark fw-medium"><?= htmlspecialchars($r['name'] ?? $r['username']) ?></td>
                             <td><?= htmlspecialchars($r['email']) ?></td>
                             <td>
-                                <span class="badge border text-dark fw-normal" style="background: #f1f5f9; border-color: #cbd5e1 !important;">
+                                <span class="badge border text-dark fw-normal"
+                                    style="background: #f1f5f9; border-color: #cbd5e1 !important;">
                                     <?= $r['type'] ?>
                                 </span>
                             </td>
@@ -111,7 +113,9 @@ $qs  = '&search=' . urlencode($search);
                                 </span>
                             </td>
                             <td class="text-end">
-                                <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1" title="Leave Management" style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
+                                <a href="leave_management.php?id=<?= $r['id'] ?>" class="pms-action-btn me-1"
+                                    title="Leave Management"
+                                    style="color: #0284c7; border-color: #7dd3fc; background: #e0f2fe;">
                                     <i class="bi bi-calendar-event-fill"></i>
                                 </a>
 
@@ -124,19 +128,21 @@ $qs  = '&search=' . urlencode($search);
                                 </a>
 
                                 <?php if ($r['role_slug'] != 'super-admin'): ?>
-                                    <?php 
-                                        // Check if resource has any tasks assigned
-                                        $task_check = $conn->query("SELECT COUNT(*) as task_count FROM tasks WHERE (assigned_to={$r['id']} OR user_id={$r['id']}) AND status != 'completed'");
-                                        $task_data = $task_check->fetch_assoc();
-                                        $has_active_tasks = $task_data['task_count'] > 0;
+                                    <?php
+                                    // Check if resource has any tasks assigned
+                                    $task_check = $conn->query("SELECT COUNT(*) as task_count FROM tasks WHERE (assigned_to={$r['id']} OR user_id={$r['id']}) AND status != 'completed'");
+                                    $task_data = $task_check->fetch_assoc();
+                                    $has_active_tasks = $task_data['task_count'] > 0;
                                     ?>
-                                    
+
                                     <?php if ($has_active_tasks): ?>
                                         <span class="pms-action-btn" title="This resource has tasks assigned. Cannot delete.">
                                             <i class="bi bi-lock-fill"></i>
                                         </span>
                                     <?php else: ?>
-                                        <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger" title="Delete" onclick="return confirm('Are you sure you want to delete this resource?')">
+                                        <a href="resources.php?delete=<?= $r['id'] ?>" class="pms-action-btn pms-action-btn-danger"
+                                            title="Delete"
+                                            onclick="return confirm('Are you sure you want to delete this resource?')">
                                             <i class="bi bi-trash"></i>
                                         </a>
                                     <?php endif; ?>
@@ -152,16 +158,19 @@ $qs  = '&search=' . urlencode($search);
         <div class="pms-footer">
             <?php
             $start = ($total > 0) ? $offset + 1 : 0;
-            $end   = min($total, $offset + $per_page);
+            $end = min($total, $offset + $per_page);
             ?>
             <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> entries</div>
 
             <div class="pms-pagination">
-                <a href="?page=<?= $page - 1 ?><?= $qs ?>" class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
+                <a href="?page=<?= $page - 1 ?><?= $qs ?>"
+                    class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?= $i ?><?= $qs ?>" class="pms-page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
+                    <a href="?page=<?= $i ?><?= $qs ?>"
+                        class="pms-page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
                 <?php endfor; ?>
-                <a href="?page=<?= $page + 1 ?><?= $qs ?>" class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">Next</a>
+                <a href="?page=<?= $page + 1 ?><?= $qs ?>"
+                    class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">Next</a>
             </div>
         </div>
 
