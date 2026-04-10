@@ -138,7 +138,7 @@ include "includes/header.php";
                 <div class="pms-panel">
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        Edit Order
+                        <h5 class="mb-0 fw-bold" style="color: #1e293b;">Edit Order</h5>
                         <a href="view_order.php?id=<?= $order_id ?>" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-left me-1"></i>
                             Back
                         </a>
@@ -148,7 +148,7 @@ include "includes/header.php";
                         <div class="row g-3">
                             <input type="hidden" name="order_id" value="<?= $order_id ?? '' ?>">
                             <div class="col-md-6">
-                                <label class="pms-form-label">Order #</label>
+                                <label class="pms-form-label">Order No</label>
                                 <input type="text" class="form-control" value="<?= htmlspecialchars($order['order_no']) ?>" disabled>
                             </div>
 

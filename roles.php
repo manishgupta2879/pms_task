@@ -61,7 +61,7 @@ $qs  = '&search=' . urlencode($search);
 
         <div class="pms-controls">
             <div class="pms-controls-left">
-                <h5 class="mb-0 fw-bold" style="color: #334155;">Roles</h5>
+                <h5 class="mb-0 fw-bold" style="color: #1e293b;">Roles</h5>
             </div>
 
             <div class="pms-controls-right">

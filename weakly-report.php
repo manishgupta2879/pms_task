@@ -83,10 +83,10 @@ while ($row = $taskRes->fetch_assoc()) {
         $estMinutes = (int)$row['est_time']; // est_time is already in minutes
 
         if ($actualMinutes > $estMinutes) {
-            
+
             $diffMinutesTotal = $actualMinutes - $estMinutes;
             $delayText = formatMinutes($diffMinutesTotal) . ' Delay';
-            $statusColor = '#fecaca'; 
+            $statusColor = '#fecaca';
         } else {
             $delayText = '✓';
             $statusColor = '#bbf7d0';
@@ -98,7 +98,7 @@ while ($row = $taskRes->fetch_assoc()) {
         'order_no' => $row['order_no'],
         'delayText' => $delayText,
         'statusColor' => $statusColor,
-        'est_time' => $row['est_time'], 
+        'est_time' => $row['est_time'],
         'start_time' => $row['start_time'],
         'end_time' => $row['end_time'],
         'deadline' => $row['deadline'],
@@ -124,39 +124,34 @@ include "includes/header.php";
         <!-- Filter Panel -->
         <div class="col-md-4 col-lg-3">
             <div class="pms-panel mb-3">
-                <div class="pms-panel-header d-flex justify-content-between align-items-center" style="cursor: pointer;" data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="true">
-                    <span>
-                        <i class="bi bi-funnel me-2"></i>Filter
-                    </span>
-                    <i class="bi bi-chevron-down"></i>
+                <div class="pms-panel-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
                 </div>
-                <div id="filterPanel" class="collapse show">
-                    <form method="GET">
-                        <div class="pms-panel-body">
-                            <div class="row g-3">
-                                <div class="">
-                                    <label class="pms-form-label">Resources</label>
-                                    <select name="resource" class="form-select select2" id="select2">
-                                        <option value="">All Resources</option>
-                                        <?php foreach ($resources as $resource): ?>
-                                            <option value="<?= $resource['id'] ?>" <?= $resource_filter == $resource['id'] ? 'selected' : '' ?>><?= $resource['name'] ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="">
-                                    <label class="pms-form-label">Week Filter</label>
-                                    <input type="week" name="week" class="form-control" value="<?= htmlspecialchars($week) ?>">
-                                </div>
+                <form method="GET">
+                    <div class="pms-panel-body">
+                        <div class="row g-3">
+                            <div class="">
+                                <label class="pms-form-label">Resources</label>
+                                <select name="resource" class="form-select select2" id="select2">
+                                    <option value="">All Resources</option>
+                                    <?php foreach ($resources as $resource): ?>
+                                        <option value="<?= $resource['id'] ?>" <?= $resource_filter == $resource['id'] ? 'selected' : '' ?>><?= $resource['name'] ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="">
+                                <label class="pms-form-label">Week Filter</label>
+                                <input type="week" name="week" class="form-control" value="<?= htmlspecialchars($week) ?>">
                             </div>
                         </div>
-                        <div class="pms-panel-footer d-flex gap-2 text-end">
-                            <a href="weakly-report.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
-                            <button type="submit" class="pms-btn-dark btn-sm">
-                                <i class="bi bi-funnel"></i> Apply Filters
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                    <div class="pms-panel-footer d-flex gap-2 text-end">
+                        <a href="weakly-report.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+                        <button type="submit" class="pms-btn-dark btn-sm">
+                            <i class="bi bi-funnel"></i> Apply Filters
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -165,10 +160,13 @@ include "includes/header.php";
             <div class="pms-panel mb-2">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <div>
-                        <i class="bi bi-list-check me-2"></i>Scheduling / Workload
-                        <?php if (!empty($week)): ?>
-                            ( <?= date('M d, Y', strtotime($start_date)) ?> - <?= date('M d, Y', strtotime($end_date)) ?> )
-                        <?php endif; ?>
+                        <h5 class="mb-0 fw-bold" style="color: #1e293b;">
+                            Scheduling / Workload
+                            <?php if (!empty($week)): ?>
+                                ( <?= date('M d, Y', strtotime($start_date)) ?> - <?= date('M d, Y', strtotime($end_date)) ?> )
+                            <?php endif; ?>
+                        </h5>
+
                     </div>
                     <div class="dropdown">
                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"

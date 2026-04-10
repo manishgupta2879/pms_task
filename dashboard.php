@@ -268,7 +268,7 @@ include "includes/header.php"; ?>
                             <thead>
                                 <tr>
                                     <th>Task Name</th>
-                                    <th>Order #</th>
+                                    <th>Order No</th>
                                     <th>Assigned To</th>
                                     <th>Due Date</th>
                                     <th>Duration</th>

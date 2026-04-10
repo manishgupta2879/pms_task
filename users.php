@@ -72,7 +72,7 @@ include "includes/header.php";
         <!-- Header -->
         <div class="pms-controls">
             <div class="pms-controls-left">
-                <h5 class="mb-0 fw-bold" style="color:#334155;">Users</h5>
+                <h5 class="mb-0 fw-bold" style="color: #1e293b;">Users</h5>
             </div>
 
             <div class="pms-controls-right">
