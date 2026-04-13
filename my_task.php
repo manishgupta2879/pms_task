@@ -14,7 +14,7 @@ $deadline = $_GET['deadline'] ?? '';
 $product = $_GET['product'] ?? '';
 
 // pagination
-$limit = $_SESSION['pagination_limit'] ?? 10;
+$limit = $_SESSION['pagination_limit'] ?? 20;
 $page = max(1, (int) ($_GET['page'] ?? 1));
 $offset = ($page - 1) * $limit;
 

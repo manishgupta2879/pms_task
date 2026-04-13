@@ -122,15 +122,15 @@ include "includes/header.php";
 <div class="pms-wrap">
     <div class="row g-3">
         <!-- Filter Panel -->
-        <div class="col-md-4 col-lg-3">
-            <div class="pms-panel mb-3">
+        <div class="col-md-12 col-lg-12 filter-panel" style="display: none;">
+            <div class="pms-panel mb-2">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
-                            <div class="">
+                            <div class="col-md-4">
                                 <label class="pms-form-label">Resources</label>
                                 <select name="resource" class="form-select select2" id="select2">
                                     <option value="">All Resources</option>
@@ -139,24 +139,27 @@ include "includes/header.php";
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="">
+                            <div class="col-md-4">
                                 <label class="pms-form-label">Week Filter</label>
                                 <input type="week" name="week" class="form-control" value="<?= htmlspecialchars($week) ?>">
                             </div>
                         </div>
                     </div>
-                    <div class="pms-panel-footer d-flex gap-2 text-end">
-                        <a href="weakly-report.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
-                        <button type="submit" class="pms-btn-dark btn-sm">
-                            <i class="bi bi-funnel"></i> Apply Filters
-                        </button>
+                    <div class="pms-panel-footer d-flex gap-2 justify-content-end">
+                        <div class=" d-flex gap-2 text-end">
+                            <a href="weakly-report.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
+                            <button type="submit" class="pms-btn-dark btn-sm">
+                                <i class="bi bi-funnel"></i> Apply Filters
+                            </button>
+                        </div>
+                        
                     </div>
                 </form>
             </div>
         </div>
 
         <!-- Scheduling/Workload Panel -->
-        <div class="col-md-8 col-lg-9">
+        <div class="col-md-12 col-lg-12">
             <div class="pms-panel mb-2">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <div>
@@ -168,24 +171,33 @@ include "includes/header.php";
                         </h5>
 
                     </div>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-download me-1"></i> Export
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="weekly_report_export_csv.php?<?= http_build_query($_GET) ?>">
-                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
-                                </a>
-                            </li>
-                            <!-- <li>
-                                <a class="dropdown-item" href="export_pdf.php?<?= http_build_query($_GET) ?>">
-                                    <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
-                                </a>
-                            </li> -->
-                        </ul>
+                    <div class="d-flex gap-2">
+                        <div>
+                            <button  class="btn btn-outline-secondary btn-sm filter-toggle">
+                                <i class="bi bi-funnel"></i> Filters
+                            </button>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-download me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="weekly_report_export_csv.php?<?= http_build_query($_GET) ?>">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
+                                    </a>
+                                </li>
+                                <!-- <li>
+                                    <a class="dropdown-item" href="export_pdf.php?<?= http_build_query($_GET) ?>">
+                                        <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
+                                    </a>
+                                </li> -->
+                            </ul>
+                        </div>
                     </div>
+                    
                 </div>
 
                 <?php if (count($employees) == 0): ?>
@@ -493,3 +505,14 @@ include "includes/header.php";
 </div>
 
 <?php include "includes/footer.php"; ?>
+<script>
+    // filter-panel
+    document.querySelector('.filter-toggle').addEventListener('click', function() {
+        const panel = document.querySelector('.filter-panel');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    });
+</script>
