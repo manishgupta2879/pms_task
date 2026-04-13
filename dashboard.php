@@ -39,8 +39,9 @@ $urgent_tasks = $conn->query("
     SELECT 
         t.task_name,
         t.est_time,
-        t.priority, 
-        o.order_no, 
+        t.priority,
+        t.order_id, 
+        o.order_no,
         u.name AS assigned_to, 
         DATE(t.deadline) AS due_date, 
         t.status
@@ -64,10 +65,10 @@ $result = $conn->query("
     WHERE 
         t.status != 'completed'
         AND t.priority = 'high'
-        AND o.deadline >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
-        AND o.deadline <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
+        AND t.deadline >= DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY)
+        AND t.deadline <= DATE_ADD(DATE_SUB(CURDATE(), INTERVAL WEEKDAY(CURDATE()) DAY), INTERVAL 6 DAY)
     ORDER BY 
-        FIELD(DAYNAME(o.deadline), 
+        FIELD(DAYNAME(t.deadline), 
             'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'
         ),
         o.deadline ASC
@@ -277,7 +278,7 @@ include "includes/header.php"; ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($task['task_name']); ?></td>
                                             <td>
-                                                <a href="orders.php?order_id=<?php echo $task['order_id']; ?>">
+                                                <a href="view_order.php?id=<?php echo $task['order_id']; ?>">
                                                     <?php echo htmlspecialchars($task['order_no']); ?>
                                                 </a>
                                             </td>
