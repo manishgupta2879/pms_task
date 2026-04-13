@@ -117,14 +117,14 @@ include "includes/header.php";
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <!-- 8 digit order number -->
-                             <div class="col-md-6">
+                            <div class="col-md-6">
                                 <label class="pms-form-label">
                                     <span class="text-danger">*</span> Order No
                                 </label>
                                 <input type="text" name="order_no" class="form-control"
                                     placeholder="Enter 8-digit Order No"
                                     value="<?= htmlspecialchars($order_no ?? '') ?>"
-                                    required pattern="\d{8}">
+                                    required pattern="\d{8}" maxlength="8" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                 <div class="invalid-feedback">
                                     Please enter a valid 8-digit order number
                                 </div>
