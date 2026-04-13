@@ -9,9 +9,43 @@ $priority = $_GET['priority'] ?? '';
 $employee = $_GET['employee'] ?? '';
 $from_date = $_GET['from_date'] ?? date("Y-m-d");
 $to_date = $_GET['to_date'] ?? date("Y-m-d");
+$product = $_GET['product'] ?? '';
+$species = $_GET['species'] ?? '';
+$sort  = $_GET['sort'] ?? 'deadline';
+$order = $_GET['order'] ?? 'DESC';
+
+$allowed_sorts = [
+    'order_no'   => 'o.order_no',
+    'deadline'   => 't.deadline',
+    'task_name'  => 't.task_name',
+    'user_name'  => 'u.name',
+    'qty'        => 'oi.qty',
+    'product'    => 'oi.product',
+    'species'    => 'oi.species',
+    'priority'   => 't.priority',
+    'est_time'   => 't.est_time',
+];
+
+if (!array_key_exists($sort, $allowed_sorts)) {
+    $sort = 'deadline';
+}
+
+$sort_column = $allowed_sorts[$sort];
+
+if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+    $order = 'DESC';
+}
 
 $where = "o.deleted_at IS NULL";
+if ($product != '') {
+    $product_esc = $conn->real_escape_string($product);
+    $where .= " AND oi.product LIKE '%$product_esc%'";
+}
 
+if ($species != '') {
+    $species_esc = $conn->real_escape_string($species);
+    $where .= " AND oi.species LIKE '%$species_esc%'";
+}
 if ($employee != '') {
     $where .= " AND t.user_id = " . (int)$employee;
 }
@@ -52,7 +86,7 @@ LEFT JOIN users ab ON t.assigned_by = ab.id
 LEFT JOIN orders o ON t.order_id = o.id
 left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
 WHERE $where
-ORDER BY t.updated_at DESC
+ORDER BY $sort_column $order
 ");
 ?>
 
