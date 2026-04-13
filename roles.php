@@ -31,6 +31,20 @@ if (isset($_GET['delete'])) {
 }
 
 $search   = $_GET['search'] ?? '';
+$sort     = $_GET['sort'] ?? 'r.id';
+$order    = $_GET['order'] ?? 'DESC';
+
+// Validate sort column to prevent SQL injection
+$allowed_sorts = ['r.id', 'r.role_name','r.created_at','r.slug','r.status'];
+if (!in_array($sort, $allowed_sorts)) {
+    $sort = 'r.id';
+}
+
+// Validate order direction
+if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+    $order = 'DESC';
+}
+
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = $_SESSION['pagination_limit'] ?? 20;
 $offset   = ($page - 1) * $per_page;
@@ -49,10 +63,10 @@ $res = $conn->query("
     SELECT r.*, 
     (SELECT COUNT(*) FROM users u WHERE u.role_id = r.id AND u.deleted_at IS NULL) as user_count 
     FROM roles r $where 
-    ORDER BY r.id DESC 
+    ORDER BY $sort $order
     LIMIT $per_page OFFSET $offset
 ");
-$qs  = '&search=' . urlencode($search);
+$qs  = '&search=' . urlencode($search) . '&sort=' . urlencode($sort) . '&order=' . urlencode($order);
 ?>
 
 <div class="pms-wrap">
@@ -82,10 +96,10 @@ $qs  = '&search=' . urlencode($search);
             <thead>
                 <tr>
                     <th style="width: 80px;">#</th>
-                    <th>Role Name</th>
-                    <th>Slug</th>
-                    <th>Date Created</th>
-                    <th>Status</th>
+                    <th><?= sortLink('r.role_name', 'Role Name', $sort, $order) ?></th>
+                    <th><?= sortLink('r.slug', 'Slug', $sort, $order) ?></th>
+                    <th><?= sortLink('r.created_at', 'Date Created', $sort, $order) ?></th>
+                    <th><?= sortLink('r.status', 'Status', $sort, $order) ?></th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>

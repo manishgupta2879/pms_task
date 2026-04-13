@@ -32,6 +32,19 @@ $status = $_GET['status'] ?? '';
 $customer = $_GET['customer'] ?? '';
 $deadline = $_GET['deadline'] ?? '';
 $due = $_GET['due'] ?? '';
+$sort = $_GET['sort'] ?? 'order_no';
+$order = $_GET['order'] ?? 'DESC';
+
+// Validate sort column to prevent SQL injection
+$allowed_sorts = ['order_no', 'customer', 'status', 'id'];
+if (!in_array($sort, $allowed_sorts)) {
+    $sort = 'order_no';
+}
+
+// Validate order direction
+if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+    $order = 'DESC';
+}
 
 // pagination
 $limit = $_SESSION['pagination_limit'] ?? 20;
@@ -72,7 +85,7 @@ $query = "
     LEFT JOIN tasks ON tasks.order_id = orders.id
     $where
     GROUP BY orders.id
-    ORDER BY orders.id DESC
+    ORDER BY orders.$sort $order
     LIMIT $limit OFFSET $offset
 ";
 
@@ -142,10 +155,10 @@ include "includes/header.php";
 
                         <thead class="table-dark">
                             <tr>
-                                <th style="background-color: #9fbad5;">Order No</th>
-                                <th style="background-color: #9fbad5;">Customer</th>
-                                <th style="background-color: #9fbad5;">Status</th>
-                                <th class="text-end" style="width: 80px;background-color: #9fbad5;">Actions</th>
+                                <th><?= sortLink('order_no', 'Order No', $sort, $order) ?></th>
+                                <th><?= sortLink('customer', 'Customer', $sort, $order) ?></th>
+                                <th><?= sortLink('status', 'Status', $sort, $order) ?></th>
+                                <th class="text-end" style="width: 80px;">Actions</th>
                             </tr>
                         </thead>
 
@@ -200,11 +213,13 @@ include "includes/header.php";
                     $start = ($total > 0) ? $offset + 1 : 0;
                     $end   = min($total, $offset + $limit);
 
-                    // build query string (preserve filters)
+                    // build query string (preserve filters and sort)
                     $qs = "&search=" . urlencode($search) .
                         "&customer=" . urlencode($customer) .
                         "&status=" . urlencode($status) .
-                        "&due=" . urlencode($due);
+                        "&due=" . urlencode($due) .
+                        "&sort=" . urlencode($sort) .
+                        "&order=" . urlencode($order);
                     ?>
 
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> orders</div>

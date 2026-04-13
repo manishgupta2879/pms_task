@@ -172,8 +172,12 @@ include "includes/header.php";
                                             <input type="hidden" name="item_id[]" value="<?= $item['id'] ?>">
                                             <div class="col-md-4">
                                                 <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
-                                                <input type="text" name="product[]" class="form-control"
-                                                    value="<?= htmlspecialchars($item['product']) ?>" required>
+                                                <div class="position-relative">
+                                                    <input type="text" name="product[]" class="form-control product-input"
+                                                        value="<?= htmlspecialchars($item['product']) ?>" required autocomplete="off">
+                                                    <ul class="product-suggestions list-unstyled position-absolute bg-white border rounded mt-1" style="display:none; width:100%; max-height:200px; overflow-y:auto; z-index:1000; top:100%;">
+                                                    </ul>
+                                                </div>
                                                 <div class="invalid-feedback">Please enter product name</div>
                                             </div>
                                             <div class="col-md-4">
@@ -202,7 +206,11 @@ include "includes/header.php";
                                         <input type="hidden" name="item_id[]" value="">
                                         <div class="col-md-4">
                                             <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
-                                            <input type="text" name="product[]" class="form-control" placeholder="Product" required>
+                                            <div class="position-relative">
+                                                <input type="text" name="product[]" class="form-control product-input" placeholder="Product" required autocomplete="off">
+                                                <ul class="product-suggestions list-unstyled position-absolute bg-white border rounded mt-1" style="display:none; width:100%; max-height:200px; overflow-y:auto; z-index:1000; top:100%;">
+                                                </ul>
+                                            </div>
                                             <div class="invalid-feedback">Please enter product name</div>
                                         </div>
                                         <div class="col-md-4">
@@ -248,6 +256,108 @@ include "includes/header.php";
     </div>
 </div>
 <script>
+    // Product autocomplete functionality with debouncing
+    function setupProductAutocomplete(input) {
+        const suggestionsList = input.closest('.position-relative').querySelector('.product-suggestions');
+        let debounceTimer;
+        const DEBOUNCE_DELAY = 300; // 300ms debounce
+
+        input.addEventListener('keyup', function (e) {
+            const query = this.value.trim();
+
+            // Clear existing timer
+            clearTimeout(debounceTimer);
+
+            // Don't show suggestions if input is empty
+            if (query.length === 0) {
+                suggestionsList.style.display = 'none';
+                return;
+            }
+
+            // Show loader
+            suggestionsList.innerHTML = '<li class="px-3 py-2 text-center"><span class="spinner-border spinner-border-sm me-2"></span>Loading...</li>';
+            suggestionsList.style.display = 'block';
+
+            // Debounce the API call
+            debounceTimer = setTimeout(async function () {
+                try {
+                    const response = await fetch('get_product_suggestions.php?q=' + encodeURIComponent(query));
+                    const data = await response.json();
+
+                    // Clear previous suggestions
+                    suggestionsList.innerHTML = '';
+
+                    if (data.length > 0) {
+                        data.forEach(product => {
+                            const li = document.createElement('li');
+                            li.className = 'px-3 py-2 cursor-pointer suggestion-item';
+                            li.textContent = product;
+                            li.style.cursor = 'pointer';
+                            li.style.borderBottom = '1px solid #f0f0f0';
+
+                            li.addEventListener('mouseenter', () => {
+                                li.style.backgroundColor = '#e9ecef';
+                            });
+                            li.addEventListener('mouseleave', () => {
+                                li.style.backgroundColor = '';
+                            });
+
+                            li.addEventListener('click', () => {
+                                input.value = product;
+                                suggestionsList.style.display = 'none';
+                            });
+
+                            suggestionsList.appendChild(li);
+                        });
+                        suggestionsList.style.display = 'block';
+                    } else {
+                        // Show "No records found" message
+                        const li = document.createElement('li');
+                        li.className = 'px-3 py-2 text-center text-muted';
+                        li.textContent = 'No records found';
+                        li.style.cursor = 'default';
+                        suggestionsList.appendChild(li);
+                        suggestionsList.style.display = 'block';
+                    }
+                } catch (error) {
+                    console.error('Error fetching suggestions:', error);
+                    suggestionsList.innerHTML = '<li class="px-3 py-2 text-center text-danger">Error loading suggestions</li>';
+                    suggestionsList.style.display = 'block';
+                }
+            }, DEBOUNCE_DELAY);
+        });
+
+        // Hide suggestions when clicking outside
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.position-relative')) {
+                suggestionsList.style.display = 'none';
+            }
+        });
+
+        // Show suggestions on focus if there's a value
+        input.addEventListener('focus', function () {
+            if (this.value.trim().length > 0) {
+                const event = new KeyboardEvent('keyup', { bubbles: true });
+                this.dispatchEvent(event);
+            }
+        });
+    }
+
+    // Initialize autocomplete for existing and new product inputs
+    function initializeProductInputs() {
+        document.querySelectorAll('.product-input').forEach(input => {
+            // Remove old event listeners by cloning
+            const newInput = input.cloneNode(true);
+            input.parentNode.replaceChild(newInput, input);
+            setupProductAutocomplete(newInput);
+        });
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        initializeProductInputs();
+    });
+
     document.getElementById('add-row').addEventListener('click', function() {
         let row = document.querySelector('.item-row').cloneNode(true);
 
@@ -270,6 +380,10 @@ include "includes/header.php";
         }
 
         document.getElementById('order-items').appendChild(row);
+
+        // Reinitialize autocomplete for the new product input
+        const newProductInput = row.querySelector('.product-input');
+        setupProductAutocomplete(newProductInput);
     });
 
     document.addEventListener('click', function(e) {
@@ -282,6 +396,8 @@ include "includes/header.php";
     });
     document.querySelector('form').addEventListener('submit', function(e) {
         let valid = true;
+        let products = [];
+        let duplicateProducts = new Set();
 
         document.querySelectorAll('.item-row').forEach(row => {
 
@@ -303,7 +419,34 @@ include "includes/header.php";
                 valid = false;
                 qty.classList.add('is-invalid');
             }
+
+            // Check for duplicate products
+            if (product && product.value.trim()) {
+                let productValue = product.value.trim().toLowerCase();
+                if (products.includes(productValue)) {
+                    duplicateProducts.add(productValue);
+                    valid = false;
+                } else {
+                    products.push(productValue);
+                }
+            }
         });
+
+        // Mark duplicate products as invalid
+        if (duplicateProducts.size > 0) {
+            document.querySelectorAll('.item-row').forEach(row => {
+                let productInput = row.querySelector('input[name="product[]"]');
+                if (productInput) {
+                    let productValue = productInput.value.trim().toLowerCase();
+                    if (duplicateProducts.has(productValue)) {
+                        productInput.classList.add('is-invalid');
+                        productInput.title = 'Duplicate product in this order';
+                    }
+                }
+            });
+            // Show alert
+            alert('Error: Duplicate products found in the same order. Please remove duplicates.');
+        }
 
         if (!valid) {
             e.preventDefault();

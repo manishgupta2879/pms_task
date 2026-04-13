@@ -35,13 +35,13 @@ $page = max(1, (int) ($_GET['page'] ?? 1));
 $per_page = $_SESSION['pagination_limit'] ?? 20;
 $offset = ($page - 1) * $per_page;
 
-$allowedColumns = ['name', 'email','type', 'r.role_name', 'status'];
-$sort = $_GET['sort'] ?? 'name';
+$allowedColumns = ['u.name', 'u.email','u.type', 'r.role_name', 'u.status'];
+$sort = $_GET['sort'] ?? 'u.name';
 $order = $_GET['order'] ?? 'ASC';
 
 
 if (!in_array($sort, $allowedColumns)) {
-    $sort = 'name';
+    $sort = 'u.name';
 }
 $order = ($order === 'DESC') ? 'DESC' : 'ASC';
 
@@ -55,9 +55,9 @@ $count_res = $conn->query($count_sql);
 $total = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, (int) ceil($total / $per_page));
 
-$sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u  LEFT JOIN roles r ON u.role_id = r.id  $where  ORDER BY $sort $order LIMIT $per_page OFFSET $offset";
+$sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u LEFT JOIN roles r ON u.role_id = r.id $where ORDER BY $sort $order LIMIT $per_page OFFSET $offset";
 $res = $conn->query($sql);
-$qs = '&search=' . urlencode($search);
+$qs = '&search=' . urlencode($search) . '&sort=' . urlencode($sort) . '&order=' . urlencode($order);
 include "includes/header.php";
 
 
@@ -94,11 +94,11 @@ include "includes/header.php";
                 <thead>
                     <tr>
                         <th style="width: 80px;">#</th>
-                        <th><?= sortLink('name', 'Name', $sort, $order) ?></th>
-                        <th><?= sortLink('email', 'Email', $sort, $order) ?></th>
-                        <th><?= sortLink('type', 'Type', $sort, $order) ?></th>
+                        <th><?= sortLink('u.name', 'Name', $sort, $order) ?></th>
+                        <th><?= sortLink('u.email', 'Email', $sort, $order) ?></th>
+                        <th><?= sortLink('u.type', 'Type', $sort, $order) ?></th>
                         <th><?= sortLink('r.role_name', 'Role', $sort, $order) ?></th>
-                        <th><?= sortLink('status', 'Status', $sort, $order) ?></th>
+                        <th><?= sortLink('u.status', 'Status', $sort, $order) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>

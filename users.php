@@ -33,35 +33,48 @@ if (isset($_GET['delete'])) {
 
 // Search + Pagination
 $search   = $_GET['search'] ?? '';
+$sort = $_GET['sort'] ?? 'id';
+$order = $_GET['order'] ?? 'DESC';
+
+// Validate sort column to prevent SQL injection
+$allowed_sorts = ['u.id', 'u.name', 'u.username', 'u.email', 'r.role_name', 'u.created_at'];
+if (!in_array($sort, $allowed_sorts)) {
+    $sort = 'u.id';
+}
+
+// Validate order direction
+if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+    $order = 'DESC';
+}
+
 $page     = max(1, (int)($_GET['page'] ?? 1));
 $per_page = $_SESSION['pagination_limit'] ?? 20;
 $offset   = ($page - 1) * $per_page;
 
-$where = "WHERE 1 = 1";
+$where = "WHERE u.deleted_at IS NULL";
 
 if ($search != '') {
     $safe = $conn->real_escape_string($search);
-    $where .= " AND (username LIKE '%$safe%' OR email LIKE '%$safe%')";
+    $where .= " AND (u.username LIKE '%$safe%' OR u.email LIKE '%$safe%')";
 }
 
 // Count
-$count_res   = $conn->query("SELECT COUNT(*) as cnt FROM users $where");
+$count_res   = $conn->query("SELECT COUNT(*) as cnt FROM users u LEFT JOIN roles r ON u.role_id = r.id $where");
 $total       = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, ceil($total / $per_page));
 
 // Fetch data
-// $res = $conn->query("SELECT * FROM users $where ORDER BY id DESC LIMIT $per_page OFFSET $offset");
+// $res = $conn->query("SELECT * FROM users $where ORDER BY u.id DESC LIMIT $per_page OFFSET $offset");
 $res = $conn->query("
      SELECT u.*, r.role_name,
            (SELECT COUNT(*) FROM tasks t WHERE t.user_id = u.id) as task_count
     FROM users u
     LEFT JOIN roles r ON u.role_id = r.id
     $where
-    and u.deleted_at IS NULL
-    ORDER BY u.id DESC
+    ORDER BY $sort $order
     LIMIT $per_page OFFSET $offset
 ");
-$qs = '&search=' . urlencode($search);
+$qs = '&search=' . urlencode($search) . '&sort=' . urlencode($sort) . '&order=' . urlencode($order);
 include "includes/header.php";
 ?>
 
@@ -98,11 +111,11 @@ include "includes/header.php";
             <thead>
                 <tr>
                     <th style="width:70px;">#</th>
-                    <th>Name</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Date Created</th>
+                    <th><?= sortLink('u.name', 'Name', $sort, $order) ?></th>
+                    <th><?= sortLink('u.username', 'Username', $sort, $order) ?></th>
+                    <th><?= sortLink('u.email', 'Email', $sort, $order) ?></th>
+                    <th><?= sortLink('r.role_name', 'Role', $sort, $order) ?></th>
+                    <th><?= sortLink('u.created_at', 'Date Created', $sort, $order) ?></th>
                     <th class="text-end">Actions</th>
                 </tr>
             </thead>

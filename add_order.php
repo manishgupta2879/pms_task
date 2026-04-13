@@ -50,7 +50,7 @@ if (isset($_POST['save_order'])) {
     }
     if (!empty($errors)) {
         $_SESSION['errors'] = $errors;
-        header("Location: create_order.php");
+        header("Location: add_order.php");
         exit();
     }
     
@@ -321,16 +321,49 @@ include "includes/header.php";
     });
     document.querySelector('form').addEventListener('submit', function (e) {
         let valid = true;
+        let products = [];
+        let duplicateProducts = new Set();
 
+        // Check for empty fields and collect products
         document.querySelectorAll('.item-row').forEach(row => {
+            let productInput = row.querySelector('input[name="product[]"]');
             let inputs = row.querySelectorAll('input');
+            
+            // Check for empty fields
             inputs.forEach(input => {
                 if (!input.value.trim()) {
                     valid = false;
                     input.classList.add('is-invalid');
                 }
             });
+
+            // Check for duplicate products
+            if (productInput && productInput.value.trim()) {
+                let productValue = productInput.value.trim().toLowerCase();
+                if (products.includes(productValue)) {
+                    duplicateProducts.add(productValue);
+                    valid = false;
+                } else {
+                    products.push(productValue);
+                }
+            }
         });
+
+        // Mark duplicate products as invalid
+        if (duplicateProducts.size > 0) {
+            document.querySelectorAll('.item-row').forEach(row => {
+                let productInput = row.querySelector('input[name="product[]"]');
+                if (productInput) {
+                    let productValue = productInput.value.trim().toLowerCase();
+                    if (duplicateProducts.has(productValue)) {
+                        productInput.classList.add('is-invalid');
+                        productInput.title = 'Duplicate product in this order';
+                    }
+                }
+            });
+            // Show alert
+            alert('Error: Duplicate products found in the same order. Please remove duplicates.');
+        }
 
         if (!valid) {
             e.preventDefault();
