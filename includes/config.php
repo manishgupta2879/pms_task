@@ -7,7 +7,7 @@ if ($conn->connect_error) {
 }
 
 function formatMinutes($total_mins)
-{    
+{
     $total_mins = (int) $total_mins;
     if ($total_mins <= 0)
         return "0m";
@@ -18,7 +18,7 @@ function formatMinutes($total_mins)
         $out .= "{$hrs}h ";
     if ($mins > 0 || $hrs == 0)
         $out .= "{$mins}m";
-    
+
     return trim($out);
 }
 
@@ -54,7 +54,7 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
             )";
 
     $res = $conn->query($sql);
-    
+
     $resources = [];
     if ($res) {
         while ($u = $res->fetch_assoc()) {
@@ -78,7 +78,34 @@ function getAvailableResources($conn, $task_minutes = 0, $date = null)
             }
         }
     }
-    
+
     return $resources;
 }
-?>
+
+function buildQuery($params = [])
+{
+    return http_build_query(array_merge($_GET, $params));
+}
+
+
+function sortLink($column, $label, $currentSort, $currentOrder)
+{
+    $icon = '<i class="bi bi-arrow-down-up ms-1"></i>';
+    $newOrder = 'ASC';
+    if ($currentSort === $column) {
+        if($currentOrder === 'ASC') {
+            $icon = '<i class="bi bi-arrow-up ms-1"></i>';
+            $newOrder = 'DESC';
+        } else {
+            $icon = '<i class="bi bi-arrow-down ms-1"></i>';
+            $newOrder = 'ASC';
+        }
+    }
+    $query = buildQuery([
+        'sort' => $column,
+        'order' => $newOrder,
+        'page' => 1 // reset page on sorting
+    ]);
+
+    return "<a href='?$query' class='text-decoration-none text-dark'>$label $icon</a>";
+}

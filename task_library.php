@@ -6,6 +6,16 @@ requireAuth();
 requirePermission('tasks');
 include "includes/header.php";
 
+
+$allowedColumns = ['task_name', 'default_time','description'];
+$sort = $_GET['sort'] ?? 'task_name';
+$order = $_GET['order'] ?? 'ASC';
+
+if (!in_array($sort, $allowedColumns)) {
+    $sort = 'id';
+}
+$order = ($order === 'DESC') ? 'DESC' : 'ASC';
+
 $limit = $_SESSION['pagination_limit'] ?? 10;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int) $page);
@@ -18,9 +28,10 @@ $total_pages = ceil($total / $limit);
 
 $start = ($total > 0) ? $offset + 1 : 0;
 $end = min($total, $offset + $limit);
-
 // fetch tasks
-$tasks = $conn->query("SELECT * FROM task_library LIMIT $limit OFFSET $offset");
+$tasks = $conn->query("SELECT * FROM task_library  ORDER BY $sort $order LIMIT $limit OFFSET $offset");
+
+
 ?>
 
 <div class="pms-wrap">
@@ -41,9 +52,9 @@ $tasks = $conn->query("SELECT * FROM task_library LIMIT $limit OFFSET $offset");
                 <thead>
                     <tr>
                         <th style="width: 60px;">#</th>
-                        <th>Task Name</th>
-                        <th>Duration</th>
-                        <th>Description</th>
+                        <th><?=  sortLink('task_name','Task Name', $sort, $order) ?></th>
+                        <th><?= sortLink('default_time', 'Duration', $sort, $order) ?></th>
+                        <th><?= sortLink('description', 'Description', $sort, $order) ?></th>
                         <th class="text-end">Actions</th>
                     </tr>
                 </thead>
@@ -93,17 +104,18 @@ $tasks = $conn->query("SELECT * FROM task_library LIMIT $limit OFFSET $offset");
             <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> Tasks</div>
 
             <div class="pms-pagination">
-                <a href="?page=<?= $page - 1 ?>" class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">
+                <a href="?<?= buildQuery(['page' => $page - 1]) ?>" class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">
                     Previous
                 </a>
 
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?= $i ?>" class="pms-page-btn <?= $i == $page ? 'active' : '' ?>">
+
+                    <a href="?<?= buildQuery(['page' => $i]) ?>" class="pms-page-btn <?= $i == $page ? 'active' : '' ?>">
                         <?= $i ?>
                     </a>
                 <?php endfor; ?>
 
-                <a href="?page=<?= $page + 1 ?>" class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">
+                <a href="?<?= buildQuery(['page' => $page + 1]) ?>" class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">
                     Next
                 </a>
             </div>

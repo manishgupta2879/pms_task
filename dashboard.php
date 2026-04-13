@@ -106,10 +106,6 @@ while ($task = $result->fetch_assoc()) {
 
 
 include "includes/header.php"; ?>
-<!-- <div class="card">
-    <h1>Welcome <?php echo $_SESSION['user']; ?></h1>
-    <p>Role: <?php echo $_SESSION['role']; ?></p>
-</div> -->
 <?php if ($_SESSION['role'] == 'super-admin'): ?>
     <div class="">
         <div class="row g-4">

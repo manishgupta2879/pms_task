@@ -35,6 +35,15 @@ $page = max(1, (int) ($_GET['page'] ?? 1));
 $per_page = $_SESSION['pagination_limit'] ?? 10;
 $offset = ($page - 1) * $per_page;
 
+$allowedColumns = ['name', 'email','type', 'r.role_name', 'status'];
+$sort = $_GET['sort'] ?? 'name';
+$order = $_GET['order'] ?? 'ASC';
+
+
+if (!in_array($sort, $allowedColumns)) {
+    $sort = 'name';
+}
+$order = ($order === 'DESC') ? 'DESC' : 'ASC';
 
 $where = "WHERE u.deleted_at IS NULL AND (r.slug != 'super-admin' OR r.slug IS NULL)";
 if ($search != '') {
@@ -46,10 +55,15 @@ $count_res = $conn->query($count_sql);
 $total = $count_res->fetch_assoc()['cnt'];
 $total_pages = max(1, (int) ceil($total / $per_page));
 
-$sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u  LEFT JOIN roles r ON u.role_id = r.id  $where  ORDER BY u.id DESC LIMIT $per_page OFFSET $offset";
+$sql = "SELECT u.*, r.role_name, r.slug as role_slug FROM users u  LEFT JOIN roles r ON u.role_id = r.id  $where  ORDER BY $sort $order LIMIT $per_page OFFSET $offset";
 $res = $conn->query($sql);
 $qs = '&search=' . urlencode($search);
 include "includes/header.php";
+
+
+
+
+
 ?>
 
 <div class="pms-wrap">
@@ -80,11 +94,11 @@ include "includes/header.php";
                 <thead>
                     <tr>
                         <th style="width: 80px;">#</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Type</th>
-                        <th>Role</th>
-                        <th>Status</th>
+                        <th><?= sortLink('name', 'Name', $sort, $order) ?></th>
+                        <th><?= sortLink('email', 'Email', $sort, $order) ?></th>
+                        <th><?= sortLink('type', 'Type', $sort, $order) ?></th>
+                        <th><?= sortLink('r.role_name', 'Role', $sort, $order) ?></th>
+                        <th><?= sortLink('status', 'Status', $sort, $order) ?></th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -164,13 +178,13 @@ include "includes/header.php";
             <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> entries</div>
 
             <div class="pms-pagination">
-                <a href="?page=<?= $page - 1 ?><?= $qs ?>"
+                <a href="?<?= buildQuery(['page' => $page - 1]) ?><?= $qs ?>"
                     class="pms-page-btn <?= $page <= 1 ? 'disabled' : '' ?>">Previous</a>
                 <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                    <a href="?page=<?= $i ?><?= $qs ?>"
+                    <a href="?<?= buildQuery(['page' => $i]) ?><?= $qs ?>"
                         class="pms-page-btn <?= $i == $page ? 'active' : '' ?>"><?= $i ?></a>
                 <?php endfor; ?>
-                <a href="?page=<?= $page + 1 ?><?= $qs ?>"
+                <a href="?<?= buildQuery(['page' => $page + 1]) ?><?= $qs ?>"
                     class="pms-page-btn <?= $page >= $total_pages ? 'disabled' : '' ?>">Next</a>
             </div>
         </div>
