@@ -19,12 +19,32 @@ $to_date = $_GET['to_date'] ?? date("Y-m-d");
 // $search = $_GET['search'] ?? '';
 $product = $_GET['product'] ?? '';
 $species = $_GET['species'] ?? '';
-
+$sort  = $_GET['sort'] ?? 't.updated_at';
+$order = $_GET['order'] ?? 'DESC';
 $limit = $_SESSION['pagination_limit'] ?? 20;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int) $page);
 $offset = ($page - 1) * $limit;
 
+$allowed_sorts = [
+    'order_no'   => 'o.order_no',
+    'deadline'   => 't.deadline',
+    'task_name'  => 't.task_name',
+    'user_name'  => 'u.name',
+    'qty'        => 'oi.qty',
+    'product'    => 'oi.product',
+    'species'    => 'oi.species',
+    'priority'   => 't.priority',
+    'est_time'   => 't.est_time',
+];
+if (!array_key_exists($sort, $allowed_sorts)) {
+    $sort = 'deadline';
+}
+$sort_column = $allowed_sorts[$sort];
+
+if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+    $order = 'DESC';
+}
 
 $where = "o.deleted_at IS NULL";
 // if ($search != '') {
@@ -92,7 +112,7 @@ LEFT JOIN users ab ON t.assigned_by = ab.id
 LEFT JOIN orders o ON t.order_id = o.id
 left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
 WHERE $where
-ORDER BY t.updated_at DESC
+ORDER BY $sort_column $order
 LIMIT $limit OFFSET $offset");
 
 include "includes/header.php";
@@ -213,16 +233,16 @@ include "includes/header.php";
 
                         <thead class="table-dark">
                             <tr>
-                                <th>Order No</th>
+                                <th><?= sortLink('order_no', 'Order No', $sort, $order) ?></th>
                                 <th>Need Date</th>
-                                <th>Task</th>
-                                <th>Name</th>
-                                <th>Qty</th>
-                                <th>Product</th>
-                                <th>Species</th>
-                                <th>Duration</th>
+                                <th><?= sortLink('task_name', 'Task', $sort, $order) ?></th>
+                                <th><?= sortLink('user_name', 'Name', $sort, $order) ?></th>
+                                <th><?= sortLink('qty', 'Qty', $sort, $order) ?></th>
+                                <th><?= sortLink('product', 'Product', $sort, $order) ?></th>
+                                <th><?= sortLink('species', 'Species', $sort, $order) ?></th>
+                                <th><?= sortLink('est_time', 'Duration', $sort, $order) ?></th>
                                 <th class="text-nowrap">Time Taken</th>
-                                <th>Priority</th>
+                                <th><?= sortLink('priority', 'Priority', $sort, $order) ?></th>
                                 <th>Extras</th>
                             </tr>
                         </thead>
@@ -286,7 +306,9 @@ include "includes/header.php";
                     $qs = "&employee=" . urlencode($employee) .
                         "&priority=" . urlencode($priority) .
                         "&from_date=" . urlencode($from_date) .
-                        "&to_date=" . urlencode($to_date);
+                        "&to_date=" . urlencode($to_date) .
+                        "&sort=" . urlencode($sort) .
+                        "&order=" . urlencode($order);
                     ?>
 
                     <div>Showing <?= $start ?> to <?= $end ?> of <?= $total ?> orders</div>
