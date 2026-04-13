@@ -17,7 +17,7 @@ $employee = $_GET['employee'] ?? '';
 $from_date = $_GET['from_date'] ?? date("Y-m-d");
 $to_date = $_GET['to_date'] ?? date("Y-m-d");
 
-$limit = $_SESSION['pagination_limit'] ?? 10;
+$limit = $_SESSION['pagination_limit'] ?? 20;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int) $page);
 $offset = ($page - 1) * $limit;
@@ -87,30 +87,30 @@ include "includes/header.php";
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
             <div class="alert alert-danger text-center">Order deleted successfully</div>
         <?php } ?>
-        <div class="col-lg-3 col-md-4">
-            <div class="pms-panel mb-4">
+        <div class="col-lg-12 col-md-12 filter-panel" style="display: none;">
+            <div class="pms-panel mb-2">
                 <div class="pms-panel-header">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
                 </div>
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
-                            <div class="col-6">
+                            <div class="col-3">
 
                                 <label class="pms-form-label">From Date</label>
                                 <input type="date" name="from_date" class="form-control" value="<?= $from_date ?>"
                                     max="<?= date('Y-m-d') ?>">
                             </div>
 
-                            <div class="col-6">
+                            <div class="col-3">
                                 <label class="pms-form-label">To Date</label>
                                 <input type="date" name="to_date" class="form-control" value="<?= $to_date ?>"
                                     max="<?= date('Y-m-d') ?>">
                             </div>
-                            <div class="col-6">
+                            <div class="col-3">
 
                                 <label class="pms-form-label">Resources</label>
-                                <select name="employee" class="form-select select2">
+                                <select name="employee" class="form-select select2 w-100">
                                     <option value="">All Resource</option>
                                     <?php
                                     $users = $conn->query("SELECT u.id, u.name FROM users AS u INNER JOIN roles AS r ON u.role_id = r.id WHERE r.slug = 'staff' ORDER BY u.name");
@@ -122,7 +122,7 @@ include "includes/header.php";
                                     <?php } ?>
                                 </select>
                             </div>
-                            <div class="col-6">
+                            <div class="col-3">
                                 <label class="pms-form-label">Priority</label>
                                 <select name="priority" class="form-select select2">
                                     <option value="">All Priority</option>
@@ -134,7 +134,7 @@ include "includes/header.php";
 
                         </div>
                     </div>
-                    <div class="pms-panel-footer d-flex gap-2">
+                    <div class="pms-panel-footer d-flex gap-2 justify-content-end">
                         <a href="daily-report.php" class="btn btn-outline-secondary btn-sm"><i
                                 class="bi bi-arrow-clockwise"></i> Reset</a>
                         <button type="submit" name="apply_filter" class="pms-btn-dark btn-sm">
@@ -144,30 +144,36 @@ include "includes/header.php";
                 </form>
             </div>
         </div>
-        <div class="col-lg-9 col-md-8">
+        <div class="col-lg-12 col-md-12">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">
                         Production Report (<?= date('M d, Y', strtotime($from_date)) ?> to <?= date('M d, Y', strtotime($to_date)) ?>)
                     </h5>
-                    <div class="dropdown">
-                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
-                            data-bs-toggle="dropdown">
-                            <i class="bi bi-download me-1"></i> Export
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-outline-secondary btn-sm filter-toggle">
+                            <i class="bi bi-funnel"></i> Filters
                         </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li>
-                                <a class="dropdown-item" href="export_csv.php?<?= http_build_query($_GET) ?>">
-                                    <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
-                                </a>
-                            </li>
-                            <li>
-                                <a class="dropdown-item" href="export_pdf.php?<?= http_build_query($_GET) ?>">
-                                    <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
-                                </a>
-                            </li>
-                        </ul>
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                data-bs-toggle="dropdown">
+                                <i class="bi bi-download me-1"></i> Export
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li>
+                                    <a class="dropdown-item" href="export_csv.php?<?= http_build_query($_GET) ?>">
+                                        <i class="bi bi-file-earmark-spreadsheet me-2"></i> Export Excel
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" href="export_pdf.php?<?= http_build_query($_GET) ?>">
+                                        <i class="bi bi-file-earmark-pdf me-2"></i> Export PDF
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+                    
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -277,3 +283,14 @@ include "includes/header.php";
 </div>
 
 <?php include "includes/footer.php"; ?>
+<script>
+    // filter-panel
+    document.querySelector('.filter-toggle').addEventListener('click', function() {
+        const panel = document.querySelector('.filter-panel');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    });
+</script>

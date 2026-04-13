@@ -26,7 +26,7 @@ if (isset($_POST['login'])) {
         $_SESSION['role_slug'] = $row['slug'] ?? 'staff'; // Fallback to 'staff' if no role assigned
         $_SESSION['role_name'] = $row['role_name'] ?? 'Staff';
         $_SESSION['role_id'] = $row['role_id'];
-
+        $_SESSION['pagination_limit'] = $row['pagination_limit'] ?? 20;
         // Legacy support (deprecated but kept for compatibility)
         $_SESSION['role'] = $row['slug'] ?? 'staff';
 

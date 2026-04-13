@@ -83,7 +83,7 @@ include "includes/header.php";
 // Server-Side Pagination for Leave History
 // -----------------------------------------------------
 $page     = max(1, (int)($_GET['page'] ?? 1));
-$per_page = $_SESSION['pagination_limit'] ?? 10;
+$per_page = $_SESSION['pagination_limit'] ?? 20;
 $offset   = ($page - 1) * $per_page;
 $resource_id = $resource['id'];
 $count_sql = "SELECT COUNT(*) as cnt FROM leaves WHERE user_id=$resource_id AND deleted_at IS NULL";

@@ -34,7 +34,7 @@ $deadline = $_GET['deadline'] ?? '';
 $due = $_GET['due'] ?? '';
 
 // pagination
-$limit = $_SESSION['pagination_limit'] ?? 10;
+$limit = $_SESSION['pagination_limit'] ?? 20;
 $page = $_GET['page'] ?? 1;
 $page = max(1, (int)$page);
 $offset = ($page - 1) * $limit;
@@ -86,8 +86,8 @@ include "includes/header.php";
         <?php if (isset($_GET['msg']) && $_GET['msg'] == 'deleted') { ?>
             <div class="alert alert-danger text-center">Order deleted successfully</div>
         <?php } ?>
-        <div class="col-lg-3 col-md-4">
-            <div class="pms-panel mb-4">
+        <div class="col-lg-12 col-md-12 filter-panel" style="display: none;">
+            <div class="pms-panel mb-2">
                 <div class="pms-panel-header">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
                     
@@ -95,17 +95,17 @@ include "includes/header.php";
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
-                            <div class="col-6">
+                            <div class="col-3">
                                 <label class="pms-form-label">Search</label>
                                 <input type="text" name="search" class="form-control" placeholder="Order No" value="<?= $search ?>">
                             </div>
                            
-                            <div class="col-6">
+                            <div class="col-3">
                                 <label class="pms-form-label">Customer</label>
                                 <input type="text" name="customer" class="form-control" placeholder="Customer Name" value="<?= $customer ?>">
                             </div>
 
-                            <div class="col-6">
+                            <div class="col-3">
                                 <label class="pms-form-label">Status</label>
                                 <select name="status" class="form-select">
                                     <option value="">All Statuses</option>
@@ -116,7 +116,7 @@ include "includes/header.php";
 
                         </div>
                     </div>
-                    <div class="pms-panel-footer d-flex gap-2">
+                    <div class="pms-panel-footer d-flex gap-2 justify-content-end">
                         <a href="orders.php" class="btn btn-outline-secondary btn-sm"><i class="bi bi-arrow-clockwise"></i> Reset</a>
                         <button type="submit" name="save_leave" class="pms-btn-dark btn-sm">
                             <i class="bi bi-funnel"></i> Apply Filters
@@ -125,11 +125,16 @@ include "includes/header.php";
                 </form>
             </div>
         </div>
-        <div class="col-lg-9 col-md-8">
+        <div class="col-lg-12 col-md-12">
             <div class="pms-panel">
                 <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Orders List</h5>
-                    <a href="add_order.php" class="btn btn-outline-secondary btn-sm">+ Add Order</a>
+                    <div>
+                        <button  class="btn btn-outline-secondary btn-sm filter-toggle">
+                            <i class="bi bi-funnel"></i> Filters
+                        </button>
+                        <a href="add_order.php" class="btn btn-outline-secondary btn-sm">+ Add Order</a>
+                    </div>
                 </div>
 
                 <div style="overflow-x: auto;">
@@ -137,10 +142,10 @@ include "includes/header.php";
 
                         <thead class="table-dark">
                             <tr>
-                                <th>Order No</th>
-                                <th>Customer</th>
-                                <th>Status</th>
-                                <th class="text-end" style="width: 80px;">Actions</th>
+                                <th style="background-color: #9fbad5;">Order No</th>
+                                <th style="background-color: #9fbad5;">Customer</th>
+                                <th style="background-color: #9fbad5;">Status</th>
+                                <th class="text-end" style="width: 80px;background-color: #9fbad5;">Actions</th>
                             </tr>
                         </thead>
 
@@ -152,7 +157,7 @@ include "includes/header.php";
                             <?php } ?>
 
                             <?php while ($row = $result->fetch_assoc()) { ?>
-                                <tr>
+                                <tr style="background-color: <?= $row['status'] == 'completed' ? '#e0f2fe' : ($row['status'] == 'pending' ? '#fef9c3' : '#d1e7dd') ?>;">
                                     <td class="text-dark fw-medium"><?= $row['order_no'] ?></td>
                                     <td class="text-dark fw-medium"><?= $row['customer'] ?? '-' ?></td>
                                     
@@ -230,3 +235,14 @@ include "includes/header.php";
 </div>
 
 <?php include "includes/footer.php"; ?>
+<script>
+    // filter-panel
+    document.querySelector('.filter-toggle').addEventListener('click', function() {
+        const panel = document.querySelector('.filter-panel');
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'block';
+        } else {
+            panel.style.display = 'none';
+        }
+    });
+</script>
