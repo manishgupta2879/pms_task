@@ -16,6 +16,9 @@ $priority = $_GET['priority'] ?? '';
 $employee = $_GET['employee'] ?? '';
 $from_date = $_GET['from_date'] ?? date("Y-m-d");
 $to_date = $_GET['to_date'] ?? date("Y-m-d");
+// $search = $_GET['search'] ?? '';
+$product = $_GET['product'] ?? '';
+$species = $_GET['species'] ?? '';
 
 $limit = $_SESSION['pagination_limit'] ?? 20;
 $page = $_GET['page'] ?? 1;
@@ -24,6 +27,18 @@ $offset = ($page - 1) * $limit;
 
 
 $where = "o.deleted_at IS NULL";
+// if ($search != '') {
+//     $search_esc = $conn->real_escape_string($search);
+//     $where .= " AND (o.order_no LIKE '%$search_esc%' OR oi.product LIKE '%$search_esc%' OR oi.species LIKE '%$search_esc%')";
+// }
+if ($product != '') {
+    $product_esc = $conn->real_escape_string($product);
+    $where .= " AND oi.product LIKE '%$product_esc%'";
+}
+if ($species != '') {
+    $species_esc = $conn->real_escape_string($species);
+    $where .= " AND oi.species LIKE '%$species_esc%'";
+}
 
 if ($employee != '') {
     $employee_esc = (int) $employee;
@@ -49,6 +64,7 @@ $countRes = $conn->query("
     SELECT COUNT(*) as total
     FROM tasks t
     LEFT JOIN orders o ON t.order_id = o.id
+    left join order_items oi on o.order_no = oi.order_id and oi.id = t.product
     WHERE $where
 ");
 
@@ -95,19 +111,35 @@ include "includes/header.php";
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
-                            <div class="col-3">
+                            <!-- <div class="col-4">
+
+                                <label class="pms-form-label">Search</label>
+                                <input type="text" name="search" class="form-control" value="<?= $search ?>"
+                                    placeholder="Search by order no, product, species...">
+                            </div> -->
+                            <div class="col-2">
+                                <label class="pms-form-label">Product</label>
+                                <input type="text" name="product" class="form-control" value="<?= $product ?>"
+                                    placeholder="Search by product...">
+                            </div>
+                            <div class="col-2">
+                                <label class="pms-form-label">Species</label>
+                                <input type="text" name="species" class="form-control" value="<?= $species ?>"
+                                    placeholder="Search by species...">
+                            </div>
+                            <div class="col-2">
 
                                 <label class="pms-form-label">From Date</label>
                                 <input type="date" name="from_date" class="form-control" value="<?= $from_date ?>"
                                     max="<?= date('Y-m-d') ?>">
                             </div>
 
-                            <div class="col-3">
+                            <div class="col-2">
                                 <label class="pms-form-label">To Date</label>
                                 <input type="date" name="to_date" class="form-control" value="<?= $to_date ?>"
                                     max="<?= date('Y-m-d') ?>">
                             </div>
-                            <div class="col-3">
+                            <div class="col-2">
 
                                 <label class="pms-form-label">Resources</label>
                                 <select name="employee" class="form-select select2 w-100">
@@ -122,7 +154,7 @@ include "includes/header.php";
                                     <?php } ?>
                                 </select>
                             </div>
-                            <div class="col-3">
+                            <div class="col-2">
                                 <label class="pms-form-label">Priority</label>
                                 <select name="priority" class="form-select select2">
                                     <option value="">All Priority</option>
