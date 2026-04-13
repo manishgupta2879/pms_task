@@ -100,7 +100,8 @@ include "includes/header.php";
                 <div class="pms-panel">
 
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0 fw-bold" style="color: #1e293b;"><?= isset($order_id) ? 'Edit Order' : 'Create Order' ?></h5>
+                        <h5 class="mb-0 fw-bold" style="color: #1e293b;">
+                            <?= isset($order_id) ? 'Edit Order' : 'Create Order' ?></h5>
                         <a href="orders.php" class="pms-btn-back"><i class="bi bi-arrow-left me-1"></i>Back</a>
                     </div>
 
@@ -123,22 +124,27 @@ include "includes/header.php";
                             </div>
                             <div id="order-items">
                                 <div class="d-flex justify-content-end align-items-center">
-                                    <button type="button" id="add-row" class="btn btn-sm btn-primary mb-2 ">+ Add More</button>
+                                    <button type="button" id="add-row" class="btn btn-sm btn-primary mb-2 ">+ Add
+                                        More</button>
                                 </div>
                                 <div class="row g-3 item-row mt-2">
                                     <div class="col-md-4 m-0">
                                         <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
-                                        <input type="text" name="product[]" class="form-control" placeholder="Product" required>
+                                        <input type="text" name="product[]" class="form-control" placeholder="Product"
+                                            required>
                                         <div class="invalid-feedback">Please enter product name</div>
                                     </div>
                                     <div class="col-md-4 m-0">
                                         <label class="pms-form-label"><span class="text-danger">*</span>Species</label>
-                                        <input type="text" name="species[]" class="form-control" placeholder="Species" required>
+                                        <input type="text" name="species[]" class="form-control" placeholder="Species"
+                                            required>
                                         <div class="invalid-feedback">Please enter species name</div>
                                     </div>
                                     <div class="col-md-3 m-0">
-                                        <label class="pms-form-label"><span class="text-danger">*</span> Quantity</label>
-                                        <input type="number" name="qty[]" class="form-control" placeholder="Qty" required>
+                                        <label class="pms-form-label"><span class="text-danger">*</span>
+                                            Quantity</label>
+                                        <input type="number" name="qty[]" class="form-control" placeholder="Qty"
+                                            required>
                                         <div class="invalid-feedback">Please enter Quantity</div>
                                     </div>
                                     <div class="col-md-1">
@@ -164,7 +170,7 @@ include "includes/header.php";
     </div>
 </div>
 <script>
-    document.getElementById('add-row').addEventListener('click', function() {
+    document.getElementById('add-row').addEventListener('click', function () {
         let row = document.querySelector('.item-row').cloneNode(true);
 
         row.querySelectorAll('input').forEach(input => {
@@ -175,14 +181,14 @@ include "includes/header.php";
         document.getElementById('order-items').appendChild(row);
     });
 
-    document.addEventListener('click', function(e) {
+    document.addEventListener('click', function (e) {
         if (e.target.classList.contains('remove-row')) {
             if (document.querySelectorAll('.item-row').length > 1) {
                 e.target.closest('.item-row').remove();
             }
         }
     });
-    document.querySelector('form').addEventListener('submit', function(e) {
+    document.querySelector('form').addEventListener('submit', function (e) {
         let valid = true;
 
         document.querySelectorAll('.item-row').forEach(row => {
@@ -201,12 +207,12 @@ include "includes/header.php";
     });
 </script>
 <script>
-    (function() {
+    (function () {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
         Array.prototype.slice.call(forms)
-            .forEach(function(form) {
-                form.addEventListener('submit', function(event) {
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()

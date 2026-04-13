@@ -136,7 +136,7 @@ include "includes/header.php";
 
                     <!-- Header -->
                     <div class="pms-panel-header d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Settings</h5>
+                        <h5>Settings</h5>
                     </div>
 
                     <!-- Body -->
@@ -279,7 +279,7 @@ include "includes/header.php";
         <div class="col-md-4">
             <div class="pms-panel">
                 <div class="pms-panel-header">
-                    <h5 class="mb-0">Account Information</h5>
+                    <h5>Account Information</h5>
                 </div>
                 <div class="pms-panel-body">
                     <div class="mb-3">

@@ -280,7 +280,11 @@ include "includes/header.php"; ?>
                                     <?php foreach ($urgent_tasks as $task) { ?>
                                         <tr>
                                             <td><?php echo htmlspecialchars($task['task_name']); ?></td>
-                                            <td><?php echo htmlspecialchars($task['order_no']); ?></td>
+                                            <td>
+                                                <a href="orders.php?order_id=<?php echo $task['order_id']; ?>">
+                                                    <?php echo htmlspecialchars($task['order_no']); ?>
+                                                </a>
+                                            </td>
                                             <td><?php echo htmlspecialchars($task['assigned_to']); ?></td>
                                             <td><?php echo $task['due_date'] ? date("d M Y", strtotime($task['due_date'])) : 'N/A'; ?>
                                             </td>

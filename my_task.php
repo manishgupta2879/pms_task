@@ -99,7 +99,7 @@ include "includes/header.php";
     <div class="pms-panel mb-3">
         <div class="pms-panel-header d-flex justify-content-between align-items-center" style="cursor: pointer;"
             data-bs-toggle="collapse" data-bs-target="#filterPanel" aria-expanded="true">
-            <h5 class="mb-0">Filter My Tasks</h5>
+            <h5 lass="mb-0">Filter My Tasks</h5>
         </div>
         <div id="filterPanel" class="collapse show">
             <form method="GET">
