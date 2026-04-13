@@ -125,9 +125,9 @@ include "includes/header.php";
         <?php } ?>
         <div class="col-lg-12 col-md-12 filter-panel" style="display: none;">
             <div class="pms-panel mb-2">
-                <div class="pms-panel-header">
+                <!-- <div class="pms-panel-header">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
-                </div>
+                </div> -->
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
