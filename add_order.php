@@ -12,12 +12,17 @@ if (isset($_POST['save_order'])) {
     $customer = $conn->real_escape_string($customer);
 
     $status = $conn->real_escape_string($status);
+    $order_no = $_POST['order_no'];
+    $order_no = $conn->real_escape_string($order_no);
     $products = $_POST['product'];
     $species_list = $_POST['species'];
     $qtys = $_POST['qty'];
 
     $errors = [];
 
+    if (empty($order_no) || !preg_match('/^\d{8}$/', $order_no)) {
+        $errors[] = "Order number must be exactly 8 digits.";
+    }
     if (empty(trim($customer))) {
         $errors[] = "Customer name is required.";
     }
@@ -39,19 +44,23 @@ if (isset($_POST['save_order'])) {
             $errors[] = "Valid quantity required in row " . ($i + 1);
         }
     }
-
+    $check = $conn->query("SELECT id FROM orders WHERE order_no = '$order_no'");
+    if ($check->num_rows > 0) {
+        $errors[] = "Order number already exists.";
+    }
     if (!empty($errors)) {
         $_SESSION['errors'] = $errors;
         header("Location: create_order.php");
         exit();
     }
+    
 
-    $res = $conn->query("SELECT MAX(id) as max_id FROM orders");
-    $row = $res->fetch_assoc();
+    // $res = $conn->query("SELECT MAX(id) as max_id FROM orders");
+    // $row = $res->fetch_assoc();
 
-    $next_id = ($row['max_id'] ?? 0) + 1;
+    // $next_id = ($row['max_id'] ?? 0) + 1;
 
-    $order_no = 10000 + $next_id;
+    // $order_no = 10000 + $next_id;
     $conn->begin_transaction();
 
     try {
@@ -107,7 +116,19 @@ include "includes/header.php";
 
                     <div class="pms-panel-body">
                         <div class="row g-3">
-
+                            <!-- 8 digit order number -->
+                             <div class="col-md-6">
+                                <label class="pms-form-label">
+                                    <span class="text-danger">*</span> Order No
+                                </label>
+                                <input type="text" name="order_no" class="form-control"
+                                    placeholder="Enter 8-digit Order No"
+                                    value="<?= htmlspecialchars($order_no ?? '') ?>"
+                                    required pattern="\d{8}">
+                                <div class="invalid-feedback">
+                                    Please enter a valid 8-digit order number
+                                </div>
+                            </div>
                             <div class="col-md-6">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
                                 <input type="text" name="customer" class="form-control" placeholder="Customer Name"

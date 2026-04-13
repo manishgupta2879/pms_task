@@ -17,7 +17,7 @@ $form_data = [
     'name' => $current_user['name'] ?? '',
     'email' => $current_user['email'] ?? '',
     'profile_pic' => $current_user['profile_pic'] ?? '',
-    'pagination_limit' => $current_user['pagination_limit'] ?? 10,
+    'pagination_limit' => $current_user['pagination_limit'] ?? 20,
 ];
 
 // Create uploads directory if it doesn't exist
@@ -32,7 +32,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_profile'])) {
     $form_data['email'] = trim($_POST['email'] ?? '');
     $password = $_POST['password'] ?? '';
     $confirm_password = $_POST['confirm_password'] ?? '';
-    $form_data['pagination_limit'] = isset($_POST['pagination_limit']) ? (int) $_POST['pagination_limit'] : 10;
+    $form_data['pagination_limit'] = isset($_POST['pagination_limit']) ? (int) $_POST['pagination_limit'] : 20;
 
     // Validation
     if (empty($form_data['name'])) {
