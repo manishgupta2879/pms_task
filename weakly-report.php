@@ -9,7 +9,9 @@ $resources = $conn->query("SELECT u.id, u.name FROM users AS u INNER JOIN roles 
 
 $resource_filter = $_GET['resource'] ?? '';
 $week = $_GET['week'] ?? date('o-\WW');
-
+$product = $_GET['product'] ?? '';
+$species = $_GET['species'] ?? '';
+$priority = $_GET['priority'] ?? '';
 $where = "o.deleted_at IS NULL";
 
 if (!empty($week) && strpos($week, '-W') !== false) {
@@ -29,7 +31,22 @@ if ($resource_filter != '') {
     $resource_esc = (int) $resource_filter;
     $where .= " AND t.user_id = $resource_esc";
 }
-
+if ($product != '') {
+    $product_esc = $conn->real_escape_string($product);
+    $where .= " AND oi.product LIKE '%$product_esc%'";
+}
+if ($species != '') {
+    $species_esc = $conn->real_escape_string($species);
+    $where .= " AND oi.species LIKE '%$species_esc%'";
+}
+if ($priority != '') {
+    $priority_esc = $conn->real_escape_string($priority);
+    if ($priority_esc == 'low') {
+        $where .= " AND (t.priority = '$priority_esc' OR t.priority IS NULL)";
+    } else {
+        $where .= " AND t.priority = '$priority_esc'";
+    }
+}
 $taskRes = $conn->query("
     SELECT 
         u.id as user_id,
@@ -124,13 +141,23 @@ include "includes/header.php";
         <!-- Filter Panel -->
         <div class="col-md-12 col-lg-12 filter-panel" style="display: none;">
             <div class="pms-panel mb-2">
-                <div class="pms-panel-header d-flex justify-content-between align-items-center">
+                <!-- <div class="pms-panel-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0 fw-bold" style="color: #1e293b;">Filter</h5>
-                </div>
+                </div> -->
                 <form method="GET">
                     <div class="pms-panel-body">
                         <div class="row g-3">
-                            <div class="col-md-4">
+                            <div class="col-2">
+                                <label class="pms-form-label">Product</label>
+                                <input type="text" name="product" class="form-control" value="<?= $product ?>"
+                                    placeholder="Search by product...">
+                            </div>
+                            <div class="col-2">
+                                <label class="pms-form-label">Species</label>
+                                <input type="text" name="species" class="form-control" value="<?= $species ?>"
+                                    placeholder="Search by species...">
+                            </div>
+                            <div class="col-md-2">
                                 <label class="pms-form-label">Resources</label>
                                 <select name="resource" class="form-select select2" id="select2">
                                     <option value="">All Resources</option>
@@ -139,9 +166,18 @@ include "includes/header.php";
                                     <?php endforeach; ?>
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-2">
                                 <label class="pms-form-label">Week Filter</label>
                                 <input type="week" name="week" class="form-control" value="<?= htmlspecialchars($week) ?>">
+                            </div>
+                            <div class="col-2">
+                                <label class="pms-form-label">Priority</label>
+                                <select name="priority" class="form-select select2">
+                                    <option value="">All Priority</option>
+                                    <option value="low" <?= $priority == 'low' ? 'selected' : '' ?>>Low</option>
+                                    <option value="medium" <?= $priority == 'medium' ? 'selected' : '' ?>>Medium</option>
+                                    <option value="high" <?= $priority == 'high' ? 'selected' : '' ?>>High</option>
+                                </select>
                             </div>
                         </div>
                     </div>
