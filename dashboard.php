@@ -71,7 +71,7 @@ $result = $conn->query("
         FIELD(DAYNAME(t.deadline), 
             'Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'
         ),
-        o.deadline ASC
+        t.deadline ASC
 ");
 
 $weekly_tasks = [
