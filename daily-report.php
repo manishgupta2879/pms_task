@@ -234,7 +234,7 @@ include "includes/header.php";
                         <thead class="table-dark">
                             <tr>
                                 <th><?= sortLink('order_no', 'Order No', $sort, $order) ?></th>
-                                <th>Need Date</th>
+                                <th><?= sortLink('deadline', 'Need Date', $sort, $order) ?></th>
                                 <th><?= sortLink('task_name', 'Task', $sort, $order) ?></th>
                                 <th><?= sortLink('user_name', 'Name', $sort, $order) ?></th>
                                 <th><?= sortLink('qty', 'Qty', $sort, $order) ?></th>
