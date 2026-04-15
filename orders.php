@@ -27,9 +27,9 @@ if (isset($_GET['delete'])) {
 }
 
 // search & filter
-$search = $_GET['search'] ?? '';
+$search = trim($_GET['search'] ?? '');
 $status = $_GET['status'] ?? '';
-$customer = $_GET['customer'] ?? '';
+$customer = trim($_GET['customer'] ?? '');
 $deadline = $_GET['deadline'] ?? '';
 $due = $_GET['due'] ?? '';
 $sort = $_GET['sort'] ?? 'order_no';

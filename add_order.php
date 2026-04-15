@@ -4,56 +4,86 @@ include "includes/rbac.php";
 
 requireAuth();
 requirePermission('orders');
+$order_no = '';
+$customer = '';
+$status = 'active';
+$products = [];
+$species_list = [];
+$qtys = [];
+$field_errors = [];
 
 if (isset($_POST['save_order'])) {
 
-    $customer = $_POST['customer'];
-    $status = $_POST['status'];
+    $order_no = trim($_POST['order_no'] ?? '');
+    $customer = trim($_POST['customer'] ?? '');
+    $status = $_POST['status'] ?? 'active';
+    $products = $_POST['product'] ?? [];
+    $species_list = $_POST['species'] ?? [];
+    $qtys = $_POST['qty'] ?? [];
+
+    $raw_customer = $customer; // Keep raw for display
     $customer = $conn->real_escape_string($customer);
-
     $status = $conn->real_escape_string($status);
-    $order_no = $_POST['order_no'];
     $order_no = $conn->real_escape_string($order_no);
-    $products = $_POST['product'];
-    $species_list = $_POST['species'];
-    $qtys = $_POST['qty'];
 
-    $errors = [];
 
     if (empty($order_no) || !preg_match('/^\d{8}$/', $order_no)) {
-        $errors[] = "Order number must be exactly 8 digits.";
+        $field_errors['order_no'] = "Order number must be exactly 8 digits.";
     }
-    if (empty(trim($customer))) {
-        $errors[] = "Customer name is required.";
+    if (empty(trim($raw_customer))) {
+        $field_errors['customer'] = "Customer name is required.";
     }
-
-    if (!isset($products) || !is_array($products) || count($products) == 0) {
-        $errors[] = "At least one product is required.";
+    $valid_products_count = count(array_filter(array_map('trim', $products)));
+    if ($valid_products_count == 0) {
+        $field_errors['products'] = "At least one product is required.";
     }
     for ($i = 0; $i < count($products); $i++) {
-
         if (empty(trim($products[$i]))) {
-            $errors[] = "Product name is required in row " . ($i + 1);
+            $field_errors["product_$i"] = "Product name is required in row " . ($i + 1);
         }
-
-        if (empty(trim($species_list[$i]))) {
-            $errors[] = "Species is required in row " . ($i + 1);
+        if (empty(trim($species_list[$i] ?? ''))) {
+            $field_errors["species_$i"] = "Species is required in row " . ($i + 1);
         }
-
-        if (!is_numeric($qtys[$i]) || $qtys[$i] <= 0) {
-            $errors[] = "Valid quantity required in row " . ($i + 1);
+        if (!is_numeric($qtys[$i] ?? 0) || ($qtys[$i] ?? 0) <= 0) {
+            $field_errors["qty_$i"] = "Valid quantity required in row " . ($i + 1);
         }
     }
+
     $check = $conn->query("SELECT id FROM orders WHERE order_no = '$order_no'");
     if ($check->num_rows > 0) {
-        $errors[] = "Order number already exists.";
+        $field_errors['order_no'] = "Order number already exists.";
     }
-    if (!empty($errors)) {
-        $_SESSION['errors'] = $errors;
-        header("Location: add_order.php");
-        exit();
+    if (!empty($field_errors)) {
+        // $_SESSION['field_errors'] = $field_errors;
+        // header("Location: add_order.php");
+        // exit();
+    } else {
+        $conn->begin_transaction();
+        try {
+
+            $conn->query("INSERT INTO orders(order_no, customer, status)
+              VALUES('$order_no', '$customer', '$status')");
+            $order_id = $conn->insert_id;
+
+            for ($i = 0; $i < count($products); $i++) {
+
+                $product = $conn->real_escape_string($products[$i]);
+                $species = $conn->real_escape_string($species_list[$i]);
+                $qty = $conn->real_escape_string($qtys[$i]);
+
+                $conn->query("INSERT INTO order_items(order_id, product, species, qty) VALUES('$order_no', '$product', '$species', '$qty')");
+            }
+
+            $conn->commit();
+
+            $_SESSION['success'] = "Order created successfully.";
+            header("Location: orders.php");
+            exit();
+        } catch (Exception $e) {
+            $conn->rollback();
+            die("Error: " . $e->getMessage());
+        }
     }
-    
 
     // $res = $conn->query("SELECT MAX(id) as max_id FROM orders");
     // $row = $res->fetch_assoc();
@@ -61,47 +91,21 @@ if (isset($_POST['save_order'])) {
     // $next_id = ($row['max_id'] ?? 0) + 1;
 
     // $order_no = 10000 + $next_id;
-    $conn->begin_transaction();
 
-    try {
-
-        $conn->query("INSERT INTO orders(order_no, customer, status)
-              VALUES('$order_no', '$customer', '$status')");
-        $order_id = $conn->insert_id;
-
-        for ($i = 0; $i < count($products); $i++) {
-
-            $product = $conn->real_escape_string($products[$i]);
-            $species = $conn->real_escape_string($species_list[$i]);
-            $qty = $conn->real_escape_string($qtys[$i]);
-
-            $conn->query("INSERT INTO order_items(order_id, product, species, qty) VALUES('$order_no', '$product', '$species', '$qty')");
-        }
-
-        $conn->commit();
-
-        $_SESSION['success'] = "Order created successfully.";
-        header("Location: orders.php");
-        exit();
-    } catch (Exception $e) {
-        $conn->rollback();
-        die("Error: " . $e->getMessage());
-    }
 }
 include "includes/header.php";
 ?>
 
 <div class="pms-wrap">
     <div class="row">
-        <?php if (!empty($_SESSION['errors'])): ?>
+        <?php if (!empty($field_errors) && 1 == 2): ?>
             <div class="alert alert-danger">
                 <ul class="mb-0">
-                    <?php foreach ($_SESSION['errors'] as $error): ?>
+                    <?php foreach ($field_errors as $error): ?>
                         <li><?= htmlspecialchars($error) ?></li>
                     <?php endforeach; ?>
                 </ul>
             </div>
-            <?php unset($_SESSION['errors']); ?>
         <?php endif; ?>
         <div class="col-md-12">
 
@@ -117,30 +121,32 @@ include "includes/header.php";
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <!-- 8 digit order number -->
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="pms-form-label">
                                     <span class="text-danger">*</span> Order No
                                 </label>
-                                <input type="text" name="order_no" class="form-control"
+                                <input type="text" name="order_no" class="form-control <?= isset($field_errors['order_no']) ? 'is-invalid' : '' ?>"
                                     placeholder="Enter 8-digit Order No"
-                                    value="<?= htmlspecialchars($order_no ?? '') ?>"
-                                    required pattern="\d{8}" maxlength="8" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+                                    value="<?= htmlspecialchars($order_no) ?>"
+                                    required autofocus pattern="\d{8}" maxlength="8" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
                                 <div class="invalid-feedback">
-                                    Please enter a valid 8-digit order number
+                                    <?= isset($field_errors['order_no']) ? htmlspecialchars($field_errors['order_no']) : 'Please enter a valid 8-digit order number' ?>
                                 </div>
                             </div>
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
-                                <input type="text" name="customer" class="form-control" placeholder="Customer Name"
-                                    value="<?= htmlspecialchars($customer ?? '') ?>" required autofocus>
-                                <div class="invalid-feedback">Please enter customer name</div>
+                                <input type="text" name="customer" class="form-control <?= isset($field_errors['customer']) ? 'is-invalid' : '' ?>" placeholder="Customer Name"
+                                    value="<?= htmlspecialchars($customer) ?>" required>
+                                <div class="invalid-feedback">
+                                    <?= isset($field_errors['customer']) ? htmlspecialchars($field_errors['customer']) : 'Please enter customer name' ?>
+                                </div>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="pms-form-label">Status</label>
                                 <select name="status" class="form-select">
-                                    <option value="active" <?= (isset($status) && $status == 'active') ? 'selected' : '' ?>>Active</option>
-                                    <option value="completed" <?= (isset($status) && $status == 'completed') ? 'selected' : '' ?>>Completed</option>
+                                    <option value="active" <?= $status == 'active' ? 'selected' : '' ?>>Active</option>
+                                    <option value="completed" <?= $status == 'completed' ? 'selected' : '' ?>>Completed</option>
                                 </select>
                             </div>
                             <div id="order-items">
@@ -148,7 +154,7 @@ include "includes/header.php";
                                     <button type="button" id="add-row" class="btn btn-sm btn-primary mb-2 ">+ Add
                                         More</button>
                                 </div>
-                                <div class="row g-3 item-row mt-2">
+                                <!-- <div class="row g-3 item-row mt-2">
                                     <div class="col-md-4 m-0">
                                         <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
                                         <div class="position-relative">
@@ -176,7 +182,71 @@ include "includes/header.php";
                                         <div>&nbsp;</div>
                                         <button type="button" class="btn btn-danger remove-row">X</button>
                                     </div>
-                                </div>
+                                </div> -->
+                                <?php
+                                $old_count = max(1, count($products));
+                                for ($i = 0; $i < $old_count; $i++):
+                                ?>
+                                    <div class="row g-3 item-row mt-2">
+
+                                        <!-- Product -->
+                                        <div class="col-md-4 m-0">
+                                            <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
+                                            <div class="position-relative">
+                                                <input type="text"
+                                                    name="product[]"
+                                                    class="form-control product-input <?= isset($field_errors["product_$i"]) ? 'is-invalid' : '' ?>"
+                                                    placeholder="Product"
+                                                    value="<?= htmlspecialchars($products[$i] ?? '') ?>"
+                                                    required autocomplete="off">
+
+                                                <ul class="product-suggestions list-unstyled position-absolute bg-white border rounded mt-1"
+                                                    style="display:none; width:100%; max-height:200px; overflow-y:auto; z-index:1000;">
+                                                </ul>
+                                            </div>
+                                            <div class="invalid-feedback">
+                                                <?= $field_errors["product_$i"] ?? 'Please enter product name' ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Species -->
+                                        <div class="col-md-4 m-0">
+                                            <label class="pms-form-label"><span class="text-danger">*</span>Species</label>
+                                            <input type="text"
+                                                name="species[]"
+                                                class="form-control <?= isset($field_errors["species_$i"]) ? 'is-invalid' : '' ?>"
+                                                placeholder="Species"
+                                                value="<?= htmlspecialchars($species_list[$i] ?? '') ?>"
+                                                required>
+
+                                            <div class="invalid-feedback">
+                                                <?= $field_errors["species_$i"] ?? 'Please enter species name' ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Quantity -->
+                                        <div class="col-md-3 m-0">
+                                            <label class="pms-form-label"><span class="text-danger">*</span>Quantity</label>
+                                            <input type="number"
+                                                name="qty[]"
+                                                class="form-control <?= isset($field_errors["qty_$i"]) ? 'is-invalid' : '' ?>"
+                                                placeholder="Qty"
+                                                value="<?= htmlspecialchars($qtys[$i] ?? '') ?>"
+                                                required>
+
+                                            <div class="invalid-feedback">
+                                                <?= $field_errors["qty_$i"] ?? 'Please enter Quantity' ?>
+                                            </div>
+                                        </div>
+
+                                        <!-- Remove button -->
+                                        <div class="col-md-1">
+                                            <div>&nbsp;</div>
+                                            <button type="button" class="btn btn-danger remove-row">X</button>
+                                        </div>
+
+                                    </div>
+                                <?php endfor; ?>
                             </div>
                         </div>
                     </div>
@@ -201,7 +271,7 @@ include "includes/header.php";
         let debounceTimer;
         const DEBOUNCE_DELAY = 300; // 300ms debounce
 
-        input.addEventListener('keyup', function (e) {
+        input.addEventListener('keyup', function(e) {
             const query = this.value.trim();
 
             // Clear existing timer
@@ -218,7 +288,7 @@ include "includes/header.php";
             suggestionsList.style.display = 'block';
 
             // Debounce the API call
-            debounceTimer = setTimeout(async function () {
+            debounceTimer = setTimeout(async function() {
                 try {
                     const response = await fetch('get_product_suggestions.php?q=' + encodeURIComponent(query));
                     const data = await response.json();
@@ -267,16 +337,18 @@ include "includes/header.php";
         });
 
         // Hide suggestions when clicking outside
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             if (!e.target.closest('.position-relative')) {
                 suggestionsList.style.display = 'none';
             }
         });
 
         // Show suggestions on focus if there's a value
-        input.addEventListener('focus', function () {
+        input.addEventListener('focus', function() {
             if (this.value.trim().length > 0) {
-                const event = new KeyboardEvent('keyup', { bubbles: true });
+                const event = new KeyboardEvent('keyup', {
+                    bubbles: true
+                });
                 this.dispatchEvent(event);
             }
         });
@@ -293,11 +365,11 @@ include "includes/header.php";
     }
 
     // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         initializeProductInputs();
     });
 
-    document.getElementById('add-row').addEventListener('click', function () {
+    document.getElementById('add-row').addEventListener('click', function() {
         let row = document.querySelector('.item-row').cloneNode(true);
 
         row.querySelectorAll('input').forEach(input => {
@@ -306,20 +378,20 @@ include "includes/header.php";
         });
 
         document.getElementById('order-items').appendChild(row);
-        
+
         // Reinitialize autocomplete for the new product input
         const newProductInput = row.querySelector('.product-input');
         setupProductAutocomplete(newProductInput);
     });
 
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (e.target.classList.contains('remove-row')) {
             if (document.querySelectorAll('.item-row').length > 1) {
                 e.target.closest('.item-row').remove();
             }
         }
     });
-    document.querySelector('form').addEventListener('submit', function (e) {
+    document.querySelector('form').addEventListener('submit', function(e) {
         let valid = true;
         let products = [];
         let duplicateProducts = new Set();
@@ -328,7 +400,7 @@ include "includes/header.php";
         document.querySelectorAll('.item-row').forEach(row => {
             let productInput = row.querySelector('input[name="product[]"]');
             let inputs = row.querySelectorAll('input');
-            
+
             // Check for empty fields
             inputs.forEach(input => {
                 if (!input.value.trim()) {
@@ -371,12 +443,12 @@ include "includes/header.php";
     });
 </script>
 <script>
-    (function () {
+    (function() {
         'use strict'
         var forms = document.querySelectorAll('.needs-validation')
         Array.prototype.slice.call(forms)
-            .forEach(function (form) {
-                form.addEventListener('submit', function (event) {
+            .forEach(function(form) {
+                form.addEventListener('submit', function(event) {
                     if (!form.checkValidity()) {
                         event.preventDefault()
                         event.stopPropagation()
