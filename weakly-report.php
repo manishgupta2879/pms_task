@@ -9,8 +9,8 @@ $resources = $conn->query("SELECT u.id, u.name FROM users AS u INNER JOIN roles 
 
 $resource_filter = $_GET['resource'] ?? '';
 $week = $_GET['week'] ?? date('o-\WW');
-$product = $_GET['product'] ?? '';
-$species = $_GET['species'] ?? '';
+$product = trim($_GET['product'] ?? '');
+$species = trim($_GET['species'] ?? '');
 $priority = $_GET['priority'] ?? '';
 $where = "o.deleted_at IS NULL";
 

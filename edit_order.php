@@ -5,6 +5,7 @@ include "includes/rbac.php";
 requireAuth();
 requirePermission('orders');
 // include "includes/header.php";
+$field_errors = [];
 
 if (!isset($_GET['id'])) {
     header("Location: orders.php");
@@ -25,6 +26,10 @@ if (!$order) {
 $order_no = $order['order_no'];
 $customer = $order['customer'];
 $status   = $order['status'];
+// if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+//     $customer = $_POST['customer'];
+//     $status   = $_POST['status'];
+// }
 $items_res = $conn->query("SELECT * FROM order_items WHERE order_id = $order_no");
 $items = [];
 while ($row = $items_res->fetch_assoc()) {
@@ -35,97 +40,97 @@ while ($row = $items_res->fetch_assoc()) {
 if (isset($_POST['update'])) {
 
     $order_id = (int)($_POST['order_id'] ?? 0);
-    $customer = $conn->real_escape_string($_POST['customer']);
-    $status   = $conn->real_escape_string($_POST['status']);
+    $customer = $conn->real_escape_string(trim($_POST['customer'] ?? ''));
+    $status   = $conn->real_escape_string(trim($_POST['status'] ?? ''));
     $products  = $_POST['product'];
     $species_list  = $_POST['species'];
     $qtys  = $_POST['qty'];
 
     $errors = [];
     if (empty(trim($customer))) {
-        $errors[] = "Customer name is required.";
+        $field_errors['customer'] = "Customer name is required.";
     }
 
     if (!isset($products) || !is_array($products) || count($products) == 0) {
-        $errors[] = "At least one product is required.";
+        $field_errors['products'] = "At least one product is required.";
     }
     for ($i = 0; $i < count($products); $i++) {
 
         if (empty(trim($products[$i]))) {
-            $errors[] = "Product name is required in row " . ($i + 1);
+            $field_errors["product_$i"] = "Product name is required in row " . ($i + 1);
         }
 
         if (empty(trim($species_list[$i]))) {
-            $errors[] = "Species is required in row " . ($i + 1);
+            $field_errors["species_$i"] = "Species is required in row " . ($i + 1);
         }
 
         if (!is_numeric($qtys[$i]) || $qtys[$i] <= 0) {
-            $errors[] = "Valid quantity required in row " . ($i + 1);
+            $field_errors["qty_$i"] = "Valid quantity required in row " . ($i + 1);
         }
     }
 
-    if (!empty($errors)) {
-        $_SESSION['errors'] = $errors;
-        header("Location: edit_order.php?id=" . $order_id);
-        exit();
-    }
+    if (!empty($field_errors)) {
+        // $_SESSION['field_errors'] = $field_errors;
+        // header("Location: edit_order.php?id=" . $order_id);
+        // exit();
+    } else {
+        $conn->begin_transaction();
+        try {
 
-    $conn->begin_transaction();
-    try {
+            $order_no = $order['order_no'];
 
-        $order_no = $order['order_no'];
+            $conn->query("UPDATE orders SET customer='$customer', status='$status' WHERE id='$order_id'");
 
-        $conn->query("UPDATE orders SET customer='$customer', status='$status' WHERE id='$order_id'");
+            $existing_ids = [];
 
-        $existing_ids = [];
+            for ($i = 0; $i < count($products); $i++) {
 
-        for ($i = 0; $i < count($products); $i++) {
+                $item_id = $_POST['item_id'][$i] ?? '';
 
-            $item_id = $_POST['item_id'][$i] ?? '';
+                $product = $conn->real_escape_string($products[$i]);
+                $species = $conn->real_escape_string($species_list[$i]);
+                $qty     = (int)$qtys[$i];
 
-            $product = $conn->real_escape_string($products[$i]);
-            $species = $conn->real_escape_string($species_list[$i]);
-            $qty     = (int)$qtys[$i];
+                if (!empty($item_id)) {
+                    $existing_ids[] = $item_id;
 
-            if (!empty($item_id)) {
-                $existing_ids[] = $item_id;
-
-                $conn->query("UPDATE order_items 
+                    $conn->query("UPDATE order_items 
                     SET product='$product', species='$species', qty='$qty'
                     WHERE id='$item_id'");
-            } else {
+                } else {
 
-                $conn->query("INSERT INTO order_items(order_id, product, species, qty)
+                    $conn->query("INSERT INTO order_items(order_id, product, species, qty)
                     VALUES('$order_no', '$product', '$species', '$qty')");
 
-                $existing_ids[] = $conn->insert_id;
-            }
-        }
-
-        $old_items = $conn->query("SELECT id FROM order_items WHERE order_id='$order_no'");
-
-        while ($old = $old_items->fetch_assoc()) {
-
-            if (!in_array($old['id'], $existing_ids)) {
-                $task_check = $conn->query("SELECT id FROM tasks WHERE product='{$old['id']}' LIMIT 1");
-                if ($task_check->num_rows == 0) {
-                    $conn->query("DELETE FROM order_items WHERE id='{$old['id']}'");
+                    $existing_ids[] = $conn->insert_id;
                 }
             }
+
+            $old_items = $conn->query("SELECT id FROM order_items WHERE order_id='$order_no'");
+
+            while ($old = $old_items->fetch_assoc()) {
+
+                if (!in_array($old['id'], $existing_ids)) {
+                    $task_check = $conn->query("SELECT id FROM tasks WHERE product='{$old['id']}' LIMIT 1");
+                    if ($task_check->num_rows == 0) {
+                        $conn->query("DELETE FROM order_items WHERE id='{$old['id']}'");
+                    }
+                }
+            }
+
+            $conn->commit();
+
+            $_SESSION['success'] = "Order updated successfully.";
+            header("Location: edit_order.php?id=" . $order_id);
+            exit();
+        } catch (Exception $e) {
+
+            $conn->rollback();
+
+            $_SESSION['error'] = $e->getMessage();
+            header("Location: edit_order.php?id=" . $order_id);
+            exit();
         }
-
-        $conn->commit();
-
-        $_SESSION['success'] = "Order updated successfully.";
-        header("Location: edit_order.php?id=" . $order_id);
-        exit();
-    } catch (Exception $e) {
-
-        $conn->rollback();
-
-        $_SESSION['error'] = $e->getMessage();
-        header("Location: edit_order.php?id=" . $order_id);
-        exit();
     }
 }
 include "includes/header.php";
@@ -147,22 +152,30 @@ include "includes/header.php";
                     <div class="pms-panel-body">
                         <div class="row g-3">
                             <input type="hidden" name="order_id" value="<?= $order_id ?? '' ?>">
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="pms-form-label">Order No</label>
-                                <input type="text" class="form-control" value="<?= htmlspecialchars($order['order_no']) ?>" disabled>
+                                <input type="text" class="form-control " value="<?= htmlspecialchars($order['order_no']) ?>" disabled>
                             </div>
 
-                            <div class="col-md-6">
+                            <div class="col-md-4">
                                 <label class="pms-form-label"><span class="text-danger">*</span> Customer</label>
-                                <input type="text" name="customer" class="form-control" value="<?= htmlspecialchars($order['customer']) ?>" required>
-                                <div class="invalid-feedback">Please enter customer name</div>
+                                <input type="text" name="customer" class="form-control <?= isset($field_errors['customer']) ? 'is-invalid' : '' ?>" value="<?= htmlspecialchars($customer) ?>" required>
+                                <div class="invalid-feedback"><?= $field_errors['customer'] ?? 'Please enter customer name' ?></div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="pms-form-label"><span class="text-danger">*</span> Status</label>
+                                <select name="status" class="form-select" required>
+                                    <option value="active" <?= ($status == 'active') ? 'selected' : '' ?>>Active</option>
+                                    <option value="completed" <?= ($status == 'completed') ? 'selected' : '' ?>>Completed</option>
+                                </select>
+                                <div class="invalid-feedback"><?= $field_errors['status'] ?? 'Please select status' ?></div>
                             </div>
                             <div id="order-items">
                                 <div class="d-flex justify-content-end align-items-center">
                                     <button type="button" id="add-row" class="btn btn-sm btn-primary mb-2 ">+ Add More</button>
                                 </div>
                                 <?php if (!empty($items)): ?>
-                                    <?php foreach ($items as $item): ?>
+                                    <?php foreach ($items as $i => $item): ?>
                                         <?php
                                         // check if task exists for this product
                                         $task_check = $conn->query("SELECT id FROM tasks WHERE product='{$item['id']}' LIMIT 1");
@@ -173,24 +186,24 @@ include "includes/header.php";
                                             <div class="col-md-4">
                                                 <label class="pms-form-label"><span class="text-danger">*</span>Product</label>
                                                 <div class="position-relative">
-                                                    <input type="text" name="product[]" class="form-control product-input"
+                                                    <input type="text" name="product[]" class="form-control product-input <?= isset($field_errors["product_$i"]) ? 'is-invalid' : '' ?>"
                                                         value="<?= htmlspecialchars($item['product']) ?>" required autocomplete="off">
                                                     <ul class="product-suggestions list-unstyled position-absolute bg-white border rounded mt-1" style="display:none; width:100%; max-height:200px; overflow-y:auto; z-index:1000; top:100%;">
                                                     </ul>
                                                 </div>
-                                                <div class="invalid-feedback">Please enter product name</div>
+                                                <div class="invalid-feedback"><?= $field_errors["product_$i"] ?? 'Please enter product name' ?></div>
                                             </div>
                                             <div class="col-md-4">
                                                 <label class="pms-form-label"><span class="text-danger">*</span>Species</label>
-                                                <input type="text" name="species[]" class="form-control"
+                                                <input type="text" name="species[]" class="form-control <?= isset($field_errors["species_$i"]) ? 'is-invalid' : '' ?>"
                                                     value="<?= htmlspecialchars($item['species']) ?>" required>
-                                                <div class="invalid-feedback">Please enter species name</div>
+                                                <div class="invalid-feedback"><?= $field_errors["species_$i"] ?? 'Please enter species name' ?></div>
                                             </div>
                                             <div class="col-md-3">
                                                 <label class="pms-form-label"><span class="text-danger">*</span>Quantity</label>
-                                                <input type="number" name="qty[]" class="form-control"
+                                                <input type="number" name="qty[]" class="form-control <?= isset($field_errors["qty_$i"]) ? 'is-invalid' : '' ?>"
                                                     value="<?= htmlspecialchars($item['qty']) ?>" required>
-                                                <div class="invalid-feedback">Please enter quantity</div>
+                                                <div class="invalid-feedback"><?= $field_errors["qty_$i"] ?? 'Please enter quantity' ?></div>
                                             </div>
                                             <div class="col-md-1">
                                                 <?php if ($hasTask): ?>
@@ -230,14 +243,7 @@ include "includes/header.php";
                                 <?php endif; ?>
                             </div>
 
-                            <div class="col-md-6">
-                                <label class="pms-form-label"><span class="text-danger">*</span> Status</label>
-                                <select name="status" class="form-select" required>
-                                    <option value="active" <?= ($order['status'] == 'active') ? 'selected' : '' ?>>Active</option>
-                                    <option value="completed" <?= ($order['status'] == 'completed') ? 'selected' : '' ?>>Completed</option>
-                                </select>
-                                <div class="invalid-feedback">Please select status</div>
-                            </div>
+
 
                         </div>
                     </div>
@@ -262,7 +268,7 @@ include "includes/header.php";
         let debounceTimer;
         const DEBOUNCE_DELAY = 300; // 300ms debounce
 
-        input.addEventListener('keyup', function (e) {
+        input.addEventListener('keyup', function(e) {
             const query = this.value.trim();
 
             // Clear existing timer
@@ -279,7 +285,7 @@ include "includes/header.php";
             suggestionsList.style.display = 'block';
 
             // Debounce the API call
-            debounceTimer = setTimeout(async function () {
+            debounceTimer = setTimeout(async function() {
                 try {
                     const response = await fetch('get_product_suggestions.php?q=' + encodeURIComponent(query));
                     const data = await response.json();
@@ -328,16 +334,18 @@ include "includes/header.php";
         });
 
         // Hide suggestions when clicking outside
-        document.addEventListener('click', function (e) {
+        document.addEventListener('click', function(e) {
             if (!e.target.closest('.position-relative')) {
                 suggestionsList.style.display = 'none';
             }
         });
 
         // Show suggestions on focus if there's a value
-        input.addEventListener('focus', function () {
+        input.addEventListener('focus', function() {
             if (this.value.trim().length > 0) {
-                const event = new KeyboardEvent('keyup', { bubbles: true });
+                const event = new KeyboardEvent('keyup', {
+                    bubbles: true
+                });
                 this.dispatchEvent(event);
             }
         });
@@ -354,7 +362,7 @@ include "includes/header.php";
     }
 
     // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function () {
+    document.addEventListener('DOMContentLoaded', function() {
         initializeProductInputs();
     });
 
